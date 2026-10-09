@@ -1,0 +1,35 @@
+.aph-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 900px;
+}
+
+.aph-note {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+}
+
+.aph-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.aph-tool textarea:not([readonly]) {
+  width: 100%;
+  resize: vertical;
+}
+
+.ipk-copy-wrap textarea {
+  width: 100%;
+}
+
+#aph-output {
+  font-size: 0.8rem;
+}
+
+.aph-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}

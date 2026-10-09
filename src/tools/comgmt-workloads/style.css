@@ -1,0 +1,71 @@
+.cmw-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 900px;
+}
+
+.cmw-note {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+}
+
+.cmw-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.cmw-tool input[type="text"] {
+  width: 100%;
+}
+
+.ipk-copy-wrap textarea {
+  width: 100%;
+}
+
+#cmw-output {
+  font-size: 0.8rem;
+}
+
+.cmw-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.cmw-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-2);
+  font-size: 0.85rem;
+}
+
+.cmw-table th,
+.cmw-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.cmw-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.cmw-enabled-cell {
+  text-align: center;
+}
+
+.cmw-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--success);
+  cursor: pointer;
+}
+
+.cmw-hex {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

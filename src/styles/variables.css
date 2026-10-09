@@ -1,0 +1,50 @@
+/*
+ * Single source of truth for colors. Everything else in the app references
+ * these custom properties instead of hard-coded colors, so the whole site
+ * reskins by editing this one file.
+ */
+:root {
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-contrast: #ffffff;
+}
+
+:root,
+[data-theme="light"] {
+  --bg: #f6f7f9;
+  --bg-elevated: #ffffff;
+  --bg-hover: #eef1f5;
+  --border: #e1e4e9;
+  --text: #171a21;
+  --text-muted: #5b6372;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+
+[data-theme="dark"] {
+  --bg: #14161a;
+  --bg-elevated: #1c1f26;
+  --bg-hover: #262a33;
+  --border: #2d313b;
+  --text: #e7e9ee;
+  --text-muted: #9aa2b1;
+  --danger: #f87171;
+  --success: #4ade80;
+}

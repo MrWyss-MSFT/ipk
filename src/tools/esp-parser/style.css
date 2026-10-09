@@ -1,0 +1,146 @@
+.esp-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.esp-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+}
+
+.esp-tool textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  resize: vertical;
+}
+
+.esp-tip {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.esp-status {
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.esp-warn {
+  margin: 0;
+  color: var(--danger, #e05252);
+}
+
+.esp-phase {
+  margin-top: var(--space-3);
+}
+
+.esp-phase h3 {
+  margin: 0 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.esp-phase-text {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.esp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.esp-table th,
+.esp-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.esp-table th {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.esp-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.esp-text-cell {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.esp-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 1px 10px;
+  border: 1px solid var(--border);
+}
+
+.esp-badge-ok {
+  color: #fff;
+  background: var(--success, #2fa84f);
+  border-color: transparent;
+}
+
+.esp-badge-fail {
+  color: #fff;
+  background: var(--danger, #e05252);
+  border-color: transparent;
+}
+
+.esp-badge-progress {
+  color: #fff;
+  background: #60a5fa;
+  border-color: transparent;
+}
+
+.esp-badge-block {
+  color: #fff;
+  background: #e08a2f;
+  border-color: transparent;
+}
+
+.esp-badge-idle,
+.esp-badge-unknown {
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .esp-table,
+  .esp-table tbody,
+  .esp-table tr,
+  .esp-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .esp-table thead {
+    display: none;
+  }
+
+  .esp-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) 0;
+  }
+
+  .esp-table td {
+    border-bottom: none;
+    padding: 2px 0;
+  }
+}

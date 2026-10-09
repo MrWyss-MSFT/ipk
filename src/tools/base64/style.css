@@ -1,0 +1,32 @@
+.b64-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 720px;
+}
+
+.b64-mode {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.b64-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.b64-tool textarea:not([readonly]) {
+  width: 100%;
+  resize: vertical;
+}
+
+.ipk-copy-wrap textarea {
+  width: 100%;
+}
+
+.b64-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}

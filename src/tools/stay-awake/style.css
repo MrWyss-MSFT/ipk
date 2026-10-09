@@ -1,0 +1,82 @@
+.awk-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 560px;
+}
+
+.awk-note {
+  margin: 0;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.awk-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.awk-toggle {
+  font-size: 1.05rem;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  min-width: 260px;
+}
+
+.awk-toggle.is-active {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.awk-toggle.is-active:hover {
+  filter: brightness(0.95);
+}
+
+.awk-status {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.awk-status.is-active {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.awk-timer {
+  margin: 0;
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.awk-warning {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.awk-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.awk-status.is-active .awk-indicator {
+  background: var(--success);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 25%, transparent);
+}

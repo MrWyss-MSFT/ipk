@@ -1,0 +1,81 @@
+.abt-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+
+.abt-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  padding: var(--space-4);
+}
+
+.abt-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-3);
+}
+
+.abt-facts dt {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.abt-facts dd {
+  margin: 0;
+}
+
+.abt-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.abt-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.abt-note code {
+  font-size: 0.8em;
+}
+
+.abt-changelog-title {
+  margin: 0;
+}
+
+.abt-changelog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.abt-changelog .abt-ver {
+  margin: var(--space-3) 0 0;
+}
+
+.abt-changelog .abt-sub {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.abt-changelog ul {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.25rem;
+}
+
+.abt-changelog p {
+  margin: 0 0 var(--space-2);
+}
+
+.abt-muted {
+  color: var(--text-muted);
+}

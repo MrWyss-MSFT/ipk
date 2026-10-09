@@ -1,0 +1,259 @@
+.rgp-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 1200px;
+}
+
+.rgp-note {
+  margin: 0;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.rgp-note a {
+  color: var(--accent);
+}
+
+.rgp-sample-cmd {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+  padding: 6px 40px 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  min-height: 28px;
+}
+
+.rgp-sample-cmd code {
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.rgp-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.rgp-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rgp-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rgp-raw {
+  width: 100%;
+  font-size: 0.78rem;
+  resize: vertical;
+}
+
+.rgp-warning {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--warning, #c77d00);
+}
+
+.rgp-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(360px, 2fr);
+  gap: var(--space-3);
+  align-items: start;
+  position: relative;
+}
+
+.rgp-spinner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.rgp-spinner-overlay[hidden] {
+  display: none;
+}
+
+.rgp-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: rgp-spin 0.7s linear infinite;
+}
+
+@keyframes rgp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rgp-tree-pane,
+.rgp-details-pane {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  min-height: 200px;
+}
+
+.rgp-pane-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.rgp-tree {
+  max-height: 480px;
+  overflow: auto;
+  padding: var(--space-2);
+}
+
+.rgp-tree-root,
+.rgp-children {
+  list-style: none;
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.rgp-tree-root {
+  padding-left: 0;
+}
+
+.rgp-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.rgp-row.is-selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.rgp-row.is-selected .rgp-child-count {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.rgp-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 16px;
+  flex: none;
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.rgp-toggle-spacer {
+  display: inline-block;
+  width: 16px;
+  flex: none;
+}
+
+.rgp-key {
+  flex: 1;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+}
+
+.rgp-key:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.rgp-key.is-deleted {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.rgp-child-count {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.rgp-details {
+  padding: var(--space-3);
+}
+
+.rgp-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.rgp-path-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+  min-height: 32px;
+  padding: 2px 40px 2px 0;
+  margin-bottom: var(--space-3);
+}
+
+.rgp-path {
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.rgp-deleted-tag {
+  font-size: 0.7rem;
+  color: #fff;
+  background: #b3261e;
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+}
+
+.rgp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.rgp-table th,
+.rgp-table td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.rgp-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.rgp-value-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 860px) {
+  .rgp-layout {
+    grid-template-columns: 1fr;
+  }
+}

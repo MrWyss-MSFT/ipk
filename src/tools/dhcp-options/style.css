@@ -1,0 +1,121 @@
+.dho-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 1100px;
+}
+
+.dho-note {
+  margin: 0;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.dho-note a {
+  color: var(--accent);
+}
+
+.dho-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.dho-tool textarea {
+  width: 100%;
+  font-size: 0.8rem;
+  resize: none;
+  overflow: hidden;
+}
+
+.dho-input {
+  resize: vertical;
+  overflow: auto;
+}
+
+.dho-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dho-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.dho-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.dho-empty {
+  color: var(--text-muted);
+}
+
+.dho-subheading {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9rem;
+}
+
+.dho-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.dho-table th,
+.dho-table td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.dho-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.dho-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+.dho-badge {
+  font-size: 0.7rem;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0 5px;
+}
+
+@media (max-width: 760px) {
+  .dho-table,
+  .dho-table thead,
+  .dho-table tbody,
+  .dho-table th,
+  .dho-table td,
+  .dho-table tr {
+    display: block;
+  }
+
+  .dho-table thead {
+    display: none;
+  }
+
+  .dho-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) 0;
+  }
+
+  .dho-table td {
+    border-bottom: none;
+    padding: 2px var(--space-2);
+  }
+}

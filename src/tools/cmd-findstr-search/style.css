@@ -1,0 +1,54 @@
+.cfs-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 900px;
+}
+
+.cfs-note {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+}
+
+.cfs-note code {
+  font-size: 0.8rem;
+}
+
+.cfs-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.cfs-tool input[type="text"] {
+  width: 100%;
+}
+
+.ipk-copy-wrap textarea {
+  width: 100%;
+}
+
+.cfs-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  margin-top: var(--space-2);
+  cursor: pointer;
+}
+
+.cfs-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+#cfs-output {
+  font-size: 0.8rem;
+}
+
+.cfs-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ItProKit — handy static tools for IT Pros managing endpoints with Microsoft technologies." />
+    <title>ItProKit</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      // Apply the saved/preferred theme before first paint to avoid a flash
+      // of the wrong theme. Kept inline and tiny on purpose.
+      (function () {
+        var STORAGE_KEY = "ipk-theme";
+        var saved = localStorage.getItem(STORAGE_KEY) || "system";
+        var resolved =
+          saved === "system"
+            ? window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light"
+            : saved;
+        document.documentElement.setAttribute("data-theme", resolved);
+        document.documentElement.setAttribute("data-theme-pref", saved);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

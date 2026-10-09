@@ -1,0 +1,287 @@
+/* Header */
+.ipk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.ipk-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.ipk-brand img {
+  width: 24px;
+  height: 24px;
+}
+
+.ipk-search {
+  flex: 1;
+  max-width: 420px;
+}
+
+.ipk-search input {
+  width: 100%;
+}
+
+/* Buttons & inputs */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.1s ease, border-color 0.1s ease;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+input[type="text"],
+input[type="search"],
+textarea {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Copy-to-clipboard icon button, positioned in a field's top-right corner */
+.ipk-copy-wrap {
+  position: relative;
+}
+
+.ipk-copy-wrap input,
+.ipk-copy-wrap textarea {
+  padding-right: 40px;
+}
+
+/* Copyable output never scrolls — JS (autoGrowTextarea) sets height to fit content. */
+.ipk-copy-wrap textarea {
+  overflow: hidden;
+  resize: none;
+}
+
+.ipk-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ipk-copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.ipk-copy-btn.is-copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* Main layout */
+.ipk-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.ipk-sidebar {
+  flex: 0 0 240px;
+  width: 240px;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-3);
+  border-right: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.ipk-nav-home {
+  margin-bottom: var(--space-4);
+  font-weight: 600;
+}
+
+.ipk-nav-group {
+  margin-bottom: var(--space-4);
+}
+
+.ipk-nav-group-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.ipk-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ipk-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.ipk-nav-link:hover {
+  background: var(--bg-hover);
+}
+
+.ipk-nav-link.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.ipk-nav-icon {
+  flex: 0 0 auto;
+}
+
+.ipk-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-5);
+  overflow-y: auto;
+}
+
+/* Tool cards / grid */
+.ipk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.ipk-card {
+  display: block;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+}
+
+.ipk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+}
+
+.ipk-card-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-2);
+}
+
+.ipk-card h3 {
+  font-size: 1rem;
+}
+
+.ipk-card p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.ipk-badge {
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+/* Tool detail view */
+.ipk-tool-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.ipk-tool-header > div {
+  min-width: 0;
+}
+
+.ipk-tool-header p {
+  overflow-wrap: anywhere;
+}
+
+.ipk-back-link {
+  display: inline-block;
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.ipk-empty-state {
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--text-muted);
+}
