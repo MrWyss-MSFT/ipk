@@ -1,5 +1,7 @@
 import "./style.css";
-import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setCode } from "@/app/code-block";
+import { highlightCode } from "@/app/highlight";
 import type { ToolDefinition } from "@/types/tool";
 import {
   COMMANDS,
@@ -131,7 +133,7 @@ const tool: ToolDefinition = {
             cmd.exe command — adds the checked paths above to Registry Editor's Favorites
           </label>
           <div class="ipk-copy-wrap">
-            <textarea id="ref-fav-output" class="mono" rows="8" readonly></textarea>
+            ${codeBlockHtml("ref-fav-output")}
             ${copyButtonHtml("ref-fav-copy")}
           </div>
           <p class="ref-tip">
@@ -153,7 +155,7 @@ const tool: ToolDefinition = {
     const favPanel = container.querySelector<HTMLDivElement>("#ref-fav-panel")!;
     const favCustomList = container.querySelector<HTMLUListElement>("#ref-fav-custom-list")!;
     const favAddCustomBtn = container.querySelector<HTMLButtonElement>("#ref-fav-add-custom")!;
-    const favOutput = container.querySelector<HTMLTextAreaElement>("#ref-fav-output")!;
+    const favOutput = container.querySelector<HTMLPreElement>("#ref-fav-output")!;
     const favCopyBtn = container.querySelector<HTMLButtonElement>("#ref-fav-copy")!;
 
     let activeTab: TabId = "commands";
@@ -213,7 +215,7 @@ const tool: ToolDefinition = {
             <tr>
               <td class="ref-cmd-cell">
                 <span class="ref-cmd-inner">
-                  <code class="mono">${e.command.replace(/\n/g, "<br/>")}</code>
+                  <code class="mono">${highlightCode(e.command, e.powershellOnly ? "powershell" : "cmd").replace(/\n/g, "<br/>")}</code>
                   ${copyButtonHtml(`ref-copy-${i}`, `Copy "${e.command}"`)}
                 </span>
               </td>
@@ -394,6 +396,8 @@ const tool: ToolDefinition = {
       else renderWmi(query);
     };
 
+    let currentFavScript = "";
+
     const updateFavScript = () => {
       const builtins: RegistryFavoriteEntry[] = REGISTRY_PATHS.filter((e) => selectedFavorites.has(e.path)).map(
         (e) => ({ name: e.name, path: e.path }),
@@ -407,8 +411,8 @@ const tool: ToolDefinition = {
         }))
         .filter((f) => f.name && f.path);
 
-      favOutput.value = buildRegistryFavoritesScript([...builtins, ...customs]);
-      autoGrowTextarea(favOutput);
+      currentFavScript = buildRegistryFavoritesScript([...builtins, ...customs]);
+      setCode(favOutput, currentFavScript, "cmd");
     };
 
     const addCustomFavoriteRow = () => {
@@ -426,7 +430,7 @@ const tool: ToolDefinition = {
     };
 
     favAddCustomBtn.addEventListener("click", addCustomFavoriteRow);
-    wireCopyButton(favCopyBtn, () => favOutput.value);
+    wireCopyButton(favCopyBtn, () => currentFavScript);
 
     // Event delegation: the table body is replaced wholesale on every render(), so a single
     // listener on the stable `list` element (rather than per-checkbox listeners) survives
@@ -447,9 +451,6 @@ const tool: ToolDefinition = {
         filterInput.value = "";
         activeTags.clear();
         favPanel.hidden = activeTab !== "registry";
-        // The textarea's auto-grow measures scrollHeight, which is unreliable while the
-        // panel is display:none — recompute it now that the panel is actually visible.
-        if (!favPanel.hidden) autoGrowTextarea(favOutput);
         render();
       });
     });

@@ -1,5 +1,6 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
 
@@ -31,7 +32,7 @@ const tool: ToolDefinition = {
         </p>
         <label class="aph-label" for="aph-snippet">Get the hardware hash on a Windows device (PowerShell — copies it to your clipboard)</label>
         <div class="ipk-copy-wrap">
-          <textarea id="aph-snippet" class="mono" rows="3" readonly>${psSnippet}</textarea>
+          ${codeBlockHtml("aph-snippet")}
           ${copyButtonHtml("aph-copy-snippet")}
         </div>
         <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
@@ -71,7 +72,7 @@ const tool: ToolDefinition = {
     input.addEventListener("input", render);
     wireCopyButton(copyBtn, () => output.value);
     wireCopyButton(snippetCopyBtn, () => psSnippet);
-    autoGrowTextarea(container.querySelector<HTMLTextAreaElement>("#aph-snippet")!);
+    setPowerShellCode(container.querySelector<HTMLElement>("#aph-snippet")!, psSnippet);
 
     return () => {
       input.removeEventListener("input", render);

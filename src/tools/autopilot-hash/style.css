@@ -16,6 +16,10 @@
   margin-top: var(--space-2);
 }
 
+.aph-tool textarea {
+  font-size: 0.85rem;
+}
+
 .aph-tool textarea:not([readonly]) {
   width: 100%;
   resize: vertical;

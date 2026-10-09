@@ -1,5 +1,6 @@
 import "./style.css";
-import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeComgmtWorkloads, parseWorkloadValue } from "./decode";
 
@@ -31,7 +32,7 @@ const tool: ToolDefinition = {
         </p>
         <label class="cmw-label" for="cmw-snippet">Get the value on a co-managed device (PowerShell — copies the value to your clipboard)</label>
         <div class="ipk-copy-wrap">
-          <textarea id="cmw-snippet" class="mono" rows="3" readonly>${psSnippet}</textarea>
+          ${codeBlockHtml("cmw-snippet")}
           ${copyButtonHtml("cmw-copy-snippet")}
         </div>
         <label class="cmw-label" for="cmw-input">ComgmtWorkloads value (decimal or hex, e.g. 8193 or 0x2001)</label>
@@ -101,7 +102,7 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", renderFromValue);
     wireCopyButton(snippetCopyBtn, () => psSnippet);
-    autoGrowTextarea(container.querySelector<HTMLTextAreaElement>("#cmw-snippet")!);
+    setPowerShellCode(container.querySelector<HTMLElement>("#cmw-snippet")!, psSnippet);
 
     renderFromValue();
 

@@ -1,7 +1,10 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { highlightCode } from "@/app/highlight";
 import type { ToolDefinition } from "@/types/tool";
 import { parseRegFile, type RegKeyNode, type RegValue } from "./parser";
+
+const EXPORT_COMMAND = 'reg export "HKCU\\Software\\ItProKit" "%USERPROFILE%\\Desktop\\export.reg"';
 
 const EXAMPLE_REG = `Windows Registry Editor Version 5.00
 
@@ -73,7 +76,7 @@ const tool: ToolDefinition = {
         <p class="rgp-note">
           Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
           <span class="rgp-sample-cmd">
-            <code class="mono" id="rgp-export-cmd">reg export "HKCU\\Software\\ItProKit" "%USERPROFILE%\\Desktop\\export.reg"</code>
+            <code class="mono" id="rgp-export-cmd"></code>
             ${copyButtonHtml("rgp-export-copy", 'Copy "reg export" command')}
           </span>
           then load or paste the .reg file to browse it as a tree. Inspired by
@@ -120,6 +123,7 @@ const tool: ToolDefinition = {
     const countEl = container.querySelector<HTMLSpanElement>("#rgp-count")!;
     const exportCmdEl = container.querySelector<HTMLElement>("#rgp-export-cmd")!;
     const exportCopyBtn = container.querySelector<HTMLButtonElement>("#rgp-export-copy")!;
+    exportCmdEl.innerHTML = highlightCode(EXPORT_COMMAND, "cmd");
     const input = container.querySelector<HTMLTextAreaElement>("#rgp-input")!;
     const errorsEl = container.querySelector<HTMLDivElement>("#rgp-errors")!;
     const treeEl = container.querySelector<HTMLDivElement>("#rgp-tree")!;
@@ -297,7 +301,7 @@ const tool: ToolDefinition = {
       }, 20);
     };
 
-    wireCopyButton(exportCopyBtn, () => exportCmdEl.textContent ?? "");
+    wireCopyButton(exportCopyBtn, () => EXPORT_COMMAND);
 
     treeEl.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;

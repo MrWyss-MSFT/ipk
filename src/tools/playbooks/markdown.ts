@@ -30,6 +30,8 @@ export interface GuideStep {
   code?: string;
   /** Badge shown next to the code block, e.g. "PowerShell", "XML", "cmd". */
   lang?: string;
+  /** Normalized language key for syntax highlighting (see `@/app/highlight`), when recognized. */
+  codeLang?: "powershell" | "cmd" | "xml";
 }
 
 export interface GuideEntry {
@@ -57,6 +59,16 @@ const LANG_LABELS: Record<string, string> = {
   text: "text",
 };
 
+/** Maps a fence language tag to the normalized key `@/app/highlight` understands. */
+const CODE_LANGS: Record<string, "powershell" | "cmd" | "xml"> = {
+  powershell: "powershell",
+  ps1: "powershell",
+  xml: "xml",
+  cmd: "cmd",
+  bat: "cmd",
+  batch: "cmd",
+};
+
 function parseFrontmatter(raw: string): { meta: Record<string, string>; body: string } {
   const match = FRONTMATTER_RE.exec(raw);
   if (!match) return { meta: {}, body: raw };
@@ -77,7 +89,12 @@ function stepFromLines(lines: string[]): GuideStep {
   const text = joined.slice(0, codeMatch.index).trim();
   const rawLang = codeMatch[1].toLowerCase();
   const code = codeMatch[2].replace(/\r?\n$/, "");
-  return { text, code, lang: rawLang ? (LANG_LABELS[rawLang] ?? codeMatch[1]) : undefined };
+  return {
+    text,
+    code,
+    lang: rawLang ? (LANG_LABELS[rawLang] ?? codeMatch[1]) : undefined,
+    codeLang: CODE_LANGS[rawLang],
+  };
 }
 
 function parseSteps(body: string): GuideStep[] {

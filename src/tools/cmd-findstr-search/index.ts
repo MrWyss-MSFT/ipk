@@ -1,5 +1,6 @@
 import "./style.css";
-import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 
 /** Normalizes a free-form file formats string into `*.ext` tokens separated by spaces. */
@@ -49,7 +50,7 @@ const tool: ToolDefinition = {
 
         <label class="cfs-label" for="cfs-output">cmd.exe command</label>
         <div class="ipk-copy-wrap">
-          <textarea id="cfs-output" class="mono" rows="3" readonly></textarea>
+          ${codeBlockHtml("cfs-output")}
           ${copyButtonHtml("cfs-copy")}
         </div>
         <p class="cfs-note">
@@ -63,8 +64,10 @@ const tool: ToolDefinition = {
     const formatsInput = container.querySelector<HTMLInputElement>("#cfs-formats")!;
     const icaseInput = container.querySelector<HTMLInputElement>("#cfs-icase")!;
     const errorEl = container.querySelector<HTMLSpanElement>("#cfs-error")!;
-    const output = container.querySelector<HTMLTextAreaElement>("#cfs-output")!;
+    const output = container.querySelector<HTMLPreElement>("#cfs-output")!;
     const copyBtn = container.querySelector<HTMLButtonElement>("#cfs-copy")!;
+
+    let currentCommand = "";
 
     const render = () => {
       errorEl.textContent = "";
@@ -74,15 +77,15 @@ const tool: ToolDefinition = {
       const patterns = normalizePatterns(formatsInput.value);
 
       if (!text) {
-        output.value = "";
+        currentCommand = "";
+        setCode(output, currentCommand, "cmd");
         errorEl.textContent = "Enter a text string to search for.";
-        autoGrowTextarea(output);
         return;
       }
       if (!patterns) {
-        output.value = "";
+        currentCommand = "";
+        setCode(output, currentCommand, "cmd");
         errorEl.textContent = "Enter at least one file format (e.g. *.ps1).";
-        autoGrowTextarea(output);
         return;
       }
       if (text.includes('"')) {
@@ -91,15 +94,15 @@ const tool: ToolDefinition = {
 
       const flags = icaseInput.checked ? "/I /M" : "/M";
       const rootArg = root.includes(" ") ? `"${root}"` : root;
-      output.value = `for /r ${rootArg} %F in (${patterns}) do @findstr ${flags} /C:"${text}" "%F" >nul 2>nul && echo %F`;
-      autoGrowTextarea(output);
+      currentCommand = `for /r ${rootArg} %F in (${patterns}) do @findstr ${flags} /C:"${text}" "%F" >nul 2>nul && echo %F`;
+      setCode(output, currentCommand, "cmd");
     };
 
     textInput.addEventListener("input", render);
     pathInput.addEventListener("input", render);
     formatsInput.addEventListener("input", render);
     icaseInput.addEventListener("change", render);
-    wireCopyButton(copyBtn, () => output.value);
+    wireCopyButton(copyBtn, () => currentCommand);
 
     render();
 

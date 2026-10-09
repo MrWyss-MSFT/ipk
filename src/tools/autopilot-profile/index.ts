@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
 
@@ -119,7 +120,7 @@ const tool: ToolDefinition = {
       <div class="apc-tool">
         <p class="apc-step-label">1. Run this on the device — it copies the cached profile JSON to your clipboard</p>
         <div class="ipk-copy-wrap">
-          <textarea id="apc-cmd" class="mono" rows="3" readonly></textarea>
+          ${codeBlockHtml("apc-cmd")}
           ${copyButtonHtml("apc-cmd-copy")}
         </div>
 
@@ -131,8 +132,8 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const cmdEl = container.querySelector<HTMLTextAreaElement>("#apc-cmd")!;
-    cmdEl.value = EXPORT_COMMAND;
+    const cmdEl = container.querySelector<HTMLElement>("#apc-cmd")!;
+    setPowerShellCode(cmdEl, EXPORT_COMMAND);
     const cmdCopyBtn = container.querySelector<HTMLButtonElement>("#apc-cmd-copy")!;
     wireCopyButton(cmdCopyBtn, () => EXPORT_COMMAND);
 

@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse";
 
@@ -73,7 +74,7 @@ const tool: ToolDefinition = {
       <div class="esp-tool">
         <p class="esp-step-label">1. Run this on the device — it copies the exported JSON to your clipboard</p>
         <div class="ipk-copy-wrap">
-          <textarea id="esp-cmd" class="mono" rows="3" readonly></textarea>
+          ${codeBlockHtml("esp-cmd")}
           ${copyButtonHtml("esp-cmd-copy")}
         </div>
         <p class="esp-tip">
@@ -92,8 +93,8 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const cmdEl = container.querySelector<HTMLTextAreaElement>("#esp-cmd")!;
-    cmdEl.value = EXPORT_COMMAND;
+    const cmdEl = container.querySelector<HTMLElement>("#esp-cmd")!;
+    setPowerShellCode(cmdEl, EXPORT_COMMAND);
     const cmdCopyBtn = container.querySelector<HTMLButtonElement>("#esp-cmd-copy")!;
     wireCopyButton(cmdCopyBtn, () => EXPORT_COMMAND);
 

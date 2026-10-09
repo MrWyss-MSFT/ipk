@@ -44,10 +44,6 @@
   cursor: pointer;
 }
 
-#cfs-output {
-  font-size: 0.8rem;
-}
-
 .cfs-error {
   color: var(--danger);
   font-size: 0.85rem;

@@ -19,8 +19,12 @@
   "devDependencies": {
     "@release-it/conventional-changelog": "^11.0.1",
     "@types/node": "^20.19.43",
+    "@types/prismjs": "^1.26.6",
     "release-it": "^20.2.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "prismjs": "^1.30.0"
   }
 }

@@ -36,6 +36,15 @@
   --text-muted: #5b6372;
   --danger: #dc2626;
   --success: #16a34a;
+
+  /* Syntax highlighting (One Light palette) */
+  --syntax-comment: #696c77;
+  --syntax-string: #50a14f;
+  --syntax-keyword: #a626a4;
+  --syntax-function: #4078f2;
+  --syntax-variable: #e45649;
+  --syntax-namespace: #c18401;
+  --syntax-boolean: #986801;
 }
 
 [data-theme="dark"] {
@@ -47,4 +56,13 @@
   --text-muted: #9aa2b1;
   --danger: #f87171;
   --success: #4ade80;
+
+  /* Syntax highlighting (One Dark palette) */
+  --syntax-comment: #5c6370;
+  --syntax-string: #98c379;
+  --syntax-keyword: #c678dd;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-namespace: #e5c07b;
+  --syntax-boolean: #d19a66;
 }

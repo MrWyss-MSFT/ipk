@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { highlightCode } from "@/app/highlight";
 import type { ToolDefinition, ToolMountContext } from "@/types/tool";
 import { GUIDES, type GuideEntry } from "./data";
 
@@ -16,6 +17,7 @@ function matchText(haystack: (string | undefined)[], query: string): boolean {
 function stepHtml(guide: GuideEntry, stepIndex: number): string {
   const step = guide.steps[stepIndex];
   const copyId = `pbk-copy-${guide.id}-${stepIndex}`;
+  const codeHtml = step.code ? (step.codeLang ? highlightCode(step.code, step.codeLang) : escapeHtml(step.code)) : "";
   return `
     <li class="pbk-step">
       <p class="pbk-step-text">${step.text}</p>
@@ -23,7 +25,7 @@ function stepHtml(guide: GuideEntry, stepIndex: number): string {
         step.code
           ? `<div class="pbk-code-wrap">
                ${step.lang ? `<span class="pbk-lang">${step.lang}</span>` : ""}
-               <pre class="mono pbk-code">${escapeHtml(step.code)}</pre>
+               <pre class="mono pbk-code"><code>${codeHtml}</code></pre>
                ${copyButtonHtml(copyId, `Copy "${step.text}"`)}
              </div>`
           : ""

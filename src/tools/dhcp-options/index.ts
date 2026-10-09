@@ -1,5 +1,6 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import { hexToBytes, parseDhcpInterfaceOptions, type ParsedDhcpOption } from "./parser";
 
@@ -61,7 +62,7 @@ const tool: ToolDefinition = {
 
         <label class="dho-label" for="dho-ps">PowerShell: dump DHCP options as hex (copies the output to your clipboard)</label>
         <div class="ipk-copy-wrap">
-          <textarea id="dho-ps" class="mono" rows="7" readonly></textarea>
+          ${codeBlockHtml("dho-ps")}
           ${copyButtonHtml("dho-ps-copy")}
         </div>
 
@@ -86,7 +87,7 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const psOutput = container.querySelector<HTMLTextAreaElement>("#dho-ps")!;
+    const psOutput = container.querySelector<HTMLElement>("#dho-ps")!;
     const psCopyBtn = container.querySelector<HTMLButtonElement>("#dho-ps-copy")!;
     const input = container.querySelector<HTMLTextAreaElement>("#dho-input")!;
     const exampleBtn = container.querySelector<HTMLButtonElement>("#dho-example")!;
@@ -95,8 +96,7 @@ const tool: ToolDefinition = {
     const countEl = container.querySelector<HTMLSpanElement>("#dho-count")!;
     const results = container.querySelector<HTMLDivElement>("#dho-results")!;
 
-    psOutput.value = PS_SNIPPET;
-    autoGrowTextarea(psOutput);
+    setPowerShellCode(psOutput, PS_SNIPPET);
     wireCopyButton(psCopyBtn, () => PS_SNIPPET);
 
     const render = () => {

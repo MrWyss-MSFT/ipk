@@ -96,7 +96,8 @@ textarea:focus {
 }
 
 .ipk-copy-wrap input,
-.ipk-copy-wrap textarea {
+.ipk-copy-wrap textarea,
+.ipk-copy-wrap .ipk-code {
   padding-right: 40px;
 }
 
@@ -104,6 +105,68 @@ textarea:focus {
 .ipk-copy-wrap textarea {
   overflow: hidden;
   resize: none;
+}
+
+/* Syntax-highlighted code block — a readonly, non-editable alternative to a
+   textarea for static copyable commands (see src/app/code-block.ts). Every
+   copyable command snippet in the app (PowerShell/cmd/XML, Playbooks steps)
+   shares this one font-size so they all read consistently. */
+.ipk-code {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Prism token colors — global, so any syntax-highlighted code anywhere in the
+   app (readonly PowerShell/cmd/XML command blocks, inline `<code>` snippets,
+   Playbooks steps) picks these up automatically; adding a new highlighted
+   language only ever needs rules added here. */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.token.string,
+.token.attr-value {
+  color: var(--syntax-string);
+}
+
+.token.keyword,
+.token.property {
+  color: var(--syntax-keyword);
+}
+
+.token.function {
+  color: var(--syntax-function);
+}
+
+.token.variable,
+.token.tag,
+.token.entity {
+  color: var(--syntax-variable);
+}
+
+.token.boolean,
+.token.number {
+  color: var(--syntax-boolean);
+}
+
+.token.namespace,
+.token.attr-name {
+  color: var(--syntax-namespace);
+}
+
+.token.operator,
+.token.punctuation {
+  color: var(--text-muted);
 }
 
 .ipk-copy-btn {
