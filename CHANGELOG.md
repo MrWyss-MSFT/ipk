@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.2.0...v0.3.0) (2026-10-09)
+
+### ✨ Features
+
+* emoji section headers in generated changelog ([8dce1e0](https://github.com/MrWyss-MSFT/ipk/commit/8dce1e0be452c6d9c0d77cf50e6a17487822cb65))
+
+### 🐛 Bug Fixes
+
+* use Set-Clipboard -PassThru instead of Tee-Object in PowerShell snippets ([f6e3c64](https://github.com/MrWyss-MSFT/ipk/commit/f6e3c641b366f3784c7a0c041c86b2c5a4bb290b))
+
 ## 0.2.0 (2026-10-09)
 
 ### Features
