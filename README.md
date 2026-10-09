@@ -30,22 +30,20 @@ close the tab).
 
 ## Tools
 
-| Tool | Category | What it does |
-| --- | --- | --- |
-| Autopilot Hardware Hash Decoder | Converters | Decode a Windows Autopilot "4K hardware hash" (`DeviceHardwareData`) Base64 string into readable device details. |
-| Autopilot Profile Parser | Converters | Parse the cached Autopilot deployment profile (`PolicyJsonCache`) into a readable summary, including a decoded `CloudAssignedOobeConfig` bitmask. |
-| Base64 Encode / Decode | Converters | Encode text to Base64 or decode a Base64 string back to text. |
-| Co-Management Workloads Decoder | Converters | Decode a ConfigMgr `CCM_System.ComgmtWorkloads` bitmask into individual Co-Management workload switches. |
-| DHCP Options Decoder | Converters | Decode the raw `DhcpInterfaceOptions` registry value into human-readable option names and values. |
-| Entra ID ObjectID ↔ SID | Converters | Convert an Entra ID (Azure AD) object GUID to its Windows SID form, and back. |
-| ESP Progress Parser | Converters | Parse Enrollment Status Page (ESP) per-phase step status from an exported registry JSON blob. |
-| GDID ↔ LID | Converters | Convert the Entra ID device `g:` physical ID to and from its raw hex LID registry value. |
-| Registry Preview | Converters | Paste/load an exported `.reg` file and browse it as a visual key tree with decoded values. |
-| Find Text in Files (cmd command) | Generators | Build a `cmd.exe` one-liner that recursively searches files for a string using `for /r` + `findstr`. |
-| Playbooks | Reference | Short, copy-pasteable step-by-step guides for recurring IT Pro tasks. |
-| References | Reference | Cheat sheet of Run/cmd commands, keyboard shortcuts, folder paths, registry paths (+ a Registry Editor Favorites script generator), WMI classes, and `ms-settings:` deeplinks. |
-| Redactor | Text | Redact emails, URLs, IPs, IBANs, credit card and phone numbers (or your own custom words) from text. |
-| Stay Awake | Utilities | Keep the screen from locking/dimming with one click. Runs entirely in your browser. |
+- Autopilot Hardware Hash Decoder
+- Autopilot Profile Parser
+- Base64 Encode / Decode
+- Co-Management Workloads Decoder
+- DHCP Options Decoder
+- Entra ID ObjectID ↔ SID
+- ESP Progress Parser
+- GDID ↔ LID
+- Registry Preview
+- Find Text in Files (cmd command)
+- Playbooks
+- References
+- Redactor
+- Stay Awake
 
 New tools land often — check the in-app sidebar for the current list.
 
@@ -64,9 +62,21 @@ Then open `http://localhost:8080`. Works on Linux, Windows (Docker Desktop /
 WSL2), and Apple Silicon — images are published for both `linux/amd64` and
 `linux/arm64`.
 
+On Windows you don't even need Docker Desktop: with an up-to-date WSL
+(`wsl --update`) you can run the same image with the built-in `wslc` CLI
+instead:
+
+```powershell
+wslc run -d --name ipk -p 8080:80 ghcr.io/mrwyss-msft/ipk:latest
+```
+
 ### Local development
 
-Requirements: **Node.js 20+** (22 recommended).
+Easiest: open the repo in the included **dev container**
+(VS Code "Reopen in Container" or GitHub Codespaces) — it's preconfigured
+with Node.js and runs `npm install` for you automatically.
+
+No dev container? Requirements: **Node.js 20+** (22 recommended).
 
 ```bash
 npm install
