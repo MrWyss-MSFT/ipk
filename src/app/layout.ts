@@ -172,8 +172,8 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
   root.innerHTML = `
     <header class="ipk-header">
       <a class="ipk-brand" href="#/">
-        <img src="favicon.svg" alt="" />
-        <span>ItProKit</span>
+        <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
+        <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
       </a>
       <div class="ipk-search">
         <input type="search" id="ipk-search" placeholder="Search tools..." aria-label="Search tools" />

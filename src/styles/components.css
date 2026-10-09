@@ -22,9 +22,17 @@
   color: var(--text);
 }
 
-.ipk-brand img {
-  width: 24px;
-  height: 24px;
+.ipk-brand img.ipk-logo {
+  height: 40px;
+  width: auto;
+}
+
+[data-theme="light"] .ipk-logo-dark {
+  display: none;
+}
+
+[data-theme="dark"] .ipk-logo-light {
+  display: none;
 }
 
 .ipk-search {
