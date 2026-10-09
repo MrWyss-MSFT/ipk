@@ -9,8 +9,7 @@
     "publish": false
   },
   "github": {
-    "release": true,
-    "releaseName": "v${version}"
+    "release": false
   },
   "plugins": {
     "@release-it/conventional-changelog": {
