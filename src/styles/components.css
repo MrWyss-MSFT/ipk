@@ -83,6 +83,8 @@ select {
 
 input[type="text"],
 input[type="search"],
+input[type="number"],
+select,
 textarea {
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
@@ -93,6 +95,8 @@ textarea {
 
 input[type="text"]:focus,
 input[type="search"]:focus,
+input[type="number"]:focus,
+select:focus,
 textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
