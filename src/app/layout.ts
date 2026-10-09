@@ -50,7 +50,7 @@ function renderHome(main: HTMLElement, query = ""): void {
 
   main.innerHTML = `
     <div class="ipk-home">
-      <h1>ItProKit</h1>
+      <h1>IT Pro Kit</h1>
       <p>Handy static tools for IT Pros managing endpoints with Microsoft technologies. ${subtitle}</p>
       ${
         results.length

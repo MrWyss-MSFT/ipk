@@ -1,5 +1,5 @@
 /**
- * Contract every Tool must implement to plug into ItProKit.
+ * Contract every Tool must implement to plug into IPK.
  *
  * Drop a new folder under src/tools/<tool-id>/ with an index.ts that
  * exports a ToolDefinition as its default export, and it is automatically

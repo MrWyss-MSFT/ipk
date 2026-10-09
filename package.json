@@ -1,7 +1,7 @@
 {
   "name": "itprokit",
   "version": "0.3.0",
-  "description": "ItProKit (IPK) — handy static tools for IT Pros managing endpoints with Microsoft technologies.",
+  "description": "IPK (IT Pro Kit) — handy static tools for IT Pros managing endpoints with Microsoft technologies.",
   "private": true,
   "type": "module",
   "repository": {

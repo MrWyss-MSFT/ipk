@@ -1,10 +1,10 @@
-# AGENTS.md — ItProKit (IPK)
+# AGENTS.md — IPK - IT Pro Kit
 
 Guidance for AI agents (and humans) working in this repo.
 
 ## What this is
 
-ItProKit (IPK) is a static website of small, self-contained tools for IT Pros
+IPK (IT Pro Kit) is a static website of small, self-contained tools for IT Pros
 managing endpoints with Microsoft technologies — think [IT Tools](https://it-tools.tech/)
 but focused on Intune/Autopilot/Entra/ConfigMgr/Windows. It must stay **slim,
 fast, and trivially extensible**: adding a tool should mean "drop a folder",

@@ -1,5 +1,5 @@
 {
-  "name": "ItProKit (ipk) dev",
+  "name": "IPK (ipk) dev",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
   "features": {},
   "forwardPorts": [5173, 4173],
