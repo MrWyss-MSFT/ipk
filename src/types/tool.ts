@@ -37,6 +37,13 @@ export interface ToolDefinition {
   /** Inline SVG markup (preferred) or emoji fallback shown on the card. */
   icon?: string;
   /**
+   * Set true to exclude this tool from the home grid, sidebar nav groups,
+   * category list, and search - for app-level pages (e.g. About) that are
+   * linked from elsewhere in the chrome instead of listed as a regular tool.
+   * The tool is still reachable at #/tool/<id> and resolved by getToolById().
+   */
+  hidden?: boolean;
+  /**
    * Render the tool's UI into `container`. Called each time the tool route
    * is entered. May return a cleanup function, invoked when the user
    * navigates away (to remove listeners, timers, etc.). `context.itemId` is

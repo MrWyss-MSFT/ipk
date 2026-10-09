@@ -9,21 +9,24 @@ const modules = import.meta.glob<{ default: ToolDefinition }>("../tools/*/index.
   eager: true,
 });
 
-const tools: ToolDefinition[] = Object.values(modules)
+const allTools: ToolDefinition[] = Object.values(modules)
   .map((mod) => mod.default)
   .filter((tool): tool is ToolDefinition => Boolean(tool?.id))
   .sort((a, b) => a.name.localeCompare(b.name));
 
+/** Visible tools only (excludes `hidden` tools like About) - used for the home grid, sidebar, categories, and search. */
 export function getTools(): ToolDefinition[] {
-  return tools;
+  return allTools.filter((tool) => !tool.hidden);
 }
 
+/** Looks up any tool by id, including hidden ones, so #/tool/<id> routing works regardless of visibility. */
 export function getToolById(id: string): ToolDefinition | undefined {
-  return tools.find((tool) => tool.id === id);
+  return allTools.find((tool) => tool.id === id);
 }
 
 export function searchTools(query: string): ToolDefinition[] {
   const q = query.trim().toLowerCase();
+  const tools = getTools();
   if (!q) return tools;
   return tools.filter((tool) => {
     const haystack = [tool.name, tool.description, tool.category, ...(tool.keywords ?? [])]
@@ -43,6 +46,7 @@ export type SearchResult = { tool: ToolDefinition; item?: ToolSearchItem };
  */
 export function searchAll(query: string): SearchResult[] {
   const q = query.trim().toLowerCase();
+  const tools = getTools();
   if (!q) return tools.map((tool) => ({ tool }));
 
   const results: SearchResult[] = [];
@@ -63,5 +67,5 @@ export function searchAll(query: string): SearchResult[] {
 }
 
 export function getCategories(): string[] {
-  return Array.from(new Set(tools.map((tool) => tool.category))).sort();
+  return Array.from(new Set(getTools().map((tool) => tool.category))).sort();
 }

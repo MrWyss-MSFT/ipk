@@ -41,7 +41,10 @@ Create `src/tools/<kebab-id>/`:
 - `index.ts` — default-exports a `ToolDefinition` (see `src/types/tool.ts`):
   `id`, `name`, `description`, `category`, optional `keywords`/`icon`, and a
   `mount(container)` function that renders the UI and optionally returns a
-  cleanup callback (remove listeners/timers on navigation away).
+  cleanup callback (remove listeners/timers on navigation away). Set
+  `hidden: true` for an app-level page that shouldn't appear in the home
+  grid/sidebar groups/search (e.g. About, linked from the sidebar footer
+  instead) - it's still reachable at `#/tool/<id>`.
 - `parse.ts` / `decode.ts` / etc. — pure logic, kept separate from DOM code so
   it's easy to unit-test with a throwaway script (see "Testing" below).
 - `style.css` — imported at the top of `index.ts` (`import "./style.css"`).
@@ -194,10 +197,13 @@ Versioning and the changelog are automated with
   (this isn't an npm package, and no `GITHUB_TOKEN`/repo is wired up yet) -
   release-it only bumps the version, updates the changelog, and tags.
 - The running version and a link to the GitHub repo are shown in-app on the
-  **About** tool (`src/tools/about/`), which reads the version/repo from
-  `package.json` via `__APP_VERSION__`/`__APP_REPO_URL__` (injected by
-  `vite.config.ts`'s `define`, typed in `src/vite-env.d.ts`) and renders
-  `CHANGELOG.md` (imported with `?raw`) through `src/tools/about/changelog.ts`.
+  **About** page (`src/tools/about/`, a `hidden: true` tool linked from a
+  pinned link at the bottom of the sidebar — see `renderSidebarFooter()` in
+  `src/app/layout.ts` — instead of the home grid), which reads the
+  version/repo from `package.json` via `__APP_VERSION__`/`__APP_REPO_URL__`
+  (injected by `vite.config.ts`'s `define`, typed in `src/vite-env.d.ts`) and
+  renders `CHANGELOG.md` (imported with `?raw`) through
+  `src/tools/about/changelog.ts`.
 - Once the repo exists on GitHub, update `package.json`'s `repository.url`
   (currently a `TODO` placeholder) so the About page's repo link works.
 

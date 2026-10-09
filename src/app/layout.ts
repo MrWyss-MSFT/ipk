@@ -135,11 +135,28 @@ function renderSidebar(nav: HTMLElement): void {
     .join("");
 
   nav.innerHTML = `
-    <a class="ipk-nav-link ipk-nav-home" href="#/" data-tool-id="">
-      <span class="ipk-nav-icon">🏠</span>
-      <span>All tools</span>
-    </a>
-    ${groups}
+    <div class="ipk-nav-scroll">
+      <a class="ipk-nav-link ipk-nav-home" href="#/" data-tool-id="">
+        <span class="ipk-nav-icon">🏠</span>
+        <span>All tools</span>
+      </a>
+      ${groups}
+    </div>
+    ${renderSidebarFooter()}
+  `;
+}
+
+function renderSidebarFooter(): string {
+  const about = getToolById("about");
+  if (!about) return "";
+  return `
+    <div class="ipk-nav-footer">
+      <a class="ipk-nav-link" href="#/tool/${encodeURIComponent(about.id)}" data-tool-id="${about.id}">
+        <span class="ipk-nav-icon">${about.icon ?? "ℹ️"}</span>
+        <span>${escapeHtml(about.name)}</span>
+        <span class="ipk-nav-version">v${__APP_VERSION__}</span>
+      </a>
+    </div>
   `;
 }
 

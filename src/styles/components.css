@@ -143,10 +143,33 @@ textarea:focus {
 .ipk-sidebar {
   flex: 0 0 240px;
   width: 240px;
-  overflow-y: auto;
-  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border-right: 1px solid var(--border);
   background: var(--bg-elevated);
+}
+
+.ipk-nav-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.ipk-nav-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+}
+
+.ipk-nav-footer .ipk-nav-link {
+  justify-content: space-between;
+}
+
+.ipk-nav-version {
+  font-size: 0.7rem;
+  color: var(--text-muted);
 }
 
 .ipk-nav-home {

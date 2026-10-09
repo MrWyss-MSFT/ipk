@@ -8,8 +8,10 @@ const tool: ToolDefinition = {
   name: "About",
   description: "ItProKit's version, source repository, and release changelog.",
   category: "About",
-  keywords: ["about", "version", "changelog", "release", "release-it", "github", "source", "repo"],
   icon: "ℹ️",
+  // Linked from a pinned sidebar footer link (see layout.ts), not listed as a
+  // regular tool - keeps it out of the home grid, nav groups, and search.
+  hidden: true,
   mount(container) {
     const repoUrl = __APP_REPO_URL__;
     const repoHtml = repoUrl
