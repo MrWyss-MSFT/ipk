@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.3.0...v0.4.0) (2026-10-09)
+
+### ✨ Features
+
+* **about:** add license, author, and contributing sections; fix sidebar nav ([02100ae](https://github.com/MrWyss-MSFT/ipk/commit/02100aea8136e140c7280fa1ec3bfd6dc56a0901))
+* rebrand to IPK - IT Pro Kit with new logo and favicon ([723062a](https://github.com/MrWyss-MSFT/ipk/commit/723062a9aae2e1130c59cc7f6aa16563a69c2535))
+* redesign theme palette and add dual-tone logo for light/dark mode ([482afdc](https://github.com/MrWyss-MSFT/ipk/commit/482afdcfe2b65391c62d7c88df7e77c68a00c43b))
+
 ## [0.3.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.2.0...v0.3.0) (2026-10-09)
 
 ### ✨ Features
