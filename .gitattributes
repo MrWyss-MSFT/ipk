@@ -1,0 +1,7 @@
+# Force LF line endings for all text files in the repository, regardless of
+# the committer's OS/core.autocrlf setting. This repo is edited from both a
+# native Windows checkout and a Linux devcontainer sharing the same
+# bind-mounted working directory — without this, Windows's autocrlf=true
+# checks files out with CRLF while the devcontainer's git (no autocrlf) sees
+# every line as changed against the LF blobs actually stored in git.
+* text=auto eol=lf
