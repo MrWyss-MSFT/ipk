@@ -11,7 +11,7 @@ const PS_SNIPPET = `Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "I
         "--- $($_.Description) ---"
         ($bytes | ForEach-Object { $_.ToString('X2') }) -join ' '
     }
-} | Tee-Object -Variable Result | Out-String | Set-Clipboard; $Result`;
+} | Out-String | Set-Clipboard -PassThru`;
 
 const EXAMPLE_HEX =
   "35 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 05 00 00 00 " +

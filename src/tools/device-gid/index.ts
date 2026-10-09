@@ -5,7 +5,7 @@ import type { ToolDefinition } from "@/types/tool";
 import { gidToLid, lidToGid } from "./convert";
 
 const PS_LID_COMMAND =
-  '(Get-ItemProperty "Registry::HKEY_USERS\\.DEFAULT\\Software\\Microsoft\\IdentityCRL\\ExtendedProperties").LID | Tee-Object -Variable Result | Set-Clipboard; $Result';
+  '(Get-ItemProperty "Registry::HKEY_USERS\\.DEFAULT\\Software\\Microsoft\\IdentityCRL\\ExtendedProperties").LID | Set-Clipboard -PassThru';
 
 const tool: ToolDefinition = {
   id: "device-gid",

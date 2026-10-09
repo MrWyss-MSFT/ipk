@@ -121,11 +121,13 @@ the "Playbooks" tool as a whole) shows up as its own result when you search
   that:
   1. Reads only what's needed (don't over-fetch; prefer `-like` wildcard
      filters over `Where-Object` pipelines to keep it short).
-  2. Pipes through `Tee-Object -Variable X | Set-Clipboard; $X` so the
-     command **both displays the output in the console and copies it to the
-     clipboard** in one step — this is the established UX pattern (see
-     `esp-parser`, `autopilot-profile`, `autopilot-hash`, `device-gid`,
-     `comgmt-workloads`, `dhcp-options`).
+  2. Pipes through `Set-Clipboard -PassThru` so the command **both copies the
+     output to the clipboard and displays it back in the console** in one
+     step — this is the established UX pattern (see `esp-parser`,
+     `autopilot-profile`, `autopilot-hash`, `device-gid`, `comgmt-workloads`,
+     `dhcp-options`). If the pipeline emits multiple objects that need to
+     render as one clipboard-friendly block (e.g. multi-line output), pipe
+     through `Out-String` first: `... | Out-String | Set-Clipboard -PassThru`.
   3. Keep the actual parsing/decoding logic in TypeScript, not PowerShell —
      PowerShell should just dump raw data; all interpretation (timestamp
      resolution, bitmask decoding, JSON reshaping, etc.) belongs in the

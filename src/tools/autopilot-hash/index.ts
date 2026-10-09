@@ -23,7 +23,7 @@ const tool: ToolDefinition = {
   icon: "🧾",
   mount(container) {
     const psSnippet =
-      '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData | Tee-Object -Variable Result | Set-Clipboard; $Result';
+      '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData | Set-Clipboard -PassThru';
 
     container.innerHTML = `
       <div class="aph-tool">

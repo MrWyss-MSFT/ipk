@@ -5,7 +5,7 @@ import type { ToolDefinition } from "@/types/tool";
 import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse";
 
 const EXPORT_COMMAND =
-  '$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotSettings"; $Values = @{}; (Get-Item $RegPath).Property -like "*Category.Status*" | ForEach-Object { $Values[$_] = Get-ItemPropertyValue $RegPath -Name $_ }; $Values | ConvertTo-Json -Compress | Tee-Object -Variable Json | Set-Clipboard; $Json';
+  '$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotSettings"; $Values = @{}; (Get-Item $RegPath).Property -like "*Category.Status*" | ForEach-Object { $Values[$_] = Get-ItemPropertyValue $RegPath -Name $_ }; $Values | ConvertTo-Json -Compress | Set-Clipboard -PassThru';
 
 /** Best-effort bucket for coloring a status badge; falls back to "unknown" for anything unrecognized. */
 function stateBucket(state: string): "ok" | "fail" | "progress" | "block" | "idle" | "unknown" {

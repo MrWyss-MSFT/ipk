@@ -23,7 +23,7 @@ const tool: ToolDefinition = {
   icon: "🔀",
   mount(container) {
     const psSnippet =
-      '$System = Get-CimInstance -Namespace "root\\ccm\\InvAgt" -ClassName "CCM_System"; "CoManaged: $($System.CoManaged)"; $System.ComgmtWorkloads | Tee-Object -Variable Result | Set-Clipboard; $Result';
+      '$System = Get-CimInstance -Namespace "root\\ccm\\InvAgt" -ClassName "CCM_System"; "CoManaged: $($System.CoManaged)"; $System.ComgmtWorkloads | Set-Clipboard -PassThru';
 
     container.innerHTML = `
       <div class="cmw-tool">

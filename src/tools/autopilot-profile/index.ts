@@ -5,7 +5,7 @@ import type { ToolDefinition } from "@/types/tool";
 import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
 
 const EXPORT_COMMAND =
-  '(Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotPolicyCache" -Name PolicyJsonCache).PolicyJsonCache | Tee-Object -Variable Json | Set-Clipboard; $Json';
+  '(Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotPolicyCache" -Name PolicyJsonCache).PolicyJsonCache | Set-Clipboard -PassThru';
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
