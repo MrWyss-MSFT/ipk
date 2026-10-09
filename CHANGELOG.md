@@ -20,9 +20,3 @@
 ### Reverts
 
 * Revert "chore: auto-create GitHub Release on npm run release" ([653d102](https://github.com/MrWyss-MSFT/ipk/commit/653d102bbd77f61cf98adc32de0af63b92cc64c8))
-
-All notable changes to this project are documented here.
-
-This file is generated automatically by [release-it](https://github.com/release-it/release-it)
-(via `npm run release`) from [Conventional Commits](https://www.conventionalcommits.org/) — don't
-edit it by hand, your changes will be overwritten on the next release.

@@ -141,8 +141,8 @@ function renderSidebar(nav: HTMLElement): void {
         <span>All tools</span>
       </a>
       ${groups}
+      ${renderSidebarFooter()}
     </div>
-    ${renderSidebarFooter()}
   `;
 }
 

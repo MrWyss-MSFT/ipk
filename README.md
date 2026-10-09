@@ -1,10 +1,10 @@
-# ItProKit (IPK)
+<img src="docs/logo.png" alt="IPK - IT Pro Kit" width="300" />
 
 **Fast, static, client-side tools for IT Pros managing Microsoft-managed endpoints — Intune, Autopilot, Entra ID, ConfigMgr, and Windows. No installs, no backend, nothing ever leaves your browser.**
 
 🔗 **Live site:** https://mrwyss-msft.github.io/ipk/
 
-![ItProKit dashboard screenshot](docs/screenshot.png)
+![IPK dashboard screenshot](docs/screenshot.png)
 
 ## Why
 
@@ -90,6 +90,10 @@ npm run build       # tsc --noEmit && vite build -> dist/
 npm run preview      # serve the production build locally
 npm run typecheck    # tsc --noEmit only
 ```
+
+## License
+
+[MIT](LICENSE)
 
 ## Contributing
 
