@@ -6,7 +6,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TODO/ipk"
+    "url": "https://github.com/MrWyss-MSFT/ipk"
   },
   "scripts": {
     "dev": "vite",
