@@ -32,6 +32,7 @@ close the tab).
 
 ## Tools
 
+- Autopilot DeviceLink Decoder
 - Autopilot Hardware Hash Decoder
 - Autopilot Profile Parser
 - Base64 Encode / Decode
@@ -45,6 +46,7 @@ close the tab).
 - Playbooks
 - References
 - Redactor
+- QR Code Scanner
 - Stay Awake
 
 New tools land often — check the in-app sidebar for the current list.
