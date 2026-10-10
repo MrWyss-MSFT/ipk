@@ -72,16 +72,17 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="wsb-tool">
-        <p class="wsb-note">
-          Configures a <code>.wsb</code> file for
-          <a href="https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file" target="_blank" rel="noopener noreferrer">Windows Sandbox</a>.
-          Settings left at <strong>Default</strong> are omitted from the file since Sandbox already behaves that way.
-        </p>
-
-        <label class="wsb-label" for="wsb-install">Enable Windows Sandbox (run once, elevated PowerShell, requires restart)</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("wsb-install")}
-          ${copyButtonHtml("wsb-install-copy")}
+        <div class="wsb-note">
+          <p>
+            Configures a <code>.wsb</code> file for
+            <a href="https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file" target="_blank" rel="noopener noreferrer">Windows Sandbox</a>.
+            Double-click the downloaded file to launch Sandbox with these settings.
+          </p>
+          <p class="wsb-note-label">Enable the Windows Sandbox feature first (run once, elevated PowerShell, requires restart):</p>
+          <div class="ipk-copy-wrap">
+            ${codeBlockHtml("wsb-install")}
+            ${copyButtonHtml("wsb-install-copy")}
+          </div>
         </div>
 
         <div class="wsb-grid">

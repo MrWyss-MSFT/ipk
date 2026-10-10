@@ -12,10 +12,22 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wsb-note p {
+  margin: 0;
 }
 
 .wsb-note a {
   color: var(--accent);
+}
+
+.wsb-note-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .wsb-grid {
