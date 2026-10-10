@@ -2,6 +2,7 @@ import { getCategories, getToolById, getTools, searchAll, type SearchResult } fr
 import { navigateHome, navigateToTool, type Route } from "@/app/router";
 import { persistFormState } from "@/app/state-persistence";
 import { getResolvedTheme, onSystemThemeChange, toggleTheme } from "@/app/theme";
+import { hasUnseenChanges } from "@/app/whats-new";
 import type { ToolDefinition, ToolSearchItem } from "@/types/tool";
 
 const THEME_ICONS: Record<string, string> = {
@@ -111,6 +112,7 @@ export function renderRoute(main: HTMLElement, route: Route): void {
     renderHome(main);
   }
   updateActiveSidebarLink(route);
+  refreshWhatsNewBadge();
 }
 
 function renderSidebar(nav: HTMLElement): void {
@@ -167,12 +169,22 @@ function renderSidebarFooter(): string {
   return `
     <div class="ipk-nav-footer">
       <a class="ipk-nav-link" href="#/tool/${encodeURIComponent(about.id)}" data-tool-id="${about.id}">
-        <span class="ipk-nav-icon">${about.icon ?? "ℹ️"}</span>
-        <span>${escapeHtml(about.name)}</span>
+        <span class="ipk-nav-footer-label">
+          <span class="ipk-nav-icon">${about.icon ?? "ℹ️"}</span>
+          <span>${escapeHtml(about.name)}</span>
+          <span class="ipk-nav-new-dot" title="New changes since your last visit" hidden></span>
+        </span>
         <span class="ipk-nav-version">v${__APP_VERSION__}</span>
       </a>
     </div>
   `;
+}
+
+/** Shows/hides the sidebar footer's "new changes" dot based on current localStorage state. */
+function refreshWhatsNewBadge(): void {
+  const dot = sidebarEl?.querySelector<HTMLElement>(".ipk-nav-new-dot");
+  if (!dot) return;
+  dot.hidden = !hasUnseenChanges(__APP_VERSION__);
 }
 
 function updateActiveSidebarLink(route: Route): void {

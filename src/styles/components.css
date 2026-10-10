@@ -379,6 +379,21 @@ textarea:focus {
   justify-content: space-between;
 }
 
+.ipk-nav-footer-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ipk-nav-new-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .ipk-nav-version {
   font-size: 0.7rem;
   color: var(--text-muted);

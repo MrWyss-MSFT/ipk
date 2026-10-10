@@ -1,7 +1,8 @@
 import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import rawChangelog from "../../../CHANGELOG.md?raw";
-import { hasReleaseEntries, renderChangelogHtml } from "./changelog";
+import { hasReleaseEntries, renderChangelogHtml, sliceChangelogSince } from "./changelog";
+import { getLastSeenVersion, hasUnseenChanges, setLastSeenVersion } from "@/app/whats-new";
 
 const tool: ToolDefinition = {
   id: "about",
@@ -18,8 +19,20 @@ const tool: ToolDefinition = {
       ? `<a href="${repoUrl}" target="_blank" rel="noopener noreferrer">${repoUrl.replace(/^https?:\/\//, "")}</a>`
       : `<span class="abt-muted">Not set yet</span>`;
 
+    const lastSeen = getLastSeenVersion();
+    const isNew = hasUnseenChanges(__APP_VERSION__);
+    const whatsNewHtml = isNew && lastSeen
+      ? `
+        <section class="abt-card abt-whats-new">
+          <h2 class="abt-whats-new-title">✨ What's new since v${lastSeen}</h2>
+          <div class="abt-changelog">${renderChangelogHtml(sliceChangelogSince(rawChangelog, lastSeen))}</div>
+        </section>
+      `
+      : "";
+
     container.innerHTML = `
       <div class="abt-tool">
+        ${whatsNewHtml}
         <section class="abt-card">
           <h2 class="abt-details-title">Details</h2>
           <dl class="abt-facts">
@@ -90,6 +103,9 @@ const tool: ToolDefinition = {
         </section>
       </div>
     `;
+
+    // Mark the current version as seen now that the changelog has actually been shown.
+    if (isNew) setLastSeenVersion(__APP_VERSION__);
 
     // Easter egg: tap the version badge a few times to reveal the mascot.
     const versionButton = container.querySelector<HTMLButtonElement>(".abt-version");

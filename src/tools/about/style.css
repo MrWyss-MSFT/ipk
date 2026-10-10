@@ -118,3 +118,12 @@
 .abt-muted {
   color: var(--text-muted);
 }
+
+.abt-whats-new {
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-elevated));
+}
+
+.abt-whats-new-title {
+  color: var(--accent);
+}

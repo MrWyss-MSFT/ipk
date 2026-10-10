@@ -8,6 +8,8 @@
  *   * **scope:** description ([abcdef](commit-url))
  */
 
+import { isVersionOlder } from "@/app/version";
+
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
   div.textContent = value;
@@ -62,4 +64,32 @@ export function renderChangelogHtml(markdown: string): string {
 /** True once CHANGELOG.md contains at least one release section (a "## " heading). */
 export function hasReleaseEntries(markdown: string): boolean {
   return /^## /m.test(markdown);
+}
+
+/**
+ * Returns just the "## [x.y.z](...)" sections strictly newer than
+ * `sinceVersion`, in their original markdown form (ready to pass through
+ * renderChangelogHtml). Used to show a "what's new since your last visit"
+ * excerpt instead of the entire history.
+ */
+export function sliceChangelogSince(markdown: string, sinceVersion: string): string {
+  const lines = markdown.split(/\r?\n/);
+  const sections: { version: string; lines: string[] }[] = [];
+  let current: { version: string; lines: string[] } | null = null;
+
+  for (const line of lines) {
+    const match = /^## \[(\d+(?:\.\d+)*)\]/.exec(line.trim());
+    if (match) {
+      if (current) sections.push(current);
+      current = { version: match[1], lines: [line] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  if (current) sections.push(current);
+
+  return sections
+    .filter((section) => isVersionOlder(sinceVersion, section.version))
+    .map((section) => section.lines.join("\n"))
+    .join("\n");
 }
