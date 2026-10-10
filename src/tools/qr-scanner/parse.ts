@@ -1,10 +1,12 @@
 /**
  * Pure, DOM-free classification of decoded QR payload text into a handful of
- * common formats (URL / Wi-Fi / TOTP authenticator), so the UI can render a
- * nicer, format-aware result instead of only raw text. Anything that doesn't
- * match a known, documented format falls back to plain "text" - we don't
- * guess at undocumented shapes.
+ * common formats (URL / Wi-Fi / TOTP authenticator / Autopilot DeviceLink),
+ * so the UI can render a nicer, format-aware result instead of only raw
+ * text. Anything that doesn't match a known, documented format falls back
+ * to plain "text" - we don't guess at undocumented shapes.
  */
+
+import { isDeviceLinkPayload, parseDeviceLinkUrl } from "./devicelink";
 
 export interface UrlPayload {
   kind: "url";
@@ -37,7 +39,14 @@ export interface TextPayload {
   raw: string;
 }
 
-export type ParsedQr = UrlPayload | WifiPayload | TotpPayload | TextPayload;
+export interface DeviceLinkPayload {
+  kind: "deviceLink";
+  raw: string;
+  serialNumber: string;
+  data: string;
+}
+
+export type ParsedQr = UrlPayload | WifiPayload | TotpPayload | DeviceLinkPayload | TextPayload;
 
 /** Splits a `WIFI:` payload body into its `KEY:VALUE;` fields, honoring `\;` `\:` `\,` `\\` escapes per the format. */
 function parseWifiFields(body: string): Record<string, string> {
@@ -96,5 +105,9 @@ export function parseQrPayload(raw: string): ParsedQr {
   if (/^https?:\/\//i.test(trimmed)) return { kind: "url", raw, url: trimmed };
   if (/^WIFI:/i.test(trimmed)) return parseWifi(trimmed);
   if (/^otpauth:\/\/totp\//i.test(trimmed)) return parseTotp(trimmed);
+  if (isDeviceLinkPayload(trimmed)) {
+    const parsed = parseDeviceLinkUrl(trimmed);
+    if (parsed) return { kind: "deviceLink", raw, serialNumber: parsed.serialNumber, data: parsed.data };
+  }
   return { kind: "text", raw };
 }
