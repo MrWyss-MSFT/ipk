@@ -13,7 +13,10 @@ import {
 
 type CaptureMode = "screen" | "camera";
 
-const DEFAULT_PLACEHOLDER_TEXT = "Pick a capture source, then press Start to scan for a QR code.";
+const PLACEHOLDER_TEXT: Record<CaptureMode, string> = {
+  screen: "Press Start scanning, then pick a screen or window to share - your browser will prompt you.",
+  camera: "Press Start scanning, then allow camera access when your browser asks - this also fills in the camera list below.",
+};
 
 function escapeHtml(value: string): string {
   return value
@@ -61,6 +64,7 @@ const tool: ToolDefinition = {
     const screenSupported = mediaDevicesSupported && typeof navigator.mediaDevices.getDisplayMedia === "function";
     const cameraSupported = mediaDevicesSupported && typeof navigator.mediaDevices.getUserMedia === "function";
     const secureContext = typeof window !== "undefined" && window.isSecureContext;
+    const initialMode: CaptureMode = screenSupported ? "screen" : "camera";
 
     container.innerHTML = `
       <div class="qrs-tool">
@@ -86,6 +90,9 @@ const tool: ToolDefinition = {
           <button type="button" class="btn qrs-mode-btn" data-mode="camera" ${cameraSupported ? "" : "disabled"}>
             📷 Camera
           </button>
+          <button type="button" class="btn btn-primary" id="qrs-start">Start scanning</button>
+          <button type="button" class="btn" id="qrs-stop" hidden>Stop</button>
+          <span class="qrs-status" id="qrs-status"></span>
         </div>
 
         <div class="qrs-camera-picker" id="qrs-camera-picker" hidden>
@@ -97,14 +104,8 @@ const tool: ToolDefinition = {
 
         <div class="qrs-panel">
           <video class="qrs-video" id="qrs-video" playsinline muted hidden></video>
-          <p class="qrs-placeholder" id="qrs-placeholder">${DEFAULT_PLACEHOLDER_TEXT}</p>
+          <p class="qrs-placeholder" id="qrs-placeholder">${PLACEHOLDER_TEXT[initialMode]}</p>
           <canvas class="qrs-canvas" id="qrs-canvas" hidden></canvas>
-        </div>
-
-        <div class="qrs-controls">
-          <button type="button" class="btn btn-primary" id="qrs-start">Start scanning</button>
-          <button type="button" class="btn" id="qrs-stop" hidden>Stop</button>
-          <span class="qrs-status" id="qrs-status"></span>
         </div>
 
         <p class="qrs-warning" id="qrs-error" role="alert" hidden></p>
@@ -127,7 +128,7 @@ const tool: ToolDefinition = {
 
     const ctx = canvasEl.getContext("2d", { willReadFrequently: true });
 
-    let mode: CaptureMode = screenSupported ? "screen" : "camera";
+    let mode: CaptureMode = initialMode;
     let stream: MediaStream | null = null;
     let scanTimer: number | undefined;
     let decoding = false;
@@ -148,16 +149,11 @@ const tool: ToolDefinition = {
       statusEl.textContent = message;
     }
 
-    function updateStartLabel() {
-      startBtn.textContent =
-        mode === "screen" ? "Start scanning (pick a screen or window)" : "Start scanning (pick a camera)";
-    }
-
     function setMode(next: CaptureMode) {
       mode = next;
       modeButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.mode === next));
       cameraPickerEl.hidden = next !== "camera" || !cameraSupported;
-      updateStartLabel();
+      if (!active) placeholderEl.textContent = PLACEHOLDER_TEXT[next];
     }
 
     async function refreshCameraDevices(selectDeviceId?: string) {
@@ -249,7 +245,7 @@ const tool: ToolDefinition = {
       clearError();
       resultEl.hidden = true;
       resultEl.innerHTML = "";
-      placeholderEl.textContent = DEFAULT_PLACEHOLDER_TEXT;
+      placeholderEl.textContent = PLACEHOLDER_TEXT[mode];
 
       if (!secureContext) {
         showError("Screen/camera capture requires a secure context (HTTPS or localhost).");
