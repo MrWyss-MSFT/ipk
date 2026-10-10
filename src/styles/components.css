@@ -51,8 +51,6 @@
   border: none;
   padding: var(--space-1) 0;
   cursor: pointer;
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
 }
 
 .ipk-tagline:hover,

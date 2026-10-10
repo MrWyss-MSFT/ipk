@@ -238,6 +238,15 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
     }
   });
   taglinePopoverClose.addEventListener("click", closeTaglinePopover);
+  const taglineGroup = root.querySelector<HTMLElement>(".ipk-brand-group")!;
+  taglineGroup.addEventListener("mouseenter", openTaglinePopover);
+  taglineGroup.addEventListener("mouseleave", closeTaglinePopover);
+  taglineButton.addEventListener("focus", openTaglinePopover);
+  taglineButton.addEventListener("blur", (event) => {
+    if (!taglinePopover.contains(event.relatedTarget as Node)) {
+      closeTaglinePopover();
+    }
+  });
   document.addEventListener("click", (event) => {
     if (!taglinePopover.hidden && !taglinePopover.contains(event.target as Node) && event.target !== taglineButton) {
       closeTaglinePopover();
