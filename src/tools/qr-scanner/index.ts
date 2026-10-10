@@ -9,7 +9,7 @@ import {
   encodeUtf16LeWithBom,
   deviceLinkCsvFilename,
   type DeviceLinkInfo,
-} from "./devicelink";
+} from "@/app/devicelink";
 
 type CaptureMode = "screen" | "camera";
 

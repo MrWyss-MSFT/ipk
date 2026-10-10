@@ -1,0 +1,125 @@
+.adl-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 640px;
+}
+
+.adl-note {
+  margin: 0;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: var(--text-muted);
+}
+
+.adl-note a {
+  color: var(--accent);
+}
+
+.adl-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.adl-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.adl-raw {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.adl-warning {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.adl-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.adl-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.adl-result-kind {
+  margin: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.adl-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.adl-field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.adl-field-value {
+  width: 100%;
+}
+
+.adl-mono {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.adl-keys {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.adl-keys th,
+.adl-keys td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.adl-keys th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.adl-export {
+  align-self: flex-start;
+}
+
+.adl-export-all {
+  align-self: flex-start;
+}
+
+.adl-row-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
