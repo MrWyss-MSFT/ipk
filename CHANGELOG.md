@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.6.0...v0.7.0) (2026-10-10)
+
+### ✨ Features
+
+* **stay-awake:** add Stay Awake tool with Markdown message, full screen/theater modes, and anti burn-in protection ([c64318a](https://github.com/MrWyss-MSFT/ipk/commit/c64318af94194bb8966551a937020ad2741db671))
+
+### 🐛 Bug Fixes
+
+* **qr-scanner:** move start button next to mode toggle, clarify preview copy ([a703346](https://github.com/MrWyss-MSFT/ipk/commit/a703346a645c0e67e6095126e93c8d4d3049f7e5))
+
 ## [0.6.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.5.0...v0.6.0) (2026-10-10)
 
 ### ✨ Features
