@@ -148,13 +148,16 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     hideEmptyCheck.addEventListener("change", render);
+    // Setting .value programmatically doesn't fire a native "input" event, which the generic
+    // sessionStorage persistence (wired in layout.ts) relies on - dispatch one explicitly so this
+    // survives switching tools/apps, not just manually typed input.
     exampleBtn.addEventListener("click", () => {
       input.value = EXAMPLE_HEX;
-      render();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
     clearBtn.addEventListener("click", () => {
       input.value = "";
-      render();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     render();

@@ -239,9 +239,12 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", () => void decode());
 
+    // Setting .value programmatically doesn't fire a native "input" event, which is what both
+    // our own listener above and the generic sessionStorage persistence (wired in layout.ts) rely
+    // on - dispatch one explicitly so pasted-via-file content decodes and survives switching tools/apps.
     clearBtn.addEventListener("click", () => {
       input.value = "";
-      void decode();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     fileInput.addEventListener("change", async () => {
@@ -249,7 +252,7 @@ const tool: ToolDefinition = {
       if (!file) return;
       input.value = decodeTextFileBytes(await file.arrayBuffer());
       fileInput.value = "";
-      void decode();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     void decode();
