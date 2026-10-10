@@ -26,6 +26,19 @@
   color: var(--accent-contrast);
 }
 
+.qrs-camera-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.qrs-camera-select {
+  flex: 1;
+  max-width: 320px;
+}
+
 .qrs-panel {
   position: relative;
   display: flex;

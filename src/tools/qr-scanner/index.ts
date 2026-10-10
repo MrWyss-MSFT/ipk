@@ -71,6 +71,13 @@ const tool: ToolDefinition = {
           </button>
         </div>
 
+        <div class="qrs-camera-picker" id="qrs-camera-picker" hidden>
+          <label for="qrs-camera-select">Camera</label>
+          <select class="qrs-camera-select" id="qrs-camera-select">
+            <option value="">Default camera</option>
+          </select>
+        </div>
+
         <div class="qrs-panel">
           <video class="qrs-video" id="qrs-video" playsinline muted hidden></video>
           <p class="qrs-placeholder" id="qrs-placeholder">${DEFAULT_PLACEHOLDER_TEXT}</p>
@@ -98,6 +105,8 @@ const tool: ToolDefinition = {
     const errorEl = container.querySelector<HTMLParagraphElement>("#qrs-error")!;
     const resultEl = container.querySelector<HTMLDivElement>("#qrs-result")!;
     const modeButtons = Array.from(container.querySelectorAll<HTMLButtonElement>(".qrs-mode-btn"));
+    const cameraPickerEl = container.querySelector<HTMLDivElement>("#qrs-camera-picker")!;
+    const cameraSelectEl = container.querySelector<HTMLSelectElement>("#qrs-camera-select")!;
 
     const ctx = canvasEl.getContext("2d", { willReadFrequently: true });
 
@@ -106,6 +115,7 @@ const tool: ToolDefinition = {
     let scanTimer: number | undefined;
     let decoding = false;
     let active = false;
+    let preferredCameraId = "";
 
     function showError(message: string) {
       errorEl.textContent = message;
@@ -121,9 +131,57 @@ const tool: ToolDefinition = {
       statusEl.textContent = message;
     }
 
+    function updateStartLabel() {
+      startBtn.textContent =
+        mode === "screen" ? "Start scanning (pick a screen or window)" : "Start scanning (pick a camera)";
+    }
+
     function setMode(next: CaptureMode) {
       mode = next;
       modeButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.mode === next));
+      cameraPickerEl.hidden = next !== "camera" || !cameraSupported;
+      updateStartLabel();
+    }
+
+    async function refreshCameraDevices(selectDeviceId?: string) {
+      if (!mediaDevicesSupported || typeof navigator.mediaDevices.enumerateDevices !== "function") return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter((d) => d.kind === "videoinput");
+        if (cams.length === 0) return;
+        cameraSelectEl.innerHTML = cams
+          .map((d, i) => `<option value="${escapeHtml(d.deviceId)}">${escapeHtml(d.label || `Camera ${i + 1}`)}</option>`)
+          .join("");
+        const toSelect = selectDeviceId ?? preferredCameraId;
+        if (toSelect && cams.some((d) => d.deviceId === toSelect)) {
+          cameraSelectEl.value = toSelect;
+        }
+        preferredCameraId = cameraSelectEl.value;
+      } catch {
+        // Ignore - keep whatever options are already shown.
+      }
+    }
+
+    async function switchCamera(deviceId: string) {
+      if (!stream) return;
+      clearError();
+      try {
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" },
+        });
+        stream.getTracks().forEach((track) => track.stop());
+        stream = newStream;
+        videoEl.srcObject = stream;
+        await videoEl.play().catch(() => undefined);
+        stream.getVideoTracks()[0]?.addEventListener("ended", () => {
+          if (active) {
+            setStatus("Capture ended.");
+            stopStream();
+          }
+        });
+      } catch (err) {
+        showError(`Could not switch camera: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     function stopStream() {
@@ -191,11 +249,18 @@ const tool: ToolDefinition = {
           stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         } else {
           if (!cameraSupported) throw new Error("Camera access isn't supported in this browser.");
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: preferredCameraId ? { deviceId: { exact: preferredCameraId } } : { facingMode: "environment" },
+          });
         }
       } catch (err) {
         showError(`Could not start capture: ${err instanceof Error ? err.message : String(err)}`);
         return;
+      }
+
+      if (mode === "camera") {
+        const activeDeviceId = stream.getVideoTracks()[0]?.getSettings().deviceId;
+        void refreshCameraDevices(activeDeviceId);
       }
 
       videoEl.srcObject = stream;
@@ -271,6 +336,17 @@ const tool: ToolDefinition = {
         setMode(btn.dataset.mode as CaptureMode);
       });
     });
+
+    cameraSelectEl.addEventListener("change", () => {
+      preferredCameraId = cameraSelectEl.value;
+      if (active && mode === "camera") {
+        void switchCamera(preferredCameraId);
+      }
+    });
+
+    // If camera permission was already granted on a previous visit, this will
+    // populate real device labels without prompting again.
+    if (cameraSupported) void refreshCameraDevices();
 
     startBtn.addEventListener("click", () => void startScan());
     stopBtn.addEventListener("click", () => {
