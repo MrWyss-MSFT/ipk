@@ -32,7 +32,7 @@ close the tab).
 
 ## Tools
 
-`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🧩 ESP Progress Parser` `🆔 Entra ID ObjectID ↔ SID` `🔢 GDID ↔ LID` `🔀 Co-Management Workloads Decoder` `🌐 DHCP Options Decoder` `🔤 Base64 Encode / Decode` `🗂️ Registry Preview` `🔎 Find Text in Files (cmd command)` `📷 QR Code Scanner` `☕ Stay Awake` `⬛ Redactor` `📓 Playbooks` `📚 References`
+`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🧩 ESP Progress Parser` `🆔 Entra ID ObjectID ↔ SID` `🔢 GDID ↔ LID` `🔀 Co-Management Workloads Decoder` `🌐 DHCP Options Decoder` `🔤 Base64 Encode / Decode` `🗂️ Registry Preview` `🔎 Find Text in Files (cmd command)` `🏖️ Windows Sandbox Config Generator` `📷 QR Code Scanner` `☕ Stay Awake` `⬛ Redactor` `📓 Playbooks` `📚 References`
 
 New tools land often — check the in-app sidebar for the current list.
 
