@@ -24,14 +24,23 @@ function downloadWsb(filename: string, xml: string) {
   URL.revokeObjectURL(url);
 }
 
-/** A `.wsb-label` `<span>` (used inside a wrapping `<label>`) with a native tooltip explaining the setting. */
-function spanLabelHtml(text: string, hint: string): string {
-  return `<span class="wsb-label" title="${hint.replace(/"/g, "&quot;")}">${text}</span>`;
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-/** A standalone `.wsb-label` `<label for="...">` with a native tooltip explaining the setting. */
+/** The bubble markup shared by both label flavors below - its text stays selectable so users can copy it. */
+function tipBubbleHtml(hint: string): string {
+  return `<span class="wsb-tip-bubble" role="tooltip">${escapeHtml(hint)}</span>`;
+}
+
+/** A `.wsb-label` `<span>` (used inside a wrapping `<label>`) with a custom, copyable tooltip explaining the setting. */
+function spanLabelHtml(text: string, hint: string): string {
+  return `<span class="wsb-label wsb-tip" tabindex="0">${text}${tipBubbleHtml(hint)}</span>`;
+}
+
+/** A standalone `.wsb-label` `<label for="...">` with a custom, copyable tooltip explaining the setting. */
 function forLabelHtml(text: string, hint: string, forId: string): string {
-  return `<label class="wsb-label" for="${forId}" title="${hint.replace(/"/g, "&quot;")}">${text}</label>`;
+  return `<label class="wsb-label wsb-tip" for="${forId}">${text}${tipBubbleHtml(hint)}</label>`;
 }
 
 const tool: ToolDefinition = {
