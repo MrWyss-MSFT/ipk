@@ -22,6 +22,11 @@ export function getThemePreference(): ThemePreference {
   return saved === "light" || saved === "dark" || saved === "system" ? saved : "system";
 }
 
+/** The theme actually being shown right now (resolves "system" via the OS preference). */
+export function getResolvedTheme(): ResolvedTheme {
+  return resolve(getThemePreference());
+}
+
 /** Persist and apply a new theme preference. */
 export function setThemePreference(pref: ThemePreference): void {
   localStorage.setItem(STORAGE_KEY, pref);
@@ -42,11 +47,18 @@ export function initTheme(): void {
   });
 }
 
-/** Cycles light -> dark -> system -> light, used by the header toggle button. */
-export function cycleThemePreference(): ThemePreference {
-  const order: ThemePreference[] = ["light", "dark", "system"];
-  const current = getThemePreference();
-  const next = order[(order.indexOf(current) + 1) % order.length];
+/**
+ * Flips between light and dark, used by the header toggle button. The app
+ * still defaults to following the OS preference ("system") until the user
+ * makes an explicit choice here - after that it stays on their pick.
+ */
+export function toggleTheme(): ResolvedTheme {
+  const next: ResolvedTheme = getResolvedTheme() === "dark" ? "light" : "dark";
   setThemePreference(next);
   return next;
+}
+
+/** Re-invokes `callback` whenever the OS light/dark preference changes. */
+export function onSystemThemeChange(callback: () => void): void {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", callback);
 }

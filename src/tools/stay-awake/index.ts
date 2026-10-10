@@ -25,7 +25,7 @@ const tool: ToolDefinition = {
   id: "stay-awake",
   name: "Stay Awake",
   description:
-    "Keep this device's screen from locking or dimming with one click, and optionally show a custom Markdown message - with a live timer - for bystanders to see, in full screen.",
+    "Keep this device's screen from locking or dimming with one click, and optionally show a custom Markdown screen message - with a live timer - in full screen.",
   category: "Utilities",
   keywords: [
     "stay awake",
@@ -47,7 +47,7 @@ const tool: ToolDefinition = {
 
     container.innerHTML = `
       <div class="awk-tool">
-        <p class="awk-note">
+        <p class="awk-note ipk-hint">
           Keeps the screen on only while this tab stays open and visible - it stops the instant you leave, so it
           won't run by accident.
         </p>
@@ -70,7 +70,7 @@ const tool: ToolDefinition = {
 
         <div class="awk-message-field">
           <div class="awk-field-header">
-            <label class="awk-label" for="awk-message">Bystander message (Markdown, optional)</label>
+            <label class="awk-label" for="awk-message">Screen message (Markdown, optional)</label>
             <button type="button" id="awk-message-example" class="awk-populate-btn">Use example</button>
           </div>
           <textarea
@@ -137,15 +137,14 @@ const tool: ToolDefinition = {
 
     const renderPreview = () => {
       const raw = messageInput.value;
-      if (!raw.trim()) {
-        const fallback = active ? "Screen will stay on while this tab is open and visible." : "Screen may turn off as usual.";
-        previewContentEl.innerHTML = `<p class="awk-preview-placeholder">${escapeHtml(fallback)}</p>`;
-        return;
-      }
       const vars = {
         timer: formatElapsed(active ? Date.now() - startedAt : 0),
         startedat: active && startedAt ? new Date(startedAt).toLocaleTimeString() : "-",
       };
+      if (!raw.trim()) {
+        previewContentEl.innerHTML = `<div class="awk-preview-placeholder">${renderMarkdown(substituteVariables(MESSAGE_PLACEHOLDER, vars))}</div>`;
+        return;
+      }
       previewContentEl.innerHTML = renderMarkdown(substituteVariables(raw, vars));
     };
 

@@ -41,7 +41,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="rdx-tool">
-        <p class="rdx-note">
+        <p class="ipk-hint">
           Paste text below and pick what to redact. Detection relies on heuristic patterns, so always double-check
           the output before sharing it.
         </p>

@@ -135,7 +135,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="adl-tool">
-        <p class="adl-note">
+        <p class="ipk-hint">
           You can also scan a DeviceLink QR code directly with the <a href="#/tool/qr-scanner">QR Code Scanner</a>
           tool, which decodes it the same way.
         </p>

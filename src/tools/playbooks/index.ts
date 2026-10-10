@@ -92,7 +92,7 @@ const tool: ToolDefinition = {
       );
       empty.hidden = filtered.length > 0;
       list.innerHTML = filtered
-        .map((g, i) => guideHtml(g, deepLinkedId ? g.id === deepLinkedId : i === 0))
+        .map((g) => guideHtml(g, deepLinkedId ? g.id === deepLinkedId : false))
         .join("");
 
       filtered.forEach((guide) => {

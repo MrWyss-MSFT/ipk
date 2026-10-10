@@ -1,17 +1,27 @@
 import { getCategories, getToolById, getTools, searchAll, type SearchResult } from "@/app/registry";
 import { navigateHome, navigateToTool, type Route } from "@/app/router";
 import { persistFormState } from "@/app/state-persistence";
-import { cycleThemePreference, getThemePreference } from "@/app/theme";
+import { getResolvedTheme, onSystemThemeChange, toggleTheme } from "@/app/theme";
 import type { ToolDefinition, ToolSearchItem } from "@/types/tool";
 
 const THEME_ICONS: Record<string, string> = {
-  light: "☀️ Light",
-  dark: "🌙 Dark",
-  system: "🖥️ System",
+  light: "☀️",
+  dark: "🌙",
 };
+
+const SIDEBAR_COLLAPSE_KEY = "ipk-sidebar-collapsed";
+const MOBILE_SIDEBAR_QUERY = "(max-width: 900px)";
 
 let toolCleanup: (() => void) | void;
 let sidebarEl: HTMLElement | undefined;
+
+function isMobileViewport(): boolean {
+  return window.matchMedia(MOBILE_SIDEBAR_QUERY).matches;
+}
+
+function closeMobileSidebar(): void {
+  document.body.classList.remove("ipk-sidebar-open");
+}
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -80,10 +90,7 @@ function renderTool(main: HTMLElement, id: string, itemId?: string): void {
   main.innerHTML = `
     <a class="ipk-back-link" href="#/">&larr; Back to all tools</a>
     <div class="ipk-tool-header">
-      <div>
-        <h1>${escapeHtml(tool.name)}</h1>
-        <p>${escapeHtml(tool.description)}</p>
-      </div>
+      <h1 title="${escapeHtml(tool.description)}">${escapeHtml(tool.name)}</h1>
     </div>
     <div class="ipk-tool-body" id="ipk-tool-body"></div>
   `;
@@ -141,9 +148,17 @@ function renderSidebar(nav: HTMLElement): void {
         <span>All tools</span>
       </a>
       ${groups}
-      ${renderSidebarFooter()}
     </div>
+    ${renderSidebarFooter()}
   `;
+
+  // On a narrow viewport the sidebar is an off-canvas drawer; following any
+  // nav link should close it instead of leaving it open over the new page.
+  nav.addEventListener("click", (event) => {
+    if (isMobileViewport() && (event.target as HTMLElement).closest(".ipk-nav-link")) {
+      closeMobileSidebar();
+    }
+  });
 }
 
 function renderSidebarFooter(): string {
@@ -171,47 +186,59 @@ function updateActiveSidebarLink(route: Route): void {
 export function buildLayout(root: HTMLElement): { main: HTMLElement } {
   root.innerHTML = `
     <header class="ipk-header">
-      <div class="ipk-brand-group">
-        <a class="ipk-brand" href="#/">
-          <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
-          <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
-        </a>
-        <button
-          type="button"
-          class="ipk-tagline"
-          id="ipk-tagline"
-          aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-controls="ipk-tagline-popover"
-        >
-          Everything in your browser, nothing leaves
-        </button>
-        <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why everything stays in your browser" hidden>
-          <p>
-            IPK has no backend and makes no network calls from its tools - everything you paste or generate is
-            processed as plain JavaScript right here in this tab.
-          </p>
-          <p>
-            Some tools remember what you typed when you switch between them using the browser's
-            <code class="mono">sessionStorage</code>. That's a small per-tab storage area built into the browser: it
-            stays on your device, is never sent anywhere, and is automatically cleared the moment you close this tab.
-          </p>
-          <button type="button" class="btn ipk-tagline-popover-close" id="ipk-tagline-popover-close">Got it</button>
+      <div class="ipk-header-start">
+        <button type="button" class="btn ipk-sidebar-toggle" id="ipk-sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="true">☰</button>
+        <div class="ipk-brand-group">
+          <a class="ipk-brand" href="#/">
+            <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
+            <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
+          </a>
+          <button
+            type="button"
+            class="ipk-tagline"
+            id="ipk-tagline"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="ipk-tagline-popover"
+          >
+            Everything in your browser, nothing leaves
+          </button>
+          <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why everything stays in your browser" hidden>
+            <p>
+              IPK has no backend and makes no network calls from its tools - everything you paste or generate is
+              processed as plain JavaScript right here in this tab.
+            </p>
+            <p>
+              Some tools remember what you typed when you switch between them using the browser's
+              <code class="mono">sessionStorage</code>. That's a small per-tab storage area built into the browser: it
+              stays on your device, is never sent anywhere, and is automatically cleared the moment you close this tab.
+            </p>
+            <button type="button" class="btn ipk-tagline-popover-close" id="ipk-tagline-popover-close">Got it</button>
+          </div>
         </div>
       </div>
       <div class="ipk-search">
-        <input type="search" id="ipk-search" placeholder="Search tools..." aria-label="Search tools" />
+        <svg class="ipk-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" />
+          <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+        <input type="search" id="ipk-search" placeholder="Search..." aria-label="Search" />
       </div>
-      <button type="button" class="btn" id="ipk-theme-toggle"></button>
+      <div class="ipk-header-end">
+        <button type="button" class="btn" id="ipk-theme-toggle"></button>
+      </div>
     </header>
     <div class="ipk-body">
       <nav class="ipk-sidebar" id="ipk-sidebar" aria-label="Tools navigation"></nav>
+      <div class="ipk-sidebar-backdrop" id="ipk-sidebar-backdrop"></div>
       <main class="ipk-main" id="ipk-main"></main>
     </div>
   `;
 
   const main = root.querySelector<HTMLElement>("#ipk-main")!;
   const sidebar = root.querySelector<HTMLElement>("#ipk-sidebar")!;
+  const sidebarBackdrop = root.querySelector<HTMLElement>("#ipk-sidebar-backdrop")!;
+  const sidebarToggle = root.querySelector<HTMLButtonElement>("#ipk-sidebar-toggle")!;
   const searchInput = root.querySelector<HTMLInputElement>("#ipk-search")!;
   const themeToggle = root.querySelector<HTMLButtonElement>("#ipk-theme-toggle")!;
   const taglineButton = root.querySelector<HTMLButtonElement>("#ipk-tagline")!;
@@ -259,14 +286,39 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
     }
   });
 
-  const updateThemeLabel = () => {
-    themeToggle.textContent = THEME_ICONS[getThemePreference()];
+  const updateThemeToggle = () => {
+    const resolved = getResolvedTheme();
+    themeToggle.textContent = THEME_ICONS[resolved];
+    themeToggle.setAttribute("aria-label", `Switch to ${resolved === "dark" ? "light" : "dark"} mode`);
   };
-  updateThemeLabel();
+  updateThemeToggle();
+  onSystemThemeChange(updateThemeToggle);
 
   themeToggle.addEventListener("click", () => {
-    cycleThemePreference();
-    updateThemeLabel();
+    toggleTheme();
+    updateThemeToggle();
+  });
+
+  const setSidebarCollapsed = (collapsed: boolean) => {
+    document.body.classList.toggle("ipk-sidebar-collapsed", collapsed);
+    sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+    localStorage.setItem(SIDEBAR_COLLAPSE_KEY, collapsed ? "1" : "0");
+  };
+  if (localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "1") {
+    setSidebarCollapsed(true);
+  }
+  sidebarToggle.addEventListener("click", () => {
+    if (isMobileViewport()) {
+      document.body.classList.toggle("ipk-sidebar-open");
+    } else {
+      setSidebarCollapsed(!document.body.classList.contains("ipk-sidebar-collapsed"));
+    }
+  });
+  sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && document.body.classList.contains("ipk-sidebar-open")) {
+      closeMobileSidebar();
+    }
   });
 
   searchInput.addEventListener("input", () => {

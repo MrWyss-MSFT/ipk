@@ -51,7 +51,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="dho-tool">
-        <p class="dho-note">
+        <p class="ipk-hint">
           Windows stores every DHCP option a client received under
           <code class="mono">HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\&lt;GUID&gt;</code>
           in a binary value named <code class="mono">DhcpInterfaceOptions</code>. Run the PowerShell snippet below on
@@ -126,18 +126,20 @@ const tool: ToolDefinition = {
       }
 
       const table = (rows: ParsedDhcpOption[]) => `
-        <table class="dho-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Option</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(renderRow).join("")}
-          </tbody>
-        </table>
+        <div class="ipk-table-scroll">
+          <table class="dho-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Option</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(renderRow).join("")}
+            </tbody>
+          </table>
+        </div>
       `;
 
       results.innerHTML = `

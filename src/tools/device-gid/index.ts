@@ -28,7 +28,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="gid-tool">
-        <p class="gid-hint">
+        <p class="gid-hint ipk-hint">
           The <code class="mono">g:</code> device physical ID is a decimal view of the
           <code class="mono">LID</code> registry value. Edit either field — the other updates automatically.
         </p>

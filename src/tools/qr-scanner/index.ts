@@ -68,7 +68,7 @@ const tool: ToolDefinition = {
 
     container.innerHTML = `
       <div class="qrs-tool">
-        <p class="qrs-note">
+        <p class="qrs-note ipk-hint">
           When scanning your screen, the browser will show its own sharing indicator; that's normal.
         </p>
 
@@ -335,7 +335,7 @@ const tool: ToolDefinition = {
         )
         .join("");
       const missingPubKeyNote = info.keys.some((k) => !k.keyPub)
-        ? `<p class="qrs-note qrs-devicelink-note">
+        ? `<p class="qrs-note qrs-devicelink-note ipk-hint">
             Note: the scanned QR code doesn't include every key's public key (e.g. the endorsement key) to save
             space, so the exported CSV omits it too - Windows' own export includes it from data already on the
             device.

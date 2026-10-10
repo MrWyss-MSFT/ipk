@@ -73,7 +73,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="rgp-tool">
-        <p class="rgp-note">
+        <p class="ipk-hint">
           Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
           <span class="rgp-sample-cmd">
             <code class="mono" id="rgp-export-cmd"></code>
@@ -187,12 +187,14 @@ const tool: ToolDefinition = {
           node.values.length === 0
             ? '<p class="rgp-hint">This key has no values.</p>'
             : `
-          <table class="rgp-table">
-            <thead>
-              <tr><th>Name</th><th>Type</th><th>Value</th></tr>
-            </thead>
-            <tbody>${node.values.map(renderValueRow).join("")}</tbody>
-          </table>
+          <div class="ipk-table-scroll">
+            <table class="rgp-table">
+              <thead>
+                <tr><th>Name</th><th>Type</th><th>Value</th></tr>
+              </thead>
+              <tbody>${node.values.map(renderValueRow).join("")}</tbody>
+            </table>
+          </div>
         `
         }
       `;
