@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  max-width: 560px;
+  max-width: 720px;
 }
 
 .awk-note {
@@ -18,11 +18,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-4);
   text-align: center;
 }
 
@@ -79,4 +79,255 @@
 .awk-status.is-active .awk-indicator {
   background: var(--success);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+.awk-mode-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.awk-mode-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.awk-mode-field input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.awk-message-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.awk-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.awk-message-input {
+  width: 100%;
+  font-size: 0.85rem;
+  resize: vertical;
+  overflow: auto;
+  min-height: 6em;
+}
+
+.awk-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.awk-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+}
+
+.awk-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.awk-populate-btn {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.awk-populate-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.awk-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.awk-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.awk-preview-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.awk-color-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.awk-color-field input[type="color"] {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.awk-color-field.is-locked {
+  opacity: 0.55;
+  cursor: help;
+}
+
+.awk-color-field input[type="color"]:disabled {
+  cursor: not-allowed;
+}
+
+.awk-antiburn-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.awk-antiburn-field input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.awk-preview {
+  position: relative;
+  background: var(--awk-preview-bg, var(--bg-elevated));
+  color: var(--awk-preview-fg, var(--text));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-4);
+  min-height: 7em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.awk-preview-content {
+  width: 100%;
+  transition: transform 2s ease;
+  will-change: transform;
+}
+
+.awk-preview-content p {
+  margin: 0 0 var(--space-2);
+  color: currentColor;
+}
+
+.awk-preview-content p:last-child {
+  margin-bottom: 0;
+}
+
+.awk-preview-content ul {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+  text-align: left;
+  display: inline-block;
+}
+
+.awk-preview-content code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.35em;
+}
+
+.awk-preview-content a {
+  color: currentColor;
+  text-decoration: underline;
+}
+
+.awk-md-h1 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.6rem;
+}
+
+.awk-md-h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.3rem;
+}
+
+.awk-md-h3 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+}
+
+.awk-preview-placeholder {
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+.awk-preview.is-fullscreen,
+.awk-preview.is-theater {
+  border-radius: 0;
+  min-height: 100vh;
+  padding: var(--space-6);
+}
+
+.awk-preview.is-fullscreen .awk-preview-content,
+.awk-preview.is-theater .awk-preview-content {
+  max-width: 900px;
+}
+
+.awk-preview.is-fullscreen .awk-md-h1,
+.awk-preview.is-theater .awk-md-h1 {
+  font-size: 4rem;
+}
+
+.awk-preview.is-fullscreen .awk-md-h2,
+.awk-preview.is-theater .awk-md-h2 {
+  font-size: 3rem;
+}
+
+.awk-preview.is-fullscreen .awk-md-h3,
+.awk-preview.is-theater .awk-md-h3 {
+  font-size: 2.2rem;
+}
+
+.awk-preview.is-fullscreen .awk-preview-content p,
+.awk-preview.is-theater .awk-preview-content p {
+  font-size: 1.6rem;
+}
+
+/* Theater mode: strip the tool down to just the full-width preview. */
+body.ipk-theater-mode .awk-tool {
+  max-width: none;
+  gap: 0;
+}
+
+body.ipk-theater-mode .awk-note,
+body.ipk-theater-mode .awk-panel,
+body.ipk-theater-mode .awk-message-field,
+body.ipk-theater-mode .awk-preview-header {
+  display: none;
 }

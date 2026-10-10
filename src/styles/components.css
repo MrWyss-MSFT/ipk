@@ -361,6 +361,23 @@ textarea:focus {
   overflow-y: auto;
 }
 
+/* Theater mode: a tool can toggle this on <body> to hide the header/sidebar
+   chrome and let its own content take over the full window, without using
+   the (stricter, gesture-gated) Fullscreen API. */
+body.ipk-theater-mode .ipk-header,
+body.ipk-theater-mode .ipk-sidebar {
+  display: none;
+}
+
+body.ipk-theater-mode .ipk-main {
+  padding: 0;
+}
+
+body.ipk-theater-mode .ipk-back-link,
+body.ipk-theater-mode .ipk-tool-header {
+  display: none;
+}
+
 /* Tool cards / grid */
 .ipk-grid {
   display: grid;
