@@ -1,0 +1,287 @@
+import "./style.css";
+import type { ToolDefinition } from "@/types/tool";
+import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { decodeFrame } from "./decode";
+import { parseQrPayload } from "./parse";
+
+type CaptureMode = "screen" | "camera";
+
+const DEFAULT_PLACEHOLDER_TEXT = "Pick a capture source, then press Start to scan for a QR code.";
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+interface ResultField {
+  label: string;
+  value: string;
+  monospace?: boolean;
+}
+
+function buildFieldHtml(field: ResultField, index: number): string {
+  const id = `qrs-copy-${index}`;
+  return `
+    <div class="qrs-field">
+      <span class="qrs-field-label">${escapeHtml(field.label)}</span>
+      <div class="ipk-copy-wrap">
+        <input
+          type="text"
+          class="qrs-field-value${field.monospace ? " qrs-mono" : ""}"
+          readonly
+          value="${escapeHtml(field.value)}"
+        />
+        ${copyButtonHtml(id, `Copy ${field.label}`)}
+      </div>
+    </div>
+  `;
+}
+
+const tool: ToolDefinition = {
+  id: "qr-scanner",
+  name: "QR Code Scanner",
+  description:
+    "Scan a QR code from your screen (e.g. a TOTP/MFA setup code shown in a remote session) or a webcam - decoded entirely in your browser, nothing is uploaded anywhere.",
+  category: "Utilities",
+  keywords: ["qr", "qr code", "scanner", "screen capture", "screen share", "camera", "webcam", "totp", "mfa", "2fa", "wifi qr", "barcode"],
+  icon: "📷",
+  mount(container) {
+    const mediaDevicesSupported = typeof navigator !== "undefined" && !!navigator.mediaDevices;
+    const screenSupported = mediaDevicesSupported && typeof navigator.mediaDevices.getDisplayMedia === "function";
+    const cameraSupported = mediaDevicesSupported && typeof navigator.mediaDevices.getUserMedia === "function";
+    const secureContext = typeof window !== "undefined" && window.isSecureContext;
+
+    container.innerHTML = `
+      <div class="qrs-tool">
+        <p class="qrs-note">
+          Nothing leaves your browser - the captured frame is decoded entirely on this device and is never uploaded
+          anywhere. When scanning your screen, the browser will show its own sharing indicator; that's normal.
+        </p>
+
+        <div class="qrs-mode-toggle" role="group" aria-label="Capture source">
+          <button type="button" class="btn qrs-mode-btn" data-mode="screen" ${screenSupported ? "" : "disabled"}>
+            🖥️ Screen
+          </button>
+          <button type="button" class="btn qrs-mode-btn" data-mode="camera" ${cameraSupported ? "" : "disabled"}>
+            📷 Camera
+          </button>
+        </div>
+
+        <div class="qrs-panel">
+          <video class="qrs-video" id="qrs-video" playsinline muted hidden></video>
+          <p class="qrs-placeholder" id="qrs-placeholder">${DEFAULT_PLACEHOLDER_TEXT}</p>
+          <canvas class="qrs-canvas" id="qrs-canvas" hidden></canvas>
+        </div>
+
+        <div class="qrs-controls">
+          <button type="button" class="btn btn-primary" id="qrs-start">Start scanning</button>
+          <button type="button" class="btn" id="qrs-stop" hidden>Stop</button>
+          <span class="qrs-status" id="qrs-status"></span>
+        </div>
+
+        <p class="qrs-warning" id="qrs-error" role="alert" hidden></p>
+
+        <div class="qrs-result" id="qrs-result" hidden></div>
+      </div>
+    `;
+
+    const videoEl = container.querySelector<HTMLVideoElement>("#qrs-video")!;
+    const placeholderEl = container.querySelector<HTMLParagraphElement>("#qrs-placeholder")!;
+    const canvasEl = container.querySelector<HTMLCanvasElement>("#qrs-canvas")!;
+    const startBtn = container.querySelector<HTMLButtonElement>("#qrs-start")!;
+    const stopBtn = container.querySelector<HTMLButtonElement>("#qrs-stop")!;
+    const statusEl = container.querySelector<HTMLSpanElement>("#qrs-status")!;
+    const errorEl = container.querySelector<HTMLParagraphElement>("#qrs-error")!;
+    const resultEl = container.querySelector<HTMLDivElement>("#qrs-result")!;
+    const modeButtons = Array.from(container.querySelectorAll<HTMLButtonElement>(".qrs-mode-btn"));
+
+    const ctx = canvasEl.getContext("2d", { willReadFrequently: true });
+
+    let mode: CaptureMode = screenSupported ? "screen" : "camera";
+    let stream: MediaStream | null = null;
+    let scanTimer: number | undefined;
+    let decoding = false;
+    let active = false;
+
+    function showError(message: string) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+
+    function clearError() {
+      errorEl.hidden = true;
+      errorEl.textContent = "";
+    }
+
+    function setStatus(message: string) {
+      statusEl.textContent = message;
+    }
+
+    function setMode(next: CaptureMode) {
+      mode = next;
+      modeButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.mode === next));
+    }
+
+    function stopStream() {
+      if (scanTimer !== undefined) {
+        window.clearInterval(scanTimer);
+        scanTimer = undefined;
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+      }
+      videoEl.hidden = true;
+      videoEl.srcObject = null;
+      placeholderEl.hidden = false;
+      active = false;
+      startBtn.hidden = false;
+      stopBtn.hidden = true;
+      modeButtons.forEach((btn) => {
+        btn.disabled = btn.dataset.mode === "screen" ? !screenSupported : !cameraSupported;
+      });
+    }
+
+    async function scanTick() {
+      if (!active || decoding || !stream || !ctx) return;
+      const w = videoEl.videoWidth;
+      const h = videoEl.videoHeight;
+      if (!w || !h) return;
+      decoding = true;
+      try {
+        canvasEl.width = w;
+        canvasEl.height = h;
+        ctx.drawImage(videoEl, 0, 0, w, h);
+        const text = await decodeFrame(canvasEl, ctx);
+        if (text) {
+          setStatus("QR code found!");
+          renderResult(text);
+          stopStream();
+          placeholderEl.textContent = "✅ QR code found — see the result below.";
+        }
+      } catch {
+        // Ignore a transient decode error for this frame - keep scanning.
+      } finally {
+        decoding = false;
+      }
+    }
+
+    async function startScan() {
+      clearError();
+      resultEl.hidden = true;
+      resultEl.innerHTML = "";
+      placeholderEl.textContent = DEFAULT_PLACEHOLDER_TEXT;
+
+      if (!secureContext) {
+        showError("Screen/camera capture requires a secure context (HTTPS or localhost).");
+        return;
+      }
+      if (!ctx) {
+        showError("Could not create a 2D canvas context in this browser.");
+        return;
+      }
+
+      try {
+        if (mode === "screen") {
+          if (!screenSupported) throw new Error("Screen capture isn't supported in this browser.");
+          stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        } else {
+          if (!cameraSupported) throw new Error("Camera access isn't supported in this browser.");
+          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        }
+      } catch (err) {
+        showError(`Could not start capture: ${err instanceof Error ? err.message : String(err)}`);
+        return;
+      }
+
+      videoEl.srcObject = stream;
+      await videoEl.play().catch(() => undefined);
+      videoEl.hidden = false;
+      placeholderEl.hidden = true;
+      active = true;
+      startBtn.hidden = true;
+      stopBtn.hidden = false;
+      modeButtons.forEach((btn) => (btn.disabled = true));
+      setStatus("Scanning…");
+
+      // If the user stops sharing via the browser's own UI, reflect that here too.
+      stream.getVideoTracks()[0]?.addEventListener("ended", () => {
+        if (active) {
+          setStatus("Capture ended.");
+          stopStream();
+        }
+      });
+
+      scanTimer = window.setInterval(() => void scanTick(), 250);
+    }
+
+    function renderResult(raw: string) {
+      const parsed = parseQrPayload(raw);
+      let kindLabel = "Text";
+      let extraHtml = "";
+      const fields: ResultField[] = [];
+
+      if (parsed.kind === "url") {
+        kindLabel = "Link";
+        extraHtml = `<p class="qrs-link"><a href="${escapeHtml(parsed.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(
+          parsed.url,
+        )}</a></p>`;
+      } else if (parsed.kind === "wifi") {
+        kindLabel = "Wi-Fi network";
+        fields.push({ label: "SSID", value: parsed.ssid || "(empty)" });
+        if (parsed.password) fields.push({ label: "Password", value: parsed.password });
+        if (parsed.authType) fields.push({ label: "Security", value: parsed.authType });
+      } else if (parsed.kind === "totp") {
+        kindLabel = "TOTP / authenticator";
+        if (parsed.issuer) fields.push({ label: "Issuer", value: parsed.issuer });
+        if (parsed.account) fields.push({ label: "Account", value: parsed.account });
+        if (parsed.secret) fields.push({ label: "Secret", value: parsed.secret, monospace: true });
+      }
+
+      fields.push({ label: "Raw decoded text", value: raw, monospace: true });
+
+      resultEl.innerHTML = `
+        <p class="qrs-result-kind">${escapeHtml(kindLabel)}</p>
+        ${extraHtml}
+        ${fields.map(buildFieldHtml).join("")}
+      `;
+      resultEl.hidden = false;
+
+      resultEl.querySelectorAll<HTMLButtonElement>(".ipk-copy-btn").forEach((btn, i) => {
+        wireCopyButton(btn, () => fields[i].value);
+      });
+    }
+
+    setMode(mode);
+    if (!screenSupported && !cameraSupported) {
+      startBtn.disabled = true;
+      showError("Neither screen capture nor camera access is supported in this browser.");
+    } else if (!secureContext) {
+      startBtn.disabled = true;
+      showError("Screen/camera capture requires a secure context (HTTPS or localhost).");
+    }
+
+    modeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (active || btn.disabled) return;
+        setMode(btn.dataset.mode as CaptureMode);
+      });
+    });
+
+    startBtn.addEventListener("click", () => void startScan());
+    stopBtn.addEventListener("click", () => {
+      setStatus("Stopped.");
+      stopStream();
+    });
+
+    return () => {
+      stopStream();
+    };
+  },
+};
+
+export default tool;
