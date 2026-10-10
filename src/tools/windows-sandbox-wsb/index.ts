@@ -122,6 +122,9 @@ const tool: ToolDefinition = {
 
         ${forLabelHtml("Logon command", "A single command run automatically after the sandbox signs in - e.g. launching an app or a script from a mapped folder.", "wsb-logon")}
         <input id="wsb-logon" class="mono" type="text" placeholder="e.g. explorer.exe C:\\Users\\WDAGUtilityAccount\\Desktop" />
+        <p class="wsb-hint">
+          Example: <code>explorer.exe C:\Users\WDAGUtilityAccount\Desktop</code>
+        </p>
 
         ${forLabelHtml("Mapped folders", "Shares host folders into the sandbox, read-only or read/write. Changes made in a write-enabled folder persist on the host after the sandbox closes.", "wsb-folders")}
         <textarea id="wsb-folders" class="mono wsb-folders-input" rows="3" placeholder="C:\\Users\\Public\\Downloads&#10;C:\\Tools => C:\\Users\\WDAGUtilityAccount\\Desktop\\Tools&#10;C:\\Secrets => C:\\Secrets (readonly)"></textarea>
