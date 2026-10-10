@@ -14,7 +14,7 @@ const tool: ToolDefinition = {
   id: "stay-awake",
   name: "Stay Awake",
   description:
-    "Keep this device's screen from locking or dimming with one click - handy while following a guide, running a long task, or presenting. Runs entirely in your browser.",
+    "Keep this device's screen from locking or dimming with one click - handy while following a guide, running a long task, or presenting.",
   category: "Utilities",
   keywords: ["stay awake", "keep awake", "caffeine", "no sleep", "wake lock", "screen on", "presentation mode"],
   icon: "☕",

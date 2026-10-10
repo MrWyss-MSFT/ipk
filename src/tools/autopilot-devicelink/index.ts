@@ -118,7 +118,7 @@ const tool: ToolDefinition = {
   id: "autopilot-devicelink",
   name: "Autopilot DeviceLink Decoder",
   description:
-    "Paste a scanned Autopilot Device Preparation DeviceLink QR payload or the contents of a .devicelink.csv bulk-import file and decode it into device/key details, with a .devicelink.csv export - decoded entirely in your browser.",
+    "Paste a scanned Autopilot Device Preparation DeviceLink QR payload or the contents of a .devicelink.csv bulk-import file and decode it into device/key details, with a .devicelink.csv export.",
   category: "Converters",
   keywords: [
     "autopilot",

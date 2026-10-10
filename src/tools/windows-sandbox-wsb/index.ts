@@ -51,7 +51,7 @@ const tool: ToolDefinition = {
   id: "windows-sandbox-wsb",
   name: "Windows Sandbox Config Generator",
   description:
-    "Build a Windows Sandbox .wsb configuration file - vGPU, networking, mapped folders, logon command, audio/video input, protected client, printer/clipboard redirection, and memory - entirely in your browser.",
+    "Build a Windows Sandbox .wsb configuration file - vGPU, networking, mapped folders, logon command, audio/video input, protected client, printer/clipboard redirection, and memory.",
   category: "Generators",
   keywords: [
     "windows sandbox",

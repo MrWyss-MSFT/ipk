@@ -184,9 +184,9 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
           aria-expanded="false"
           aria-controls="ipk-tagline-popover"
         >
-          Nothing leaves your browser
+          Everything in your browser, nothing leaves
         </button>
-        <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why nothing leaves your browser" hidden>
+        <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why everything stays in your browser" hidden>
           <p>
             IPK has no backend and makes no network calls from its tools - everything you paste or generate is
             processed as plain JavaScript right here in this tab.

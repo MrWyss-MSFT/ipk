@@ -52,7 +52,7 @@ const tool: ToolDefinition = {
   id: "qr-scanner",
   name: "QR Code Scanner",
   description:
-    "Scan a QR code from your screen (e.g. a TOTP/MFA setup code shown in a remote session) or a webcam - decoded entirely in your browser, nothing is uploaded anywhere.",
+    "Scan a QR code from your screen (e.g. a TOTP/MFA setup code shown in a remote session) or a webcam - nothing is uploaded anywhere.",
   category: "Utilities",
   keywords: ["qr", "qr code", "scanner", "screen capture", "screen share", "camera", "webcam", "totp", "mfa", "2fa", "wifi qr", "barcode"],
   icon: "📷",
