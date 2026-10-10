@@ -6,10 +6,14 @@ import { buildWsbXml, parseMappedFoldersText, type TriState, type WsbConfig } fr
 
 const TRI_STATE_OPTIONS: TriState[] = ["Default", "Enable", "Disable"];
 
-function triStateSelectHtml(id: string): string {
+/** `defaultBehavior` labels what "Default" actually does for this setting, per the Windows Sandbox docs. */
+function triStateSelectHtml(id: string, defaultBehavior: "Enabled" | "Disabled"): string {
   return `
     <select id="${id}" class="wsb-select">
-      ${TRI_STATE_OPTIONS.map((v) => `<option value="${v}">${v}</option>`).join("")}
+      ${TRI_STATE_OPTIONS.map((v) => {
+        const label = v === "Default" ? `Default (${defaultBehavior})` : v;
+        return `<option value="${v}">${label}</option>`;
+      }).join("")}
     </select>
   `;
 }
@@ -74,31 +78,31 @@ const tool: ToolDefinition = {
         <div class="wsb-grid">
           <label class="wsb-field">
             ${spanLabelHtml("vGPU (virtualized GPU)", "Enables or disables the virtualized GPU. When disabled, the sandbox falls back to software rendering (WARP), which is slower but reduces attack surface.")}
-            ${triStateSelectHtml("wsb-vgpu")}
+            ${triStateSelectHtml("wsb-vgpu", "Enabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Networking", "Enables or disables network access inside the sandbox. Disable it to reduce the attack surface exposed to untrusted applications.")}
-            ${triStateSelectHtml("wsb-networking")}
+            ${triStateSelectHtml("wsb-networking", "Enabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Audio input", "Shares the host's microphone input with the sandbox. Needed by apps that record audio.")}
-            ${triStateSelectHtml("wsb-audio")}
+            ${triStateSelectHtml("wsb-audio", "Enabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Video input", "Shares the host's webcam input with the sandbox. Needed by apps that use a camera.")}
-            ${triStateSelectHtml("wsb-video")}
+            ${triStateSelectHtml("wsb-video", "Disabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Protected client", "Runs the sandbox inside an AppContainer Isolation boundary for extra security. May restrict copy/paste between host and sandbox.")}
-            ${triStateSelectHtml("wsb-protected-client")}
+            ${triStateSelectHtml("wsb-protected-client", "Disabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Printer redirection", "Shares the host's printers with the sandbox.")}
-            ${triStateSelectHtml("wsb-printer")}
+            ${triStateSelectHtml("wsb-printer", "Disabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Clipboard redirection", "Shares the host clipboard with the sandbox, so text and files can be copied in both directions.")}
-            ${triStateSelectHtml("wsb-clipboard")}
+            ${triStateSelectHtml("wsb-clipboard", "Enabled")}
           </label>
           <label class="wsb-field">
             ${spanLabelHtml("Memory (MB)", "Amount of memory, in megabytes, assigned to the sandbox. If the value is too low, Windows automatically raises it to the required minimum (2048 MB).")}
