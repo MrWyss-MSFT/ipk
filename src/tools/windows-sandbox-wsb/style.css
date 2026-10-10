@@ -1,0 +1,92 @@
+.wsb-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 900px;
+}
+
+.wsb-note {
+  margin: 0;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.wsb-note a {
+  color: var(--accent);
+}
+
+.wsb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.wsb-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wsb-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.wsb-select {
+  width: 100%;
+}
+
+.wsb-folders-input {
+  width: 100%;
+  font-size: 0.8rem;
+  resize: vertical;
+  overflow: auto;
+  min-height: 4.5em;
+}
+
+.wsb-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.wsb-tool .ipk-code {
+  min-height: 2.5em;
+}
+
+.wsb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.wsb-download-btn,
+.wsb-reset-btn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.wsb-download-btn {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.wsb-download-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.wsb-reset-btn:hover {
+  background: var(--bg-hover);
+}
