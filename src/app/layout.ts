@@ -171,11 +171,34 @@ function updateActiveSidebarLink(route: Route): void {
 export function buildLayout(root: HTMLElement): { main: HTMLElement } {
   root.innerHTML = `
     <header class="ipk-header">
-      <a class="ipk-brand" href="#/">
-        <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
-        <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
-      </a>
-      <span class="ipk-tagline">Nothing leaves your browser</span>
+      <div class="ipk-brand-group">
+        <a class="ipk-brand" href="#/">
+          <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
+          <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
+        </a>
+        <button
+          type="button"
+          class="ipk-tagline"
+          id="ipk-tagline"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="ipk-tagline-popover"
+        >
+          Nothing leaves your browser
+        </button>
+        <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why nothing leaves your browser" hidden>
+          <p>
+            IPK has no backend and makes no network calls from its tools - everything you paste or generate is
+            processed as plain JavaScript right here in this tab.
+          </p>
+          <p>
+            Some tools remember what you typed when you switch between them using the browser's
+            <code class="mono">sessionStorage</code>. That's a small per-tab storage area built into the browser: it
+            stays on your device, is never sent anywhere, and is automatically cleared the moment you close this tab.
+          </p>
+          <button type="button" class="btn ipk-tagline-popover-close" id="ipk-tagline-popover-close">Got it</button>
+        </div>
+      </div>
       <div class="ipk-search">
         <input type="search" id="ipk-search" placeholder="Search tools..." aria-label="Search tools" />
       </div>
@@ -191,9 +214,41 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
   const sidebar = root.querySelector<HTMLElement>("#ipk-sidebar")!;
   const searchInput = root.querySelector<HTMLInputElement>("#ipk-search")!;
   const themeToggle = root.querySelector<HTMLButtonElement>("#ipk-theme-toggle")!;
+  const taglineButton = root.querySelector<HTMLButtonElement>("#ipk-tagline")!;
+  const taglinePopover = root.querySelector<HTMLElement>("#ipk-tagline-popover")!;
+  const taglinePopoverClose = root.querySelector<HTMLButtonElement>("#ipk-tagline-popover-close")!;
 
   sidebarEl = sidebar;
   renderSidebar(sidebar);
+
+  const closeTaglinePopover = () => {
+    taglinePopover.hidden = true;
+    taglineButton.setAttribute("aria-expanded", "false");
+  };
+  const openTaglinePopover = () => {
+    taglinePopover.hidden = false;
+    taglineButton.setAttribute("aria-expanded", "true");
+  };
+  taglineButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (taglinePopover.hidden) {
+      openTaglinePopover();
+    } else {
+      closeTaglinePopover();
+    }
+  });
+  taglinePopoverClose.addEventListener("click", closeTaglinePopover);
+  document.addEventListener("click", (event) => {
+    if (!taglinePopover.hidden && !taglinePopover.contains(event.target as Node) && event.target !== taglineButton) {
+      closeTaglinePopover();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !taglinePopover.hidden) {
+      closeTaglinePopover();
+      taglineButton.focus();
+    }
+  });
 
   const updateThemeLabel = () => {
     themeToggle.textContent = THEME_ICONS[getThemePreference()];

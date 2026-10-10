@@ -12,6 +12,14 @@
   z-index: 10;
 }
 
+.ipk-brand-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
 .ipk-brand {
   display: flex;
   align-items: center;
@@ -39,6 +47,43 @@
   font-size: 0.8rem;
   color: var(--text-muted);
   white-space: nowrap;
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.ipk-tagline:hover,
+.ipk-tagline:focus-visible {
+  color: var(--text);
+}
+
+.ipk-tagline-popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 20;
+  width: min(360px, calc(100vw - var(--space-6)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.ipk-tagline-popover p {
+  margin: 0;
+}
+
+.ipk-tagline-popover-close {
+  align-self: flex-end;
 }
 
 @media (max-width: 720px) {
