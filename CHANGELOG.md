@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.5.0...v0.6.0) (2026-10-10)
+
+### ✨ Features
+
+* **about:** add GitHub star link and no-analytics note ([d7b6b47](https://github.com/MrWyss-MSFT/ipk/commit/d7b6b475771562e7d1a4598726a2498040b3f235))
+* add Windows Sandbox config (.wsb) generator tool ([034b59d](https://github.com/MrWyss-MSFT/ipk/commit/034b59d326e23ff635878b051a8b7eaecd2a1554))
+* **wsb:** add 'Use example' buttons for logon command and mapped folders ([85d81f3](https://github.com/MrWyss-MSFT/ipk/commit/85d81f3ce0b6214b24788fbcfcd2792dbbafede6))
+* **wsb:** add a copyable example under the logon command field ([49c6046](https://github.com/MrWyss-MSFT/ipk/commit/49c604610023b38a972989eb0d1baef106865aa7))
+* **wsb:** add copyable command to enable the Windows Sandbox feature ([e49af88](https://github.com/MrWyss-MSFT/ipk/commit/e49af88b6ab5500efefb7e599e8a7ca100134e51))
+* **wsb:** add tooltips explaining each setting ([32d33f1](https://github.com/MrWyss-MSFT/ipk/commit/32d33f1c326f1ead98c2bccc2fff01f59eca3438))
+* **wsb:** fold install command into the intro note, add double-click tip ([f17c802](https://github.com/MrWyss-MSFT/ipk/commit/f17c802e63ba53d45f978c876d8966b133d124ce))
+* **wsb:** replace native title tooltips with a copyable custom popover ([00256a9](https://github.com/MrWyss-MSFT/ipk/commit/00256a9165635e8c97f03f1b7176a7fb9e992e2f))
+* **wsb:** show actual default behavior in tri-state dropdowns ([2612edb](https://github.com/MrWyss-MSFT/ipk/commit/2612edb531dac7b7a5890ed1e42406e412735349))
+
+### ⏪ Reverts
+
+* Revert "chore: remove CNAME file (unneeded with Actions-based Pages deploy)" ([e03f3b0](https://github.com/MrWyss-MSFT/ipk/commit/e03f3b09f22f9996c1171dfa26ae99e3fc62b85b))
+
 ## [0.5.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.4.0...v0.5.0) (2026-10-10)
 
 ### ✨ Features
