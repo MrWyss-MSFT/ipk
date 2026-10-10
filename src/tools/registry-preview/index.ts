@@ -81,7 +81,7 @@ const tool: ToolDefinition = {
           </span>
           then load or paste the .reg file to browse it as a tree. Inspired by
           <a href="https://learn.microsoft.com/en-us/windows/powertoys/registry-preview" target="_blank" rel="noopener">
-            PowerToys Registry Preview</a>. This runs entirely in your browser - nothing is uploaded.
+            PowerToys Registry Preview</a>.
         </p>
 
         <div class="rgp-input-row">

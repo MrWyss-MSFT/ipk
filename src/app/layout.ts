@@ -175,6 +175,7 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
         <img class="ipk-logo ipk-logo-light" src="logo-light.png" alt="IPK" />
         <img class="ipk-logo ipk-logo-dark" src="logo-dark.png" alt="IPK" />
       </a>
+      <span class="ipk-tagline">Nothing leaves your browser</span>
       <div class="ipk-search">
         <input type="search" id="ipk-search" placeholder="Search tools..." aria-label="Search tools" />
       </div>

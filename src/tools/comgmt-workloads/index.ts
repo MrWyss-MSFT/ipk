@@ -27,9 +27,6 @@ const tool: ToolDefinition = {
 
     container.innerHTML = `
       <div class="cmw-tool">
-        <p class="cmw-note">
-          Runs entirely in your browser — nothing is uploaded anywhere.
-        </p>
         <label class="cmw-label" for="cmw-snippet">Get the value on a co-managed device (PowerShell — copies the value to your clipboard)</label>
         <div class="ipk-copy-wrap">
           ${codeBlockHtml("cmw-snippet")}

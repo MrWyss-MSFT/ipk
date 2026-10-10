@@ -35,6 +35,18 @@
   display: none;
 }
 
+.ipk-tagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .ipk-tagline {
+    display: none;
+  }
+}
+
 .ipk-search {
   flex: 1;
   max-width: 420px;

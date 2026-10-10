@@ -27,9 +27,6 @@ const tool: ToolDefinition = {
 
     container.innerHTML = `
       <div class="aph-tool">
-        <p class="aph-note">
-          Runs entirely in your browser — the hash is never uploaded anywhere.
-        </p>
         <label class="aph-label" for="aph-snippet">Get the hardware hash on a Windows device (PowerShell — copies it to your clipboard)</label>
         <div class="ipk-copy-wrap">
           ${codeBlockHtml("aph-snippet")}

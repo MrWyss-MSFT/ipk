@@ -65,8 +65,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="qrs-tool">
         <p class="qrs-note">
-          Nothing leaves your browser - the captured frame is decoded entirely on this device and is never uploaded
-          anywhere. When scanning your screen, the browser will show its own sharing indicator; that's normal.
+          When scanning your screen, the browser will show its own sharing indicator; that's normal.
         </p>
 
         <div class="qrs-formats">

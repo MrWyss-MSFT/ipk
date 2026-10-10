@@ -29,9 +29,6 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="cfs-tool">
-        <p class="cfs-note">
-          Runs entirely in your browser — nothing is uploaded anywhere.
-        </p>
         <label class="cfs-label" for="cfs-text">Text to search for</label>
         <input id="cfs-text" class="mono" type="text" placeholder="e.g. search string" value="search string" />
 

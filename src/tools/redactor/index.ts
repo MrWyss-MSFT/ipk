@@ -42,8 +42,8 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="rdx-tool">
         <p class="rdx-note">
-          Paste text below and pick what to redact. Everything runs locally in your browser — nothing is
-          uploaded. Detection relies on heuristic patterns, so always double-check the output before sharing it.
+          Paste text below and pick what to redact. Detection relies on heuristic patterns, so always double-check
+          the output before sharing it.
         </p>
 
         <div class="rdx-options">

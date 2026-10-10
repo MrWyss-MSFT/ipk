@@ -136,9 +136,6 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="adl-tool">
         <p class="adl-note">
-          Nothing leaves your browser - decoding happens entirely on this device and nothing is uploaded anywhere.
-        </p>
-        <p class="adl-note">
           You can also scan a DeviceLink QR code directly with the <a href="#/tool/qr-scanner">QR Code Scanner</a>
           tool, which decodes it the same way.
         </p>
