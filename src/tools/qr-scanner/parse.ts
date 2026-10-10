@@ -6,7 +6,7 @@
  * to plain "text" - we don't guess at undocumented shapes.
  */
 
-import { isDeviceLinkPayload, parseDeviceLinkUrl } from "./devicelink";
+import { isDeviceLinkPayload, parseDeviceLinkUrl } from "@/app/devicelink";
 
 export interface UrlPayload {
   kind: "url";
