@@ -1,7 +1,7 @@
 import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton, autoGrowTextarea } from "@/app/copy-button";
-import { codeBlockHtml, setCode } from "@/app/code-block";
+import { codeBlockHtml, setCode, setPowerShellCode } from "@/app/code-block";
 import { buildWsbXml, parseMappedFoldersText, type TriState, type WsbConfig } from "./parse";
 
 const TRI_STATE_OPTIONS: TriState[] = ["Default", "Enable", "Disable"];
@@ -47,6 +47,9 @@ function forLabelHtml(text: string, hint: string, forId: string): string {
   return `<label class="wsb-label wsb-tip" for="${forId}">${text}${tipBubbleHtml(hint)}</label>`;
 }
 
+const WSB_INSTALL_COMMAND =
+  'Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All';
+
 const tool: ToolDefinition = {
   id: "windows-sandbox-wsb",
   name: "Windows Sandbox Config Generator",
@@ -74,6 +77,12 @@ const tool: ToolDefinition = {
           <a href="https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file" target="_blank" rel="noopener noreferrer">Windows Sandbox</a>.
           Settings left at <strong>Default</strong> are omitted from the file since Sandbox already behaves that way.
         </p>
+
+        <label class="wsb-label" for="wsb-install">Enable Windows Sandbox (run once, elevated PowerShell, requires restart)</label>
+        <div class="ipk-copy-wrap">
+          ${codeBlockHtml("wsb-install")}
+          ${copyButtonHtml("wsb-install-copy")}
+        </div>
 
         <div class="wsb-grid">
           <label class="wsb-field">
@@ -144,8 +153,13 @@ const tool: ToolDefinition = {
     const foldersInput = container.querySelector<HTMLTextAreaElement>("#wsb-folders")!;
     const output = container.querySelector<HTMLPreElement>("#wsb-output")!;
     const copyBtn = container.querySelector<HTMLButtonElement>("#wsb-copy")!;
+    const installOutput = container.querySelector<HTMLPreElement>("#wsb-install")!;
+    const installCopyBtn = container.querySelector<HTMLButtonElement>("#wsb-install-copy")!;
     const downloadBtn = container.querySelector<HTMLButtonElement>("#wsb-download")!;
     const resetBtn = container.querySelector<HTMLButtonElement>("#wsb-reset")!;
+
+    setPowerShellCode(installOutput, WSB_INSTALL_COMMAND);
+    wireCopyButton(installCopyBtn, () => WSB_INSTALL_COMMAND);
 
     autoGrowTextarea(foldersInput);
 
