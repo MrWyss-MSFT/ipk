@@ -214,5 +214,41 @@ Versioning and the changelog are automated with
 - All colors are CSS custom properties in `src/styles/variables.css`
   (`--bg`, `--text`, `--accent`, `--success`, `--danger`, …), redefined under
   `[data-theme="dark"]`. **Never hard-code colors in a tool's CSS** — use the
-  variables so both themes stay correct automatically. Theme is toggled via
-  `src/app/theme.ts` (light/dark/system).
+  variables so both themes stay correct automatically. Theme is managed via
+  `src/app/theme.ts`: it defaults to following the OS preference ("system")
+  until the user clicks the header toggle, which flips between light/dark
+  directly (the toggle only ever shows the resolved ☀️/🌙 icon — there's no
+  separate "System" option to pick in the UI).
+
+## Design guidelines
+
+These apply to every new tool so the site stays visually consistent as it
+grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
+
+- **Tools use the full width of the content area.** Do not put a `max-width`
+  on your tool's root element (e.g. `.xyz-tool`) — let it fill
+  `.ipk-tool-body`. If a specific inner element genuinely needs a narrower
+  measure for readability (e.g. a long paragraph of prose), constrain that
+  element directly instead of the whole tool.
+- **Wide tables scroll horizontally, not the page.** If a table can have many
+  columns or long unbreakable cells (`white-space: nowrap` badges/commands),
+  wrap it in `<div class="ipk-table-scroll">…</div>` (defined in
+  `components.css`) so it scrolls internally instead of pushing the whole
+  page wider than the viewport.
+- **The tool header shows the description as a tooltip, not inline text.**
+  `layout.ts` already renders `<h1 title="...">` with the tool's
+  `description` for every tool — you don't need to (and shouldn't) repeat the
+  description as a visible `<p>` under your own tool's heading; it would
+  just duplicate what's already on hover and cost vertical space.
+- **The sidebar collapses manually (desktop) and automatically (narrow
+  viewports) via `components.css`'s `body.ipk-sidebar-collapsed` /
+  `body.ipk-sidebar-open` classes** — tools don't need to do anything for
+  this, it's handled centrally in `layout.ts`.
+- **Short usage notes/tips use the shared `.ipk-hint` class** (defined in
+  `components.css`) instead of a bespoke per-tool note style — it renders an
+  accent-tinted callout box with a leading 💡 icon so it reads as a hint
+  rather than blending in with plain card-like content. Add `ipk-hint`
+  alongside your tool-specific class (e.g. `<p class="xyz-note ipk-hint">`)
+  if you still need a tool-specific class for child-selector rules (links,
+  `<code>`, layout); otherwise `ipk-hint` alone is enough. Don't repeat the
+  box's `background`/`border`/`padding`/`border-radius` in your own CSS.

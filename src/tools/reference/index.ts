@@ -104,8 +104,8 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="ref-tool">
-        <p class="ref-tip">
-          💡 Tip: in the Run dialog (<kbd>Win</kbd>+<kbd>R</kbd>), press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> instead of
+        <p class="ref-tip ipk-hint">
+          Tip: in the Run dialog (<kbd>Win</kbd>+<kbd>R</kbd>), press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> instead of
           <kbd>Enter</kbd> to launch a command elevated (as Administrator).
         </p>
         <div class="ref-tabs" role="tablist">
@@ -116,10 +116,12 @@ const tool: ToolDefinition = {
         </div>
         <input id="ref-filter" class="mono" type="text" placeholder="Filter..." />
         <div class="ref-tagbar" id="ref-tagbar"></div>
-        <table class="ref-table">
-          <thead id="ref-thead"></thead>
-          <tbody id="ref-list"></tbody>
-        </table>
+        <div class="ipk-table-scroll">
+          <table class="ref-table">
+            <thead id="ref-thead"></thead>
+            <tbody id="ref-list"></tbody>
+          </table>
+        </div>
         <p class="ref-empty" id="ref-empty" hidden>Nothing matches your filter.</p>
 
         <div class="ref-fav-panel" id="ref-fav-panel" hidden>
@@ -136,9 +138,9 @@ const tool: ToolDefinition = {
             ${codeBlockHtml("ref-fav-output")}
             ${copyButtonHtml("ref-fav-copy")}
           </div>
-          <p class="ref-tip">
+          <p class="ref-tip ipk-hint">
             Paste directly into cmd.exe. Then open <strong>regedit</strong> — your picks appear under
-            <strong>Favorites</strong>. 💡 Tip: run <code class="mono">regedit -m</code> to open multiple Registry
+            <strong>Favorites</strong>. Tip: run <code class="mono">regedit -m</code> to open multiple Registry
             Editor windows at once. Inside a .bat/.cmd file, double every <code class="mono">%</code> (e.g.
             <code class="mono">%K</code> → <code class="mono">%%K</code>).
           </p>

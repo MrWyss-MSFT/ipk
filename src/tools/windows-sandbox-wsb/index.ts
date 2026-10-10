@@ -76,7 +76,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="wsb-tool">
-        <div class="wsb-note">
+        <div class="wsb-note ipk-hint">
           <p>
             Configures a <code>.wsb</code> file for
             <a href="https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file" target="_blank" rel="noopener noreferrer">Windows Sandbox</a>.

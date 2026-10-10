@@ -1,5 +1,5 @@
 /**
- * Minimal Markdown-ish renderer for the Stay Awake "bystander message" preview.
+ * Minimal Markdown-ish renderer for the Stay Awake "screen message" preview.
  * Not a general-purpose parser (see src/tools/playbooks/markdown.ts for that one) -
  * just enough for a short status message: headings, bold/italic, inline code,
  * links, and simple bullet lists. Everything else renders as plain paragraphs.
