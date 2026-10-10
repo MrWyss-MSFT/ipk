@@ -50,3 +50,11 @@ textarea.mono {
   background: var(--accent);
   color: var(--accent-contrast);
 }
+
+/* The native `hidden` attribute must always win over a class setting `display`
+   (e.g. `.btn { display: inline-flex }`) - without this, any element that is
+   both `hidden` and carries such a class stays visible, since the author
+   stylesheet's class rule otherwise beats the user-agent's `[hidden]` rule. */
+[hidden] {
+  display: none !important;
+}
