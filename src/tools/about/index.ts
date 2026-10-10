@@ -45,6 +45,27 @@ const tool: ToolDefinition = {
         </section>
 
         <section class="abt-card">
+          <h2 class="abt-support-title">Support</h2>
+          <p>
+            ${
+              repoUrl
+                ? `<a class="abt-star-btn" href="${repoUrl}" target="_blank" rel="noopener noreferrer" aria-label="Star MrWyss-MSFT/ipk on GitHub">
+                    <svg class="abt-star-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
+                      <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
+                    </svg>
+                    Star on GitHub
+                  </a>`
+                : `Star on GitHub`
+            }
+          </p>
+          <p class="abt-muted">
+            No analytics, no tracking - I have no idea how many people use IPK
+            or find it useful. A star is the only signal I get, so if it's
+            saved you time, it'd mean a lot.
+          </p>
+        </section>
+
+        <section class="abt-card">
           <h2 class="abt-contrib-title">Contributing</h2>
           <p>
             Contributions are welcome! Feel free to open a pull request, or file an
