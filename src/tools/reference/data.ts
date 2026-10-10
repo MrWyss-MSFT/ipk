@@ -81,6 +81,12 @@ export const COMMANDS: CommandEntry[] = [
     powershellOnly: true,
   },
   {
+    command: "USOClient StartInteractiveScan",
+    description:
+      'Triggers an interactive Windows Update scan — the cmd equivalent of clicking "Check for updates" in Settings.',
+    tags: ["Windows Update", "Troubleshooting"],
+  },
+  {
     command: '"%ProgramFiles%\\Windows Defender\\MpCmdRun.exe" -removedefinitions -all',
     description: "Removes all Windows Defender definition updates, reverting to the platform's baseline definitions.",
     tags: ["Windows Defender", "Security", "Troubleshooting"],
