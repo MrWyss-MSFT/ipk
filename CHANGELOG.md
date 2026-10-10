@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.7.0...v0.8.0) (2026-10-10)
+
+### ✨ Features
+
+* **ui:** responsive layout polish, shared hint styling, stay-awake tweaks ([6498cae](https://github.com/MrWyss-MSFT/ipk/commit/6498caef109a5a1e204cbec84b70a63f751cf003))
+
 ## [0.7.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.6.0...v0.7.0) (2026-10-10)
 
 ### ✨ Features
