@@ -24,6 +24,16 @@ function downloadWsb(filename: string, xml: string) {
   URL.revokeObjectURL(url);
 }
 
+/** A `.wsb-label` `<span>` (used inside a wrapping `<label>`) with a native tooltip explaining the setting. */
+function spanLabelHtml(text: string, hint: string): string {
+  return `<span class="wsb-label" title="${hint.replace(/"/g, "&quot;")}">${text}</span>`;
+}
+
+/** A standalone `.wsb-label` `<label for="...">` with a native tooltip explaining the setting. */
+function forLabelHtml(text: string, hint: string, forId: string): string {
+  return `<label class="wsb-label" for="${forId}" title="${hint.replace(/"/g, "&quot;")}">${text}</label>`;
+}
+
 const tool: ToolDefinition = {
   id: "windows-sandbox-wsb",
   name: "Windows Sandbox Config Generator",
@@ -54,43 +64,43 @@ const tool: ToolDefinition = {
 
         <div class="wsb-grid">
           <label class="wsb-field">
-            <span class="wsb-label">vGPU (virtualized GPU)</span>
+            ${spanLabelHtml("vGPU (virtualized GPU)", "Enables or disables the virtualized GPU. When disabled, the sandbox falls back to software rendering (WARP), which is slower but reduces attack surface.")}
             ${triStateSelectHtml("wsb-vgpu")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Networking</span>
+            ${spanLabelHtml("Networking", "Enables or disables network access inside the sandbox. Disable it to reduce the attack surface exposed to untrusted applications.")}
             ${triStateSelectHtml("wsb-networking")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Audio input</span>
+            ${spanLabelHtml("Audio input", "Shares the host's microphone input with the sandbox. Needed by apps that record audio.")}
             ${triStateSelectHtml("wsb-audio")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Video input</span>
+            ${spanLabelHtml("Video input", "Shares the host's webcam input with the sandbox. Needed by apps that use a camera.")}
             ${triStateSelectHtml("wsb-video")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Protected client</span>
+            ${spanLabelHtml("Protected client", "Runs the sandbox inside an AppContainer Isolation boundary for extra security. May restrict copy/paste between host and sandbox.")}
             ${triStateSelectHtml("wsb-protected-client")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Printer redirection</span>
+            ${spanLabelHtml("Printer redirection", "Shares the host's printers with the sandbox.")}
             ${triStateSelectHtml("wsb-printer")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Clipboard redirection</span>
+            ${spanLabelHtml("Clipboard redirection", "Shares the host clipboard with the sandbox, so text and files can be copied in both directions.")}
             ${triStateSelectHtml("wsb-clipboard")}
           </label>
           <label class="wsb-field">
-            <span class="wsb-label">Memory (MB)</span>
+            ${spanLabelHtml("Memory (MB)", "Amount of memory, in megabytes, assigned to the sandbox. If the value is too low, Windows automatically raises it to the required minimum (2048 MB).")}
             <input id="wsb-memory" class="mono" type="number" min="0" step="256" placeholder="e.g. 8192" />
           </label>
         </div>
 
-        <label class="wsb-label" for="wsb-logon">Logon command</label>
+        ${forLabelHtml("Logon command", "A single command run automatically after the sandbox signs in - e.g. launching an app or a script from a mapped folder.", "wsb-logon")}
         <input id="wsb-logon" class="mono" type="text" placeholder="e.g. explorer.exe C:\\Users\\WDAGUtilityAccount\\Desktop" />
 
-        <label class="wsb-label" for="wsb-folders">Mapped folders</label>
+        ${forLabelHtml("Mapped folders", "Shares host folders into the sandbox, read-only or read/write. Changes made in a write-enabled folder persist on the host after the sandbox closes.", "wsb-folders")}
         <textarea id="wsb-folders" class="mono wsb-folders-input" rows="3" placeholder="C:\\Users\\Public\\Downloads&#10;C:\\Tools => C:\\Users\\WDAGUtilityAccount\\Desktop\\Tools&#10;C:\\Secrets => C:\\Secrets (readonly)"></textarea>
         <p class="wsb-hint">
           One per line: <code>HostFolder</code>, <code>HostFolder =&gt; SandboxFolder</code>, or
