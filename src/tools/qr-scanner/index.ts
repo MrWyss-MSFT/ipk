@@ -62,6 +62,16 @@ const tool: ToolDefinition = {
           anywhere. When scanning your screen, the browser will show its own sharing indicator; that's normal.
         </p>
 
+        <div class="qrs-formats">
+          <p class="qrs-formats-title">What it can decode</p>
+          <ul class="qrs-formats-list">
+            <li><strong>Links</strong> - any <code>http(s)://</code> URL, shown as a clickable link.</li>
+            <li><strong>Wi-Fi networks</strong> - the standard <code>WIFI:T:...;S:...;P:...;;</code> QR format, parsed into SSID, password and security type.</li>
+            <li><strong>TOTP / authenticator setup codes</strong> - <code>otpauth://totp/...</code> codes, parsed into issuer, account and secret.</li>
+            <li><strong>Plain text</strong> - anything else is shown as-is.</li>
+          </ul>
+        </div>
+
         <div class="qrs-mode-toggle" role="group" aria-label="Capture source">
           <button type="button" class="btn qrs-mode-btn" data-mode="screen" ${screenSupported ? "" : "disabled"}>
             🖥️ Screen
