@@ -110,6 +110,30 @@
   color: var(--text-muted);
 }
 
+.wsb-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wsb-populate-btn {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.wsb-populate-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
 .wsb-tool .ipk-code {
   min-height: 2.5em;
 }

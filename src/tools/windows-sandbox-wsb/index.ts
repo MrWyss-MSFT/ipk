@@ -50,6 +50,10 @@ function forLabelHtml(text: string, hint: string, forId: string): string {
 const WSB_INSTALL_COMMAND =
   'Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All';
 
+const EXAMPLE_LOGON_COMMAND = "explorer.exe C:\\Users\\WDAGUtilityAccount\\Desktop";
+const EXAMPLE_MAPPED_FOLDERS =
+  "C:\\Users\\Public\\Downloads\nC:\\Tools => C:\\Users\\WDAGUtilityAccount\\Desktop\\Tools\nC:\\Secrets => C:\\Secrets (readonly)";
+
 const tool: ToolDefinition = {
   id: "windows-sandbox-wsb",
   name: "Windows Sandbox Config Generator",
@@ -120,13 +124,16 @@ const tool: ToolDefinition = {
           </label>
         </div>
 
-        ${forLabelHtml("Logon command", "A single command run automatically after the sandbox signs in - e.g. launching an app or a script from a mapped folder.", "wsb-logon")}
+        <div class="wsb-field-header">
+          ${forLabelHtml("Logon command", "A single command run automatically after the sandbox signs in - e.g. launching an app or a script from a mapped folder.", "wsb-logon")}
+          <button type="button" id="wsb-logon-example" class="wsb-populate-btn">Use example</button>
+        </div>
         <input id="wsb-logon" class="mono" type="text" placeholder="e.g. explorer.exe C:\\Users\\WDAGUtilityAccount\\Desktop" />
-        <p class="wsb-hint">
-          Example: <code>explorer.exe C:\Users\WDAGUtilityAccount\Desktop</code>
-        </p>
 
-        ${forLabelHtml("Mapped folders", "Shares host folders into the sandbox, read-only or read/write. Changes made in a write-enabled folder persist on the host after the sandbox closes.", "wsb-folders")}
+        <div class="wsb-field-header">
+          ${forLabelHtml("Mapped folders", "Shares host folders into the sandbox, read-only or read/write. Changes made in a write-enabled folder persist on the host after the sandbox closes.", "wsb-folders")}
+          <button type="button" id="wsb-folders-example" class="wsb-populate-btn">Use example</button>
+        </div>
         <textarea id="wsb-folders" class="mono wsb-folders-input" rows="3" placeholder="C:\\Users\\Public\\Downloads&#10;C:\\Tools => C:\\Users\\WDAGUtilityAccount\\Desktop\\Tools&#10;C:\\Secrets => C:\\Secrets (readonly)"></textarea>
         <p class="wsb-hint">
           One per line: <code>HostFolder</code>, <code>HostFolder =&gt; SandboxFolder</code>, or
@@ -154,7 +161,9 @@ const tool: ToolDefinition = {
     const clipboardSelect = container.querySelector<HTMLSelectElement>("#wsb-clipboard")!;
     const memoryInput = container.querySelector<HTMLInputElement>("#wsb-memory")!;
     const logonInput = container.querySelector<HTMLInputElement>("#wsb-logon")!;
+    const logonExampleBtn = container.querySelector<HTMLButtonElement>("#wsb-logon-example")!;
     const foldersInput = container.querySelector<HTMLTextAreaElement>("#wsb-folders")!;
+    const foldersExampleBtn = container.querySelector<HTMLButtonElement>("#wsb-folders-example")!;
     const output = container.querySelector<HTMLPreElement>("#wsb-output")!;
     const copyBtn = container.querySelector<HTMLButtonElement>("#wsb-copy")!;
     const installOutput = container.querySelector<HTMLPreElement>("#wsb-install")!;
@@ -203,6 +212,15 @@ const tool: ToolDefinition = {
       render();
     };
     foldersInput.addEventListener("input", onFoldersInput);
+
+    logonExampleBtn.addEventListener("click", () => {
+      logonInput.value = EXAMPLE_LOGON_COMMAND;
+      logonInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    foldersExampleBtn.addEventListener("click", () => {
+      foldersInput.value = EXAMPLE_MAPPED_FOLDERS;
+      foldersInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
 
     wireCopyButton(copyBtn, () => currentXml);
     downloadBtn.addEventListener("click", () => downloadWsb("Sandbox.wsb", currentXml));
