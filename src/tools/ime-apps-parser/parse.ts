@@ -7,9 +7,10 @@
  * - `Intent` is confirmed against the community `AppWorkloadJsonDecoder`
  *   script (github.com/thejimoneil/AppWorkloadJsonDecoder) and matches
  *   Microsoft's documented Win32 app assignment intents.
- * - `TargetType` has no official documentation found; the 1=User/2=Device
- *   labels below are best-effort (community-reported, unconfirmed) and are
- *   always shown alongside the raw number rather than replacing it.
+ * - `TargetType` has no official Microsoft docs, but is confirmed via
+ *   decompiled IME source (community writeup: msendpointmgr.com's
+ *   "Win32 app State Messages Demystified") as 0=None, 1=User, 2=Device,
+ *   3=Both Device and User. Still shown alongside the raw number.
  * - Every other field is left as-is (raw) rather than guessing — the
  *   timeline/diff view surfaces raw field-level changes regardless, so
  *   nothing is lost by not decoding every nested enum.
@@ -28,6 +29,16 @@ export interface ImeAppPolicy {
 export interface ImeSnapshot {
   /** Epoch ms parsed from the log line's CMTrace `date`/`time` attributes, or null if unparseable. */
   timestampMs: number | null;
+  /**
+   * True when `timeRaw` carried an explicit `±bias` suffix, meaning
+   * `timestampMs` is a real UTC instant safe to convert to the viewer's own
+   * local timezone for display. Some devices' AppWorkload.log entries omit
+   * the bias entirely (just `HH:mm:ss.fffffff`, no sign) — in that case
+   * `timestampMs` only preserves relative ordering and must be displayed
+   * back out verbatim (as UTC) rather than converted, since we have no way
+   * to know which timezone the device's clock was actually in.
+   */
+  hasBias: boolean;
   dateRaw: string;
   timeRaw: string;
   apps: ImeAppPolicy[];
@@ -45,10 +56,12 @@ export const INTENT_LABELS: Record<number, string> = {
   5: "Available Without Enrollment",
 };
 
-/** Best-effort / unconfirmed — see file header. Shown with the raw number, never instead of it. */
+/** Confirmed via decompiled IME source — see file header. Shown with the raw number regardless. */
 export const TARGET_TYPE_LABELS: Record<number, string> = {
+  0: "None",
   1: "User",
   2: "Device",
+  3: "Both Device and User",
 };
 
 export function intentLabel(intent: number | null): string {
@@ -58,32 +71,99 @@ export function intentLabel(intent: number | null): string {
 
 export function targetTypeLabel(targetType: number | null): string {
   if (targetType === null) return "—";
-  return TARGET_TYPE_LABELS[targetType] ? `${TARGET_TYPE_LABELS[targetType]}? (${targetType})` : String(targetType);
+  return TARGET_TYPE_LABELS[targetType] ? `${TARGET_TYPE_LABELS[targetType]} (${targetType})` : String(targetType);
 }
 
 /**
- * CMTrace log lines carry `time="HH:mm:ss.fff+NNN"` (sub-second digit count
- * and UTC-bias format both vary) and `date="MM-dd-yyyy"`. Only relative
- * ordering within one device's own logs matters here, so the fractional
- * seconds and bias suffix are simply dropped rather than fully parsed.
+ * CMTrace log lines carry `time="HH:mm:ss.fff±BBB"` (sub-second digit count
+ * varies) and `date="M-d-yyyy"` — note the month/day are *not* zero-padded
+ * (e.g. `10-5-2026`), so both can be 1 or 2 digits.
+ *
+ * `±BBB`, when present, is the device's UTC bias in minutes, with `+`
+ * meaning the device's local clock is *ahead of* UTC (e.g. `+120` = UTC+2)
+ * and `-` meaning it's behind UTC (e.g. `-420` = UTC-7). That's the opposite
+ * sign convention from the raw Win32 `TIME_ZONE_INFORMATION.Bias` field. To
+ * get a true UTC instant: `UTC = local_wallclock − bias`.
+ *
+ * Some AppWorkload.log builds omit the bias entirely (just
+ * `HH:mm:ss.fffffff`, no sign) — there's then no way to know the device's
+ * timezone at all, so `hasBias` is reported back to the caller, which must
+ * display the value back out as-is (not convert it) in that case.
+ *
+ * We always parse the wall-clock part as if it were UTC (so the browser's
+ * own timezone never leaks into the numeric value), then subtract the bias
+ * — when there is one — to land on the real UTC instant.
  */
-function parseCmTraceDateTime(dateStr: string, timeStr: string): number | null {
-  const dateMatch = /^(\d{2})-(\d{2})-(\d{4})$/.exec(dateStr.trim());
-  const timeMatch = /^(\d{2}):(\d{2}):(\d{2})/.exec(timeStr.trim());
+function parseCmTraceDateTime(dateStr: string, timeStr: string): { ms: number; hasBias: boolean } | null {
+  const dateMatch = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(dateStr.trim());
+  const timeMatch = /^(\d{1,2}):(\d{1,2}):(\d{1,2})(?:\.\d+)?([+-]\d{1,4})?/.exec(timeStr.trim());
   if (!dateMatch || !timeMatch) return null;
   const [, mm, dd, yyyy] = dateMatch;
-  const [, HH, MI, SS] = timeMatch;
-  const ms = new Date(`${yyyy}-${mm}-${dd}T${HH}:${MI}:${SS}`).getTime();
-  return Number.isNaN(ms) ? null : ms;
+  const [, HH, MI, SS, biasStr] = timeMatch;
+  const pad = (s: string) => s.padStart(2, "0");
+  const ms = Date.parse(`${yyyy}-${pad(mm)}-${pad(dd)}T${pad(HH)}:${pad(MI)}:${pad(SS)}Z`);
+  if (Number.isNaN(ms)) return null;
+  if (!biasStr) return { ms, hasBias: false };
+  const biasMinutes = Number.parseInt(biasStr, 10);
+  return { ms: ms - biasMinutes * 60_000, hasBias: true };
+}
+
+/** True for PowerShell 5.1's `{"value": [...], "Count": n}` array serialization quirk. */
+function isCountWrapper(value: unknown): value is { value: unknown; Count: unknown } {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    "value" in (value as Record<string, unknown>) &&
+    "Count" in (value as Record<string, unknown>)
+  );
+}
+
+/**
+ * Normalizes a value that should be a JSON array. Handles PowerShell
+ * `ConvertTo-Json` quirks seen in real exports: it silently unwraps a
+ * single-element array into a bare object (so a snapshot with just one app
+ * isn't an array at all), and on Windows PowerShell 5.1 it can serialize a
+ * `System.Object[]` of `PSCustomObject`s (e.g. from `ConvertFrom-Json`) as
+ * `{"value": [...], "Count": n}` instead of a plain array — at any nesting
+ * depth, regardless of element count, and sometimes with an extra
+ * PowerShell-array wrapper around it (e.g. forcing the source expression
+ * with `@(...)` can leave the `{value, Count}` object as the sole element
+ * of a one-item array rather than serializing it directly). All of these
+ * are unwrapped back into a real array here.
+ */
+function normalizeArray(value: unknown): unknown[] {
+  if (value === null || value === undefined) return [];
+  if (Array.isArray(value)) {
+    if (value.length === 1 && isCountWrapper(value[0])) {
+      return normalizeArray(value[0]);
+    }
+    return value;
+  }
+  if (isCountWrapper(value)) {
+    return normalizeArray(value.value);
+  }
+  return [value];
 }
 
 /**
  * Parses the JSON array produced by this tool's export command: a list of
- * `{Date, Time, Apps}` snapshots. PowerShell's `ConvertTo-Json` silently
- * unwraps single-element arrays into a bare object (both for the outer
- * snapshot list and each snapshot's `Apps` list) — both cases are normalized
- * back into arrays here so a single "Get policies" line, or a snapshot with
- * only one app, doesn't break parsing.
+ * `{Date, Time, Apps}` snapshots. Both the outer snapshot list and each
+ * snapshot's `Apps` list go through `normalizeArray()` so a single
+ * "Get policies" line, a snapshot with only one app, or Windows PowerShell
+ * 5.1's `{"value": [...], "Count": n}` serialization quirk all parse the
+ * same as a plain array.
+ *
+ * Snapshots are returned in input order, not re-sorted by their parsed
+ * timestamp: `Select-String -Path 'AppWorkload*.log'` already yields
+ * matches in true chronological order (log lines are appended in order
+ * within each file, and rotated backups are named
+ * `AppWorkload-yyyyMMdd-HHmmss.log` so the current `AppWorkload.log` sorts
+ * last). Re-sorting by the embedded CMTrace timestamp would actually be
+ * *less* reliable — devices without a `±bias` in their timestamp (see
+ * `hasBias`) have no real UTC instant to sort by, so a timezone change
+ * partway through the log would throw a timestamp-based sort off right at
+ * that point, whereas the physical log order is unaffected by the device's
+ * clock/timezone settings.
  */
 export function parseImeAppsExport(raw: string): { snapshots: ImeSnapshot[]; errors: ImeParseError[] } {
   let outer: unknown;
@@ -95,7 +175,7 @@ export function parseImeAppsExport(raw: string): { snapshots: ImeSnapshot[]; err
   if (!outer || typeof outer !== "object") {
     throw new Error("Expected a JSON array (or object) of {Date, Time, Apps} snapshots.");
   }
-  const outerArray = Array.isArray(outer) ? outer : [outer];
+  const outerArray = normalizeArray(outer);
 
   const errors: ImeParseError[] = [];
   const snapshots: ImeSnapshot[] = [];
@@ -108,8 +188,7 @@ export function parseImeAppsExport(raw: string): { snapshots: ImeSnapshot[]; err
     const obj = entry as Record<string, unknown>;
     const dateRaw = String(obj.Date ?? "");
     const timeRaw = String(obj.Time ?? "");
-    const appsRaw = obj.Apps;
-    const appsArray = Array.isArray(appsRaw) ? appsRaw : appsRaw ? [appsRaw] : [];
+    const appsArray = normalizeArray(obj.Apps);
 
     const apps: ImeAppPolicy[] = [];
     for (const a of appsArray) {
@@ -125,10 +204,15 @@ export function parseImeAppsExport(raw: string): { snapshots: ImeSnapshot[]; err
       });
     }
 
-    snapshots.push({ timestampMs: parseCmTraceDateTime(dateRaw, timeRaw), dateRaw, timeRaw, apps });
+    const parsed = parseCmTraceDateTime(dateRaw, timeRaw);
+    snapshots.push({
+      timestampMs: parsed ? parsed.ms : null,
+      hasBias: parsed ? parsed.hasBias : false,
+      dateRaw,
+      timeRaw,
+      apps,
+    });
   });
-
-  snapshots.sort((a, b) => (a.timestampMs ?? 0) - (b.timestampMs ?? 0));
 
   return { snapshots, errors };
 }

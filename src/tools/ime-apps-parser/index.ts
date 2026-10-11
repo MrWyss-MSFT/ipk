@@ -1,6 +1,5 @@
 import "./style.css";
-import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import {
   parseImeAppsExport,
@@ -16,18 +15,16 @@ import {
 // log files along with its CMTrace time/date attributes (needed to order
 // and label snapshots), decodes each Apps payload client-side, and copies
 // the whole thing as one JSON array — following the repo's "run here, paste
-// there" convention. Uses `$var | Set-Clipboard; $var` instead of
-// `Set-Clipboard -PassThru` because -PassThru isn't available in Windows
-// PowerShell 5.1 (the default console on managed endpoints) — only in
-// PowerShell 7.4+ — so this phrasing copies *and* echoes the output on
-// every version. The decoded Apps payload is also re-wrapped with `@(...)`
+// there" convention. The decoded Apps payload is re-wrapped with `@(...)`
 // before nesting it in the snapshot object: in Windows PowerShell 5.1,
 // re-serializing a bare ConvertFrom-Json array nested in another object
 // turns it into `{"value":[...],"Count":n}` instead of a plain array —
 // `@(...)` forces a real PowerShell array so ConvertTo-Json emits `[...]`
 // consistently on both PS 5.1 and 7+.
-const EXPORT_COMMAND =
-  '$ime = (Select-String -Path \'C:\\ProgramData\\Microsoft\\IntuneManagementExtension\\Logs\\AppWorkload*.log\' -Pattern \'<!\\[LOG\\[Get policies = (.*?)\\]LOG\\]!><time="([^"]+)" date="([^"]+)"\').ForEach({[pscustomobject]@{Date=$_.Matches.Groups[3].Value;Time=$_.Matches.Groups[2].Value;Apps=@($_.Matches.Groups[1].Value | ConvertFrom-Json)}}) | ConvertTo-Json -Depth 12 -Compress; $ime | Set-Clipboard; $ime';
+const PS_VARIANTS = makePsCommandVariants(
+  '(Select-String -Path \'C:\\ProgramData\\Microsoft\\IntuneManagementExtension\\Logs\\AppWorkload*.log\' -Pattern \'<!\\[LOG\\[Get policies = (.*?)\\]LOG\\]!><time="([^"]+)" date="([^"]+)"\').ForEach({[pscustomobject]@{Date=$_.Matches.Groups[3].Value;Time=$_.Matches.Groups[2].Value;Apps=@($_.Matches.Groups[1].Value | ConvertFrom-Json)}}) | ConvertTo-Json -Depth 12 -Compress',
+  { varName: "ime" },
+);
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -37,7 +34,12 @@ function escapeHtml(value: string): string {
 
 function formatSnapshotLabel(snapshot: ImeSnapshot): string {
   if (snapshot.timestampMs !== null) {
-    return new Date(snapshot.timestampMs).toLocaleString();
+    // With a real bias, timestampMs is a true UTC instant — convert to the
+    // viewer's own local timezone. Without one, timestampMs only preserves
+    // the raw device-local numbers (parsed as if UTC), so format it back out
+    // in UTC to avoid a spurious conversion through the viewer's timezone.
+    const zone = snapshot.hasBias ? undefined : "UTC";
+    return new Date(snapshot.timestampMs).toLocaleString(undefined, zone ? { timeZone: zone } : undefined);
   }
   return `${snapshot.dateRaw} ${snapshot.timeRaw}`.trim() || "(unknown time)";
 }
@@ -48,6 +50,81 @@ const STATUS_LABEL: Record<ImeAppDiff["status"], string> = {
   changed: "Changed",
   unchanged: "Unchanged",
 };
+
+/**
+ * Many app fields are themselves JSON *strings* (e.g. `InstallEx`,
+ * `RequirementRules`) — attempt to parse and pretty-print them so they read
+ * like structured data instead of an escaped one-liner; fall back to the
+ * raw string (or a dash for empty values) when parsing doesn't apply.
+ */
+function renderFieldValue(raw: unknown): string {
+  if (raw === null || raw === undefined || raw === "") {
+    return `<span class="ima-field-empty">—</span>`;
+  }
+  let value: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      value = raw;
+    }
+  }
+  if (typeof value === "object" && value !== null) {
+    return `<pre class="ipk-code mono ima-field-pre">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
+  }
+  return `<span class="mono">${escapeHtml(String(value))}</span>`;
+}
+
+/** Curated set of the fields most useful to inspect per app, beyond the name/intent/type already shown in the summary row. */
+const DETAIL_FIELDS: { key: string; label: string }[] = [
+  { key: "InstallCommandLine", label: "Install command" },
+  { key: "UninstallCommandLine", label: "Uninstall command" },
+  { key: "SetUpFilePath", label: "Setup file" },
+  { key: "DetectionRule", label: "Detection rule" },
+  { key: "RequirementRules", label: "Requirement rules" },
+  { key: "ExtendedRequirementRules", label: "Extended requirement rules" },
+  { key: "InstallEx", label: "Install behavior settings" },
+  { key: "RebootEx", label: "Reboot behavior" },
+  { key: "ReturnCodes", label: "Return codes" },
+  { key: "InstallBehavior", label: "Install behavior" },
+  { key: "AvailableAppEnforcement", label: "Available app enforcement" },
+  { key: "InstallContext", label: "Install context" },
+  { key: "ReevaluationInterval", label: "Re-evaluation interval (min)" },
+  { key: "InstallerData", label: "Installer data" },
+];
+
+function appDetailFieldsHtml(raw: Record<string, unknown>): string {
+  const rows = DETAIL_FIELDS.filter((f) => raw[f.key] !== undefined && raw[f.key] !== null && raw[f.key] !== "")
+    .map(
+      (f) => `
+        <div class="ima-detail-row">
+          <span class="ima-detail-label">${escapeHtml(f.label)}</span>
+          <div class="ima-detail-value">${renderFieldValue(raw[f.key])}</div>
+        </div>
+      `,
+    )
+    .join("");
+  return rows ? `<div class="ima-detail-grid">${rows}</div>` : `<p class="ima-empty">No additional details available.</p>`;
+}
+
+/**
+ * `ESPConfiguration.IsSelectedApp` marks a Win32 app as a "blocking" app in
+ * an Enrollment Status Page profile (Autopilot technician/pre-provisioning
+ * phase) — confirmed by community documentation of Intune's "Only fail
+ * selected blocking apps" ESP feature. This is a per-app policy
+ * configuration flag, not a signal that any *particular* check-in happened
+ * during ESP itself (every check-in for a targeted app can carry it), so it
+ * is shown as a per-app badge rather than used to label whole timeline
+ * entries as "in ESP".
+ */
+function espBadgeHtml(raw: Record<string, unknown>): string {
+  const esp = raw.ESPConfiguration;
+  if (!esp || typeof esp !== "object") return "";
+  const isSelected = (esp as Record<string, unknown>).IsSelectedApp === true;
+  if (!isSelected) return "";
+  const bestEffort = (esp as Record<string, unknown>).InstallWithBestEffort === true;
+  return `<span class="ima-badge ima-badge-esp" title="ESPConfiguration.IsSelectedApp = true: configured as a blocking app in an Enrollment Status Page profile">ESP blocking${bestEffort ? " · best effort" : ""}</span>`;
+}
 
 function appDiffHtml(diff: ImeAppDiff): string {
   const fieldRows = diff.fieldDiffs
@@ -68,6 +145,7 @@ function appDiffHtml(diff: ImeAppDiff): string {
         <span class="ima-badge ima-badge-${diff.status}">${STATUS_LABEL[diff.status]}</span>
         <span class="ima-app-name">${escapeHtml(diff.name)}</span>
         <span class="ima-app-meta">${escapeHtml(intentLabel(diff.app.intent))} · ${escapeHtml(targetTypeLabel(diff.app.targetType))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""}</span>
+        ${espBadgeHtml(diff.app.raw)}
       </summary>
       <div class="ima-app-detail">
         <p class="ima-app-id mono">${escapeHtml(diff.app.id)}</p>
@@ -79,6 +157,7 @@ function appDiffHtml(diff: ImeAppDiff): string {
               </table>`
             : ""
         }
+        ${appDetailFieldsHtml(diff.app.raw)}
         <details class="ima-raw">
           <summary>Raw JSON</summary>
           <pre class="ipk-code mono">${escapeHtml(JSON.stringify(diff.app.raw, null, 2))}</pre>
@@ -88,7 +167,13 @@ function appDiffHtml(diff: ImeAppDiff): string {
   `;
 }
 
-function snapshotHtml(snapshot: ImeSnapshot, diffs: ImeAppDiff[], isFirst: boolean, onlyChanges: boolean): string {
+function snapshotHtml(
+  snapshot: ImeSnapshot,
+  diffs: ImeAppDiff[],
+  isFirst: boolean,
+  onlyChanges: boolean,
+  isEmptyGap: boolean,
+): string {
   const visibleDiffs = onlyChanges && !isFirst ? diffs.filter((d) => d.status !== "unchanged") : diffs;
   const added = diffs.filter((d) => d.status === "added").length;
   const removed = diffs.filter((d) => d.status === "removed").length;
@@ -96,12 +181,13 @@ function snapshotHtml(snapshot: ImeSnapshot, diffs: ImeAppDiff[], isFirst: boole
 
   const summaryBadges = isFirst
     ? `<span class="ima-badge ima-badge-baseline">Baseline · ${snapshot.apps.length} apps</span>`
-    : [
-        added ? `<span class="ima-badge ima-badge-added">+${added}</span>` : "",
-        removed ? `<span class="ima-badge ima-badge-removed">-${removed}</span>` : "",
-        changed ? `<span class="ima-badge ima-badge-changed">${changed} changed</span>` : "",
-        !added && !removed && !changed ? `<span class="ima-badge ima-badge-unchanged">No changes</span>` : "",
-      ].join("");
+    : isEmptyGap
+      ? `<span class="ima-badge ima-badge-gap">Empty check-in · ignored</span>`
+      : [
+          added ? `<span class="ima-badge ima-badge-added">+${added}</span>` : "",
+          removed ? `<span class="ima-badge ima-badge-removed">-${removed}</span>` : "",
+          changed ? `<span class="ima-badge ima-badge-changed">${changed} changed</span>` : "",
+        ].join("");
 
   return `
     <li class="ima-entry">
@@ -115,10 +201,62 @@ function snapshotHtml(snapshot: ImeSnapshot, diffs: ImeAppDiff[], isFirst: boole
           ${
             visibleDiffs.length > 0
               ? visibleDiffs.map(appDiffHtml).join("")
-              : `<p class="ima-empty">${onlyChanges && !isFirst ? "No app changes in this check-in." : "No apps in this snapshot."}</p>`
+              : `<p class="ima-empty">${
+                  isEmptyGap
+                    ? "No apps reported in this check-in, likely a transient gap in the log (e.g. mid-sync), so it isn't treated as every app being removed."
+                    : onlyChanges && !isFirst
+                      ? "No app changes in this check-in."
+                      : "No apps in this snapshot."
+                }</p>`
           }
         </div>
       </div>
+    </li>
+  `;
+}
+
+/**
+ * A run of consecutive check-ins with no app changes at all (relative to
+ * the last known-good state) gets collapsed into a single compact marker —
+ * "+N unchanged check-ins" — instead of eating vertical space one row per
+ * check-in. Expanding it reveals each check-in's own timestamp.
+ */
+function unchangedRunHtml(snapshots: ImeSnapshot[]): string {
+  if (snapshots.length === 1) {
+    return `
+      <li class="ima-entry ima-entry-run">
+        <div class="ima-entry-dot ima-entry-dot-run"></div>
+        <div class="ima-entry-body ima-entry-run-body">
+          <div class="ima-entry-header">
+            <span class="ima-entry-time">${escapeHtml(formatSnapshotLabel(snapshots[0]))}</span>
+            <span class="ima-badge ima-badge-unchanged">No changes</span>
+          </div>
+        </div>
+      </li>
+    `;
+  }
+  const first = formatSnapshotLabel(snapshots[0]);
+  const last = formatSnapshotLabel(snapshots[snapshots.length - 1]);
+  const rows = snapshots
+    .map(
+      (s) => `
+        <div class="ima-run-row">
+          <span class="ima-entry-time">${escapeHtml(formatSnapshotLabel(s))}</span>
+          <span class="ima-badge ima-badge-unchanged">No changes</span>
+        </div>
+      `,
+    )
+    .join("");
+  return `
+    <li class="ima-entry ima-entry-run">
+      <div class="ima-entry-dot ima-entry-dot-run"></div>
+      <details class="ima-entry-body ima-entry-run-body">
+        <summary class="ima-entry-summary ima-run-summary">
+          <span class="ima-badge ima-badge-unchanged">+${snapshots.length} unchanged check-ins</span>
+          <span class="ima-run-range">${escapeHtml(first)} – ${escapeHtml(last)}</span>
+        </summary>
+        <div class="ima-run-rows">${rows}</div>
+      </details>
     </li>
   `;
 }
@@ -150,43 +288,41 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="ima-tool">
-        <p class="ima-step-label">1. Run this on the device — it copies every "Get policies" snapshot to your clipboard</p>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("ima-cmd")}
-          ${copyButtonHtml("ima-cmd-copy")}
-        </div>
+        <p class="ima-step-label">1. Run this on the device, it copies every "Get policies" snapshot to your clipboard</p>
+        ${psCommandTabsHtml("ima-cmd")}
         <p class="ipk-hint">
-          This reads every rotated <code>AppWorkload*.log</code> file and keeps each snapshot's own CMTrace
-          timestamp, so entries always sort chronologically regardless of log rotation or paste order. Re-run it
-          any time to capture newer check-ins, then paste the full output again — it fully replaces the view below.
-          <code>TargetType</code> isn't officially documented by Microsoft, so its label is shown with a "?" as a
-          best-effort guess, never as fact. Requires <strong>PowerShell 7+</strong> (<code>pwsh</code>) — run it
-          from a PowerShell 7 console, or via <code>pwsh -Command "..."</code> from Windows PowerShell 5.1.
+          Reads every rotated <code>AppWorkload*.log</code> file, covering both required and available
+          (Company Portal) check-ins, the latter only run on sync/logon or an 8h fallback, so a newly assigned
+          app may lag behind Company Portal.
         </p>
 
-        <label class="ima-step-label" for="ima-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd> — it's already on your clipboard)</label>
+        <label class="ima-step-label" for="ima-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>, it's already on your clipboard)</label>
         <textarea id="ima-input" class="mono" rows="6" placeholder="Paste the JSON output here..."></textarea>
         <div id="ima-status" class="ima-status" role="alert"></div>
 
-        <label class="ima-toggle" id="ima-toggle-wrap" hidden>
-          <input type="checkbox" id="ima-only-changes" checked />
-          Only show added / removed / changed apps after the first check-in
-        </label>
+        <div class="ima-toggles" id="ima-toggle-wrap" hidden>
+          <label class="ima-toggle">
+            <input type="checkbox" id="ima-only-changes" checked />
+            Only show added / removed / changed apps after the first check-in
+          </label>
+          <label class="ima-toggle">
+            <input type="checkbox" id="ima-hide-gaps" />
+            Hide empty check-ins (ignored gaps)
+          </label>
+        </div>
 
         <ol id="ima-timeline" class="ima-timeline"></ol>
       </div>
     `;
 
-    const cmdEl = container.querySelector<HTMLElement>("#ima-cmd")!;
-    setPowerShellCode(cmdEl, EXPORT_COMMAND);
-    const cmdCopyBtn = container.querySelector<HTMLButtonElement>("#ima-cmd-copy")!;
-    wireCopyButton(cmdCopyBtn, () => EXPORT_COMMAND);
+    const unwirePsTabs = wirePsCommandTabs(container, "ima-cmd", PS_VARIANTS);
 
     const input = container.querySelector<HTMLTextAreaElement>("#ima-input")!;
     const statusEl = container.querySelector<HTMLDivElement>("#ima-status")!;
     const timelineEl = container.querySelector<HTMLOListElement>("#ima-timeline")!;
-    const toggleWrap = container.querySelector<HTMLLabelElement>("#ima-toggle-wrap")!;
+    const toggleWrap = container.querySelector<HTMLDivElement>("#ima-toggle-wrap")!;
     const onlyChangesInput = container.querySelector<HTMLInputElement>("#ima-only-changes")!;
+    const hideGapsInput = container.querySelector<HTMLInputElement>("#ima-hide-gaps")!;
 
     const render = () => {
       const raw = input.value.trim();
@@ -204,18 +340,62 @@ const tool: ToolDefinition = {
           toggleWrap.hidden = true;
           return;
         }
-        statusEl.innerHTML = errorsHtml(errors);
+        const hasNoBiasEntries = snapshots.some((s) => s.timestampMs !== null && !s.hasBias);
+        const tzNote = hasNoBiasEntries
+          ? `<p class="ima-warn">Someone thought device-local time with no UTC offset was a good idea 😡. Times below are shown as-is, compare against the device's own clock. Snapshots are still ordered correctly top-to-bottom (that follows the log's own order, not this timestamp), even across a time zone change.</p>`
+          : "";
+        statusEl.innerHTML = errorsHtml(errors) + tzNote;
         toggleWrap.hidden = snapshots.length < 2;
 
         const onlyChanges = onlyChangesInput.checked;
+        const hideGaps = hideGapsInput.checked;
         let prevApps: ImeSnapshot["apps"] | null = null;
-        timelineEl.innerHTML = snapshots
-          .map((snapshot, i) => {
-            const diffs = diffApps(prevApps, snapshot.apps);
-            prevApps = snapshot.apps;
-            return snapshotHtml(snapshot, diffs, i === 0, onlyChanges);
-          })
-          .join("");
+        // Consecutive check-ins with nothing actionable (no adds/removes/
+        // changes) are buffered and flushed as a single collapsed
+        // "+N unchanged check-ins" marker instead of one row per check-in —
+        // the baseline, any empty-gap, and anything with real changes always
+        // breaks/flushes the run and renders as its own full entry.
+        let unchangedRun: ImeSnapshot[] = [];
+        const html: string[] = [];
+        const flushRun = () => {
+          if (unchangedRun.length === 0) return;
+          html.push(unchangedRunHtml(unchangedRun));
+          unchangedRun = [];
+        };
+
+        snapshots.forEach((snapshot, i) => {
+          // A 0-app snapshot sandwiched between non-empty ones is usually
+          // a transient gap in the log (e.g. IME briefly re-evaluating
+          // mid-sync), not a real mass-uninstall — we can't know the full
+          // app state from before the log started either, so treat this
+          // the same way as "unknown baseline": don't diff it as removals,
+          // and don't let it poison the *next* snapshot's diff into
+          // showing everything as freshly "added".
+          const isEmptyGap = i > 0 && snapshot.apps.length === 0 && prevApps !== null && prevApps.length > 0;
+          const diffs = isEmptyGap ? [] : diffApps(prevApps, snapshot.apps);
+          if (!isEmptyGap) prevApps = snapshot.apps;
+
+          if (isEmptyGap && hideGaps) {
+            // Skip it entirely — not even a run marker — without flushing a
+            // pending unchanged run, so an unchanged streak still merges
+            // across a hidden gap instead of being needlessly split in two.
+            return;
+          }
+
+          const isFirst = i === 0;
+          const hasChanges = diffs.some((d) => d.status !== "unchanged");
+          const isCollapsible = !isFirst && !isEmptyGap && !hasChanges;
+
+          if (isCollapsible) {
+            unchangedRun.push(snapshot);
+            return;
+          }
+          flushRun();
+          html.push(snapshotHtml(snapshot, diffs, isFirst, onlyChanges, isEmptyGap));
+        });
+        flushRun();
+
+        timelineEl.innerHTML = html.join("");
       } catch (err) {
         statusEl.textContent = err instanceof Error ? err.message : "Couldn't parse that input.";
         timelineEl.innerHTML = "";
@@ -225,10 +405,13 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     onlyChangesInput.addEventListener("change", render);
+    hideGapsInput.addEventListener("change", render);
 
     return () => {
       input.removeEventListener("input", render);
       onlyChangesInput.removeEventListener("change", render);
+      hideGapsInput.removeEventListener("change", render);
+      unwirePsTabs();
     };
   },
 };
