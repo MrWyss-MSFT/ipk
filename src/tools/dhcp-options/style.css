@@ -17,9 +17,10 @@
   color: var(--accent);
 }
 
-.dho-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.dho-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
 }
 
 .dho-tool textarea {

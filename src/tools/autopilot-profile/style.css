@@ -7,6 +7,7 @@
 .apc-step-label {
   font-weight: 600;
   margin: var(--space-2) 0 0;
+  color: var(--text);
 }
 
 .apc-tool textarea {

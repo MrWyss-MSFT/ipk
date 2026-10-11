@@ -28,10 +28,15 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="aph-tool">
-        <label class="aph-label" for="aph-snippet">Get the hardware hash on a Windows device (PowerShell — copies it to your clipboard)</label>
+        <p class="aph-step-label">1. Get the hardware hash on a Windows device (copies to clipboard)</p>
         ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
-        <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
-        <textarea id="aph-input" class="mono" rows="6" placeholder="Paste the Base64 hardware hash here..."></textarea>
+        <label class="aph-step-label" for="aph-input">2. Base64 hardware hash (DeviceHardwareData)</label>
+        <textarea
+          id="aph-input"
+          class="mono"
+          rows="6"
+          placeholder="AAAAAAEAHAAAAAoAAAAAwMBAAAAAAAAACgAAAAEABQAAAAEAAAAAAAAAAAAAAIABAAChDjmGH...(very long Base64 string)"
+        ></textarea>
         <span class="aph-error" id="aph-error" role="alert"></span>
         <label class="aph-label" for="aph-output">Decoded JSON</label>
         <div class="ipk-copy-wrap">

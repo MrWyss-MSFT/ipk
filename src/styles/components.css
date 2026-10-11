@@ -576,6 +576,7 @@ body.ipk-theater-mode .ipk-tool-header {
 
 /* Tool detail view */
 .ipk-tool-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -634,40 +635,123 @@ body.ipk-theater-mode .ipk-tool-header {
   overflow-x: auto;
 }
 
-/* Shared "hint/tip" callout for a tool's short usage note. Distinguishes it
-   from plain card-like boxes (which share the same --bg-elevated/--border)
-   via an accent-tinted left border and a leading icon. Combine with a
-   tool-specific class (e.g. "adl-note") for any extra layout/child-selector
-   rules; this class only owns the visual box treatment. */
-.ipk-hint {
+/* Shared "hint/tip" callout for a tool's short usage note, and its "warning"
+   variant for more cautionary notes (e.g. a caveat about time zones). Both
+   distinguish themselves from plain card-like boxes (which share the same
+   --bg-elevated/--border) via a tinted left border and a leading icon.
+   Combine with a tool-specific class (e.g. "adl-note") for any extra
+   layout/child-selector rules; these classes only own the visual box
+   treatment. Authored inline in a tool's markup, but relocated generically
+   (layout.ts, via relocateHintsToTitle) into a small icon button in the
+   title row - see .ipk-hint-chip below - so the box itself only ever
+   renders as a popover under that icon. */
+.ipk-hint,
+.ipk-warn {
   position: relative;
   margin: 0 0 var(--space-2);
   padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-2) * 2 + 18px);
   font-size: 0.85rem;
   line-height: 1.5;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.ipk-hint {
   color: var(--text-muted);
   background: color-mix(in srgb, var(--accent) 6%, var(--bg-elevated));
-  border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
-  border-radius: var(--radius-md);
+}
+
+.ipk-warn {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 6%, var(--bg-elevated));
+  border-left: 3px solid var(--danger);
 }
 
 .ipk-hint::before {
   content: "💡";
+}
+
+.ipk-warn::before {
+  content: "⚠️";
+}
+
+.ipk-hint::before,
+.ipk-warn::before {
   position: absolute;
   left: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
+  font-size: 1rem;
   line-height: 1;
 }
 
-.ipk-hint code {
+.ipk-hint code,
+.ipk-warn code {
   font-family: var(--font-mono);
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
   padding: 1px 5px;
 }
 
-.ipk-hint a {
+.ipk-hint a,
+.ipk-warn a {
   color: var(--accent);
+}
+
+/* Icon-button tray in the tool title row (right-aligned via the header's
+   justify-content: space-between) that holds one chip per relocated hint. */
+.ipk-tool-hints {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ipk-hint-chip {
+  display: inline-flex;
+}
+
+.ipk-hint-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 1rem;
+  line-height: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.ipk-hint-chip-btn:hover,
+.ipk-hint-chip-btn:focus-visible {
+  background: var(--bg-hover);
+}
+
+/* Once relocated, a .ipk-hint/.ipk-warn becomes this popover - floats under
+   its icon button instead of taking up space inline in the tool body. */
+.ipk-hint-popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 30;
+  width: min(360px, calc(100vw - var(--space-6)));
+  margin: 0;
+  /* The icon already shows on the triggering button - don't repeat it
+     inside the popover, and reclaim the left padding it reserved. */
+  padding-left: var(--space-3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ipk-hint-popover::before {
+  content: none;
+}
+
+@media (max-width: 720px) {
+  .ipk-hint-popover {
+    right: auto;
+    left: 0;
+  }
 }

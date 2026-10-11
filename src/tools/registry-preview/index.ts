@@ -74,16 +74,20 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="rgp-tool">
         <p class="ipk-hint">
-          Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
-          <span class="rgp-sample-cmd">
-            <code class="mono" id="rgp-export-cmd"></code>
-            ${copyButtonHtml("rgp-export-copy", 'Copy "reg export" command')}
-          </span>
-          then load or paste the .reg file to browse it as a tree. Inspired by
+          Inspired by
           <a href="https://learn.microsoft.com/en-us/windows/powertoys/registry-preview" target="_blank" rel="noopener">
             PowerToys Registry Preview</a>.
         </p>
 
+        <p class="rgp-step-label">
+          1. Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
+          <span class="rgp-sample-cmd">
+            <code class="mono" id="rgp-export-cmd"></code>
+            ${copyButtonHtml("rgp-export-copy", 'Copy "reg export" command')}
+          </span>
+        </p>
+
+        <label class="rgp-step-label" for="rgp-input">2. Load or paste the .reg file here</label>
         <div class="rgp-input-row">
           <label class="btn" for="rgp-file">📂 Load .reg file</label>
           <input type="file" id="rgp-file" accept=".reg,text/plain" hidden />
@@ -92,7 +96,6 @@ const tool: ToolDefinition = {
           <span class="rgp-count" id="rgp-count"></span>
         </div>
 
-        <label class="rgp-label" for="rgp-input">.reg file content</label>
         <textarea
           id="rgp-input"
           class="mono rgp-raw"

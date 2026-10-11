@@ -60,10 +60,10 @@ const tool: ToolDefinition = {
             Ingmar Verheij's ReadDhcpOptions.ps1</a>.
         </p>
 
-        <label class="dho-label" for="dho-ps">PowerShell: dump DHCP options as hex (copies the output to your clipboard)</label>
+        <p class="dho-step-label">1. Run this on the client — copies the DHCP options as hex to clipboard (pick the NIC you care about from the output)</p>
         ${psCommandTabsHtml("dho-ps")}
 
-        <label class="dho-label" for="dho-input">Paste hex bytes</label>
+        <label class="dho-step-label" for="dho-input">2. Paste the hex here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
         <textarea
           id="dho-input"
           class="mono dho-input"

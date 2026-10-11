@@ -9,10 +9,10 @@
   font-size: 0.8rem;
 }
 
-.cmw-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: var(--space-2);
+.cmw-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
 }
 
 .cmw-tool input[type="text"] {

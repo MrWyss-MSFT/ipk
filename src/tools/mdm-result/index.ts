@@ -137,15 +137,21 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="mdm-tool">
-        <p class="mdm-step-label">1. Run this on the device, it copies the policy report to your clipboard</p>
-        ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
         <p class="ipk-hint">
           Settings pushed by MDM but overridden locally or by Group Policy still show up here, with
           the "winning provider" column telling you who actually won.
         </p>
 
-        <label class="mdm-step-label" for="mdm-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>, it's already on your clipboard)</label>
-        <textarea id="mdm-input" class="mono" rows="6" placeholder="Paste the MDMDiagReport.xml content here..."></textarea>
+        <p class="mdm-step-label">1. Run this on the device — copies to clipboard</p>
+        ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
+
+        <label class="mdm-step-label" for="mdm-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <textarea
+          id="mdm-input"
+          class="mono"
+          rows="6"
+          placeholder="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;MDMEnterpriseDiagnosticsReport&gt;&#10;  &lt;EnrollmentState&gt;&#10;    &lt;EnrollmentInfo&gt;...&lt;/EnrollmentInfo&gt;&#10;  &lt;/EnrollmentState&gt;&#10;  ...&#10;&lt;/MDMEnterpriseDiagnosticsReport&gt;"
+        ></textarea>
         <div id="mdm-status" class="mdm-status" role="alert"></div>
 
         <div id="mdm-results" hidden>

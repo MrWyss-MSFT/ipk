@@ -316,7 +316,7 @@ function unchangedRunHtml(snapshots: ImeSnapshot[]): string {
 
 function errorsHtml(errors: ImeParseError[]): string {
   if (errors.length === 0) return "";
-  return `<p class="ima-warn">${errors.map((e) => escapeHtml(e.message)).join("<br/>")}</p>`;
+  return `<p class="ima-error">${errors.map((e) => escapeHtml(e.message)).join("<br/>")}</p>`;
 }
 
 const tool: ToolDefinition = {
@@ -341,16 +341,22 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="ima-tool">
-        <p class="ima-step-label">1. Run this on the device, it copies every "Get policies" snapshot to your clipboard</p>
-        ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
         <p class="ipk-hint">
           Reads every rotated <code>AppWorkload*.log</code> file, covering both required and available
           (Company Portal) check-ins, the latter only run on sync/logon or an 8h fallback, so a newly assigned
           app may lag behind Company Portal.
         </p>
 
-        <label class="ima-step-label" for="ima-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>, it's already on your clipboard)</label>
-        <textarea id="ima-input" class="mono" rows="6" placeholder="Paste the JSON output here..."></textarea>
+        <p class="ima-step-label">1. Run this on the device — copies to clipboard</p>
+        ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
+
+        <label class="ima-step-label" for="ima-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <textarea
+          id="ima-input"
+          class="mono"
+          rows="6"
+          placeholder='[{"Date":"10-5-2026","Time":"14:22:10.123+120","Apps":[{"Id":"11111111-2222-3333-4444-555555555555","Name":"7-Zip","Version":24,"Intent":1,"TargetType":2}]},...]'
+        ></textarea>
         <div id="ima-status" class="ima-status" role="alert"></div>
 
         <div class="ima-toggles" id="ima-toggle-wrap" hidden>
@@ -390,7 +396,7 @@ const tool: ToolDefinition = {
         }
         const hasNoBiasEntries = snapshots.some((s) => s.timestampMs !== null && !s.hasBias);
         const tzNote = hasNoBiasEntries
-          ? `<p class="ima-warn">Someone thought device-local time with no UTC offset was a good idea 😡. Times below are shown as-is, compare against the device's own clock. Snapshots are still ordered correctly top-to-bottom (that follows the log's own order, not this timestamp), even across a time zone change.</p>`
+          ? `<p class="ipk-warn">Someone thought device-local time with no UTC offset was a good idea 😡. Times below are shown as-is, compare against the device's own clock. Snapshots are still ordered correctly top-to-bottom (that follows the log's own order, not this timestamp), even across a time zone change.</p>`
           : "";
         statusEl.innerHTML = errorsHtml(errors) + tzNote;
         toggleWrap.hidden = snapshots.length < 2;

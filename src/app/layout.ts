@@ -1,6 +1,7 @@
 import { getCategories, getToolById, getTools, searchAll, type SearchResult } from "@/app/registry";
 import { navigateHome, navigateToTool, type Route } from "@/app/router";
 import { persistFormState } from "@/app/state-persistence";
+import { relocateHintsToTitle } from "@/app/hint-popover";
 import { getResolvedTheme, onSystemThemeChange, toggleTheme } from "@/app/theme";
 import { hasUnseenChanges } from "@/app/whats-new";
 import type { ToolDefinition, ToolSearchItem } from "@/types/tool";
@@ -99,16 +100,20 @@ function renderTool(main: HTMLElement, id: string, itemId?: string): void {
             : ""
         }
       </div>
+      <div class="ipk-tool-hints" id="ipk-tool-hints"></div>
     </div>
     <div class="ipk-tool-body" id="ipk-tool-body"></div>
   `;
 
   const body = main.querySelector<HTMLElement>("#ipk-tool-body")!;
+  const hintsTray = main.querySelector<HTMLElement>("#ipk-tool-hints")!;
   const mountCleanup = tool.mount(body, { itemId });
   const stopPersisting = persistFormState(body, tool.id);
+  const stopHintPopovers = relocateHintsToTitle(body, hintsTray);
   toolCleanup = () => {
     mountCleanup?.();
     stopPersisting();
+    stopHintPopovers();
   };
 }
 

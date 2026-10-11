@@ -118,11 +118,16 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="apc-tool">
-        <p class="apc-step-label">1. Run this on the device — it copies the cached profile JSON to your clipboard</p>
+        <p class="apc-step-label">1. Run this on the device — copies to clipboard</p>
         ${psCommandTabsHtml("apc-cmd")}
 
-        <label class="apc-step-label" for="apc-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd> — it's already on your clipboard)</label>
-        <textarea id="apc-input" class="mono" rows="6" placeholder="Paste the PolicyJsonCache JSON here..."></textarea>
+        <label class="apc-step-label" for="apc-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <textarea
+          id="apc-input"
+          class="mono"
+          rows="6"
+          placeholder='{"CloudAssignedTenantDomain":"contoso.onmicrosoft.com","DeploymentProfileName":"Contoso Autopilot","CloudAssignedDeviceName":"CNTS-%SERIAL%","AutopilotMode":0,"CloudAssignedOobeConfig":28,...}'
+        ></textarea>
         <div id="apc-status" class="apc-status" role="alert"></div>
 
         <div id="apc-results"></div>

@@ -34,9 +34,10 @@
   color: var(--text-muted);
 }
 
-.rgp-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.rgp-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
 }
 
 .rgp-raw {

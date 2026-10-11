@@ -7,6 +7,7 @@
 .ima-step-label {
   font-weight: 600;
   margin: var(--space-2) 0 0;
+  color: var(--text);
 }
 
 .ima-tool textarea {
@@ -26,26 +27,9 @@
   color: var(--text-muted);
 }
 
-.ima-warn {
-  position: relative;
+.ima-error {
   margin: 0 0 var(--space-2);
-  padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-2) * 2 + 18px);
-  font-size: 0.85rem;
-  line-height: 1.5;
   color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 6%, var(--bg-elevated));
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--danger);
-  border-radius: var(--radius-md);
-}
-
-.ima-warn::before {
-  content: "⚠️";
-  position: absolute;
-  left: var(--space-2);
-  top: 50%;
-  transform: translateY(-50%);
-  line-height: 1;
 }
 
 .ima-toggles {

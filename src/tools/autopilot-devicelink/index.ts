@@ -135,20 +135,14 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="adl-tool">
-        <p class="ipk-hint">
-          You can also scan a DeviceLink QR code directly with the <a href="#/tool/qr-scanner">QR Code Scanner</a>
-          tool, which decodes it the same way.
-        </p>
-
-        <div class="adl-input-row">
+        <p class="adl-step-label">
+          1.
           <label class="btn" for="adl-file">📂 Upload .devicelink.csv file</label>
           <input type="file" id="adl-file" accept=".csv,text/csv" hidden />
-          <button type="button" class="btn" id="adl-clear">Clear</button>
-        </div>
+          or scan a DeviceLink QR code with the <a href="#/tool/qr-scanner">QR Code Scanner</a> tool
+        </p>
 
-        <label class="adl-label" for="adl-input">
-          DeviceLink QR payload (<code>deviceLink:/1/?...</code>) or .devicelink.csv content
-        </label>
+        <label class="adl-step-label" for="adl-input">2. Paste it here</label>
         <textarea
           id="adl-input"
           class="adl-raw"
@@ -163,7 +157,6 @@ const tool: ToolDefinition = {
     `;
 
     const fileInput = container.querySelector<HTMLInputElement>("#adl-file")!;
-    const clearBtn = container.querySelector<HTMLButtonElement>("#adl-clear")!;
     const input = container.querySelector<HTMLTextAreaElement>("#adl-input")!;
     const errorEl = container.querySelector<HTMLParagraphElement>("#adl-error")!;
     const resultsEl = container.querySelector<HTMLDivElement>("#adl-results")!;
@@ -238,12 +231,7 @@ const tool: ToolDefinition = {
 
     // Setting .value programmatically doesn't fire a native "input" event, which is what both
     // our own listener above and the generic sessionStorage persistence (wired in layout.ts) rely
-    // on - dispatch one explicitly so pasted-via-file content decodes and survives switching tools/apps.
-    clearBtn.addEventListener("click", () => {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-
+    // on - dispatch one explicitly so file-loaded content decodes and survives switching tools/apps.
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files?.[0];
       if (!file) return;

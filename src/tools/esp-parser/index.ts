@@ -73,18 +73,24 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="esp-tool">
-        <p class="esp-step-label">1. Run this on the device — it copies the exported JSON to your clipboard</p>
-        ${psCommandTabsHtml("esp-cmd")}
-        <p class="esp-tip">
-          💡 Not every device has all three phases — <strong>Device Preparation</strong> only exists on
+        <p class="ipk-hint">
+          Not every device has all three phases — <strong>Device Preparation</strong> only exists on
           newer builds that use the updated Enrollment Status Page. This dumps every value under the key,
           so timestamp-suffixed value names (e.g.
           <code class="mono">AccountSetupCategory.Status.2026-10-05T13:19:26.888Z</code>) and missing
           phases are both handled automatically.
         </p>
 
-        <label class="esp-step-label" for="esp-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd> — it's already on your clipboard)</label>
-        <textarea id="esp-input" class="mono" rows="6" placeholder="Paste the JSON output here..."></textarea>
+        <p class="esp-step-label">1. Run this on the device — copies to clipboard</p>
+        ${psCommandTabsHtml("esp-cmd")}
+
+        <label class="esp-step-label" for="esp-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <textarea
+          id="esp-input"
+          class="mono"
+          rows="6"
+          placeholder='{"DeviceSetupCategory.Status":"Succeeded","DeviceSetupCategory.StatusText":"Succeeded","AccountSetupCategory.Status.2026-10-05T13:19:26.888Z":"Succeeded",...}'
+        ></textarea>
         <div id="esp-status" class="esp-status" role="alert"></div>
 
         <div id="esp-results"></div>
