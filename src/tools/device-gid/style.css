@@ -10,6 +10,28 @@
   margin-top: var(--space-2);
 }
 
+.gid-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.gid-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.gid-field .gid-field-label {
+  margin-top: 0;
+}
+
+.gid-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
+}
+
 .gid-tool input[type="text"],
 .gid-tool textarea {
   width: 100%;

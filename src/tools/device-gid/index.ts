@@ -30,28 +30,34 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="gid-tool">
         <p class="gid-hint ipk-hint">
-          The <code class="mono">g:</code> device physical ID is a decimal view of the
-          <code class="mono">LID</code> registry value. Edit either field — the other updates automatically.
+          Converts a device's GDID (physical ID, used e.g. to correlate devices in Log Analytics) to and from
+          its raw <code class="mono">LID</code> registry value. Fun fact: this ID made the news lately for
+          reasons that have nothing to do with Intune reporting 🫠.
         </p>
 
-        <label class="gid-field-label" for="gid-ps-lid">PowerShell: get the local LID value (copies it to your clipboard)</label>
+        <p class="gid-step-label">1. Get the local LID value on the device (copies to clipboard)</p>
         ${psCommandTabsHtml("gid-ps-lid")}
 
-        <label class="gid-field-label" for="gid-lid">LID (hex)</label>
-        <div class="ipk-copy-wrap">
-          <input type="text" id="gid-lid" class="mono" placeholder="0a1b2c3d4e5f6071" />
-          ${copyButtonHtml("gid-copy-lid")}
+        <p class="gid-step-label">2. Enter either value — the other updates automatically</p>
+        <div class="gid-fields">
+          <div class="gid-field">
+            <label class="gid-field-label" for="gid-lid">LID (hex)</label>
+            <div class="ipk-copy-wrap">
+              <input type="text" id="gid-lid" class="mono" placeholder="0a1b2c3d4e5f6071" />
+              ${copyButtonHtml("gid-copy-lid")}
+            </div>
+            <span class="gid-error" id="gid-error-lid" role="alert"></span>
+          </div>
+
+          <div class="gid-field">
+            <label class="gid-field-label" for="gid-gid">Device physical ID (g:)</label>
+            <div class="ipk-copy-wrap">
+              <input type="text" id="gid-gid" class="mono" placeholder="g:1234567891234567" />
+              ${copyButtonHtml("gid-copy-gid")}
+            </div>
+            <span class="gid-error" id="gid-error-gid" role="alert"></span>
+          </div>
         </div>
-
-        <span class="gid-error" id="gid-error-lid" role="alert"></span>
-
-        <label class="gid-field-label" for="gid-gid">Device physical ID (g:)</label>
-        <div class="ipk-copy-wrap">
-          <input type="text" id="gid-gid" class="mono" placeholder="g:1234567891234567" />
-          ${copyButtonHtml("gid-copy-gid")}
-        </div>
-
-        <span class="gid-error" id="gid-error-gid" role="alert"></span>
       </div>
     `;
 
