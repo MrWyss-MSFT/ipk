@@ -1,11 +1,12 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { gidToLid, lidToGid } from "./convert";
 
-const PS_LID_COMMAND =
-  '(Get-ItemProperty "Registry::HKEY_USERS\\.DEFAULT\\Software\\Microsoft\\IdentityCRL\\ExtendedProperties").LID | Set-Clipboard -PassThru';
+const PS_LID_VARIANTS = makePsCommandVariants(
+  '(Get-ItemProperty "Registry::HKEY_USERS\\.DEFAULT\\Software\\Microsoft\\IdentityCRL\\ExtendedProperties").LID',
+);
 
 const tool: ToolDefinition = {
   id: "device-gid",
@@ -34,10 +35,7 @@ const tool: ToolDefinition = {
         </p>
 
         <label class="gid-field-label" for="gid-ps-lid">PowerShell: get the local LID value (copies it to your clipboard)</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("gid-ps-lid")}
-          ${copyButtonHtml("gid-copy-ps-lid")}
-        </div>
+        ${psCommandTabsHtml("gid-ps-lid")}
 
         <label class="gid-field-label" for="gid-lid">LID (hex)</label>
         <div class="ipk-copy-wrap">
@@ -61,12 +59,10 @@ const tool: ToolDefinition = {
     const gidInput = container.querySelector<HTMLInputElement>("#gid-gid")!;
     const lidError = container.querySelector<HTMLSpanElement>("#gid-error-lid")!;
     const gidError = container.querySelector<HTMLSpanElement>("#gid-error-gid")!;
-    const psLidOutput = container.querySelector<HTMLPreElement>("#gid-ps-lid")!;
     const copyLidBtn = container.querySelector<HTMLButtonElement>("#gid-copy-lid")!;
     const copyGidBtn = container.querySelector<HTMLButtonElement>("#gid-copy-gid")!;
-    const copyPsLidBtn = container.querySelector<HTMLButtonElement>("#gid-copy-ps-lid")!;
 
-    setPowerShellCode(psLidOutput, PS_LID_COMMAND);
+    const unwirePsTabs = wirePsCommandTabs(container, "gid-ps-lid", PS_LID_VARIANTS);
 
     const fromLid = () => {
       lidError.textContent = "";
@@ -101,11 +97,11 @@ const tool: ToolDefinition = {
 
     wireCopyButton(copyLidBtn, () => lidInput.value);
     wireCopyButton(copyGidBtn, () => gidInput.value);
-    wireCopyButton(copyPsLidBtn, () => PS_LID_COMMAND);
 
     return () => {
       lidInput.removeEventListener("input", fromLid);
       gidInput.removeEventListener("input", fromGid);
+      unwirePsTabs();
     };
   },
 };

@@ -1,11 +1,11 @@
 import "./style.css";
-import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
 
-const EXPORT_COMMAND =
-  '(Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotPolicyCache" -Name PolicyJsonCache).PolicyJsonCache | Set-Clipboard -PassThru';
+const PS_VARIANTS = makePsCommandVariants(
+  '(Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotPolicyCache" -Name PolicyJsonCache).PolicyJsonCache',
+);
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -119,10 +119,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="apc-tool">
         <p class="apc-step-label">1. Run this on the device — it copies the cached profile JSON to your clipboard</p>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("apc-cmd")}
-          ${copyButtonHtml("apc-cmd-copy")}
-        </div>
+        ${psCommandTabsHtml("apc-cmd")}
 
         <label class="apc-step-label" for="apc-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd> — it's already on your clipboard)</label>
         <textarea id="apc-input" class="mono" rows="6" placeholder="Paste the PolicyJsonCache JSON here..."></textarea>
@@ -132,10 +129,7 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const cmdEl = container.querySelector<HTMLElement>("#apc-cmd")!;
-    setPowerShellCode(cmdEl, EXPORT_COMMAND);
-    const cmdCopyBtn = container.querySelector<HTMLButtonElement>("#apc-cmd-copy")!;
-    wireCopyButton(cmdCopyBtn, () => EXPORT_COMMAND);
+    const unwirePsTabs = wirePsCommandTabs(container, "apc-cmd", PS_VARIANTS);
 
     const input = container.querySelector<HTMLTextAreaElement>("#apc-input")!;
     const statusEl = container.querySelector<HTMLDivElement>("#apc-status")!;
@@ -168,6 +162,7 @@ const tool: ToolDefinition = {
 
     return () => {
       input.removeEventListener("input", render);
+      unwirePsTabs();
     };
   },
 };

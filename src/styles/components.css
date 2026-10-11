@@ -194,6 +194,46 @@ textarea:focus {
   outline-offset: 1px;
 }
 
+/* Two-tab PowerShell 7+ / Windows PowerShell 5.1 command switcher
+   (see src/app/ps-command.ts) — sits directly above a .ipk-copy-wrap code
+   block, sharing its border radius so the pair reads as one control. */
+.ipk-ps-command {
+  display: flex;
+  flex-direction: column;
+}
+
+.ipk-ps-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.ipk-ps-tab {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.ipk-ps-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.ipk-ps-tab.is-active {
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ipk-copy-wrap-tabbed .ipk-code {
+  border-top-left-radius: 0;
+}
+
 /* Copy-to-clipboard icon button, positioned in a field's top-right corner */
 .ipk-copy-wrap {
   position: relative;

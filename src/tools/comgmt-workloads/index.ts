@@ -1,8 +1,11 @@
 import "./style.css";
-import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeComgmtWorkloads, parseWorkloadValue } from "./decode";
+
+const PS_VARIANTS = makePsCommandVariants("$System.ComgmtWorkloads", {
+  setup: '$System = Get-CimInstance -Namespace "root\\ccm\\InvAgt" -ClassName "CCM_System"; "CoManaged: $($System.CoManaged)"; ',
+});
 
 const tool: ToolDefinition = {
   id: "comgmt-workloads",
@@ -22,16 +25,10 @@ const tool: ToolDefinition = {
   ],
   icon: "🔀",
   mount(container) {
-    const psSnippet =
-      '$System = Get-CimInstance -Namespace "root\\ccm\\InvAgt" -ClassName "CCM_System"; "CoManaged: $($System.CoManaged)"; $System.ComgmtWorkloads | Set-Clipboard -PassThru';
-
     container.innerHTML = `
       <div class="cmw-tool">
         <label class="cmw-label" for="cmw-snippet">Get the value on a co-managed device (PowerShell — copies the value to your clipboard)</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("cmw-snippet")}
-          ${copyButtonHtml("cmw-copy-snippet")}
-        </div>
+        ${psCommandTabsHtml("cmw-snippet")}
         <label class="cmw-label" for="cmw-input">ComgmtWorkloads value (decimal or hex, e.g. 8193 or 0x2001)</label>
         <input id="cmw-input" class="mono" type="text" placeholder="e.g. 8193" value="8193" />
         <span class="cmw-error" id="cmw-error" role="alert"></span>
@@ -54,7 +51,6 @@ const tool: ToolDefinition = {
     const errorEl = container.querySelector<HTMLSpanElement>("#cmw-error")!;
     const hexEl = container.querySelector<HTMLParagraphElement>("#cmw-hex")!;
     const tbody = container.querySelector<HTMLTableSectionElement>("#cmw-tbody")!;
-    const snippetCopyBtn = container.querySelector<HTMLButtonElement>("#cmw-copy-snippet")!;
 
     const renderFromValue = () => {
       errorEl.textContent = "";
@@ -98,13 +94,13 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", renderFromValue);
-    wireCopyButton(snippetCopyBtn, () => psSnippet);
-    setPowerShellCode(container.querySelector<HTMLElement>("#cmw-snippet")!, psSnippet);
+    const unwirePsTabs = wirePsCommandTabs(container, "cmw-snippet", PS_VARIANTS);
 
     renderFromValue();
 
     return () => {
       input.removeEventListener("input", renderFromValue);
+      unwirePsTabs();
     };
   },
 };

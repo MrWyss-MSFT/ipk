@@ -1,17 +1,17 @@
 import "./style.css";
-import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { autoGrowTextarea } from "@/app/copy-button";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { hexToBytes, parseDhcpInterfaceOptions, type ParsedDhcpOption } from "./parser";
 
-const PS_SNIPPET = `Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled='True' AND DHCPEnabled='True'" | ForEach-Object {
+const PS_VARIANTS = makePsCommandVariants(`Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled='True' AND DHCPEnabled='True'" | ForEach-Object {
     $path = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\$($_.SettingID)"
     $bytes = (Get-ItemProperty -Path $path -Name DhcpInterfaceOptions -ErrorAction SilentlyContinue).DhcpInterfaceOptions
     if ($bytes) {
         "--- $($_.Description) ---"
         ($bytes | ForEach-Object { $_.ToString('X2') }) -join ' '
     }
-} | Out-String | Set-Clipboard -PassThru`;
+} | Out-String`);
 
 const EXAMPLE_HEX =
   "35 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 05 00 00 00 " +
@@ -61,10 +61,7 @@ const tool: ToolDefinition = {
         </p>
 
         <label class="dho-label" for="dho-ps">PowerShell: dump DHCP options as hex (copies the output to your clipboard)</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("dho-ps")}
-          ${copyButtonHtml("dho-ps-copy")}
-        </div>
+        ${psCommandTabsHtml("dho-ps")}
 
         <label class="dho-label" for="dho-input">Paste hex bytes</label>
         <textarea
@@ -87,8 +84,6 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const psOutput = container.querySelector<HTMLElement>("#dho-ps")!;
-    const psCopyBtn = container.querySelector<HTMLButtonElement>("#dho-ps-copy")!;
     const input = container.querySelector<HTMLTextAreaElement>("#dho-input")!;
     const exampleBtn = container.querySelector<HTMLButtonElement>("#dho-example")!;
     const clearBtn = container.querySelector<HTMLButtonElement>("#dho-clear")!;
@@ -96,8 +91,7 @@ const tool: ToolDefinition = {
     const countEl = container.querySelector<HTMLSpanElement>("#dho-count")!;
     const results = container.querySelector<HTMLDivElement>("#dho-results")!;
 
-    setPowerShellCode(psOutput, PS_SNIPPET);
-    wireCopyButton(psCopyBtn, () => PS_SNIPPET);
+    const unwirePsTabs = wirePsCommandTabs(container, "dho-ps", PS_VARIANTS);
 
     const render = () => {
       autoGrowTextarea(input);
@@ -167,6 +161,7 @@ const tool: ToolDefinition = {
     return () => {
       input.removeEventListener("input", render);
       hideEmptyCheck.removeEventListener("change", render);
+      unwirePsTabs();
     };
   },
 };

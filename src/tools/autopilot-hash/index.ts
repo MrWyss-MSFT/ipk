@@ -1,8 +1,12 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
+
+const PS_VARIANTS = makePsCommandVariants(
+  '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData',
+);
 
 const tool: ToolDefinition = {
   id: "autopilot-hash",
@@ -22,16 +26,10 @@ const tool: ToolDefinition = {
   ],
   icon: "🧾",
   mount(container) {
-    const psSnippet =
-      '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData | Set-Clipboard -PassThru';
-
     container.innerHTML = `
       <div class="aph-tool">
         <label class="aph-label" for="aph-snippet">Get the hardware hash on a Windows device (PowerShell — copies it to your clipboard)</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("aph-snippet")}
-          ${copyButtonHtml("aph-copy-snippet")}
-        </div>
+        ${psCommandTabsHtml("aph-snippet")}
         <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
         <textarea id="aph-input" class="mono" rows="6" placeholder="Paste the Base64 hardware hash here..."></textarea>
         <span class="aph-error" id="aph-error" role="alert"></span>
@@ -47,7 +45,6 @@ const tool: ToolDefinition = {
     const output = container.querySelector<HTMLTextAreaElement>("#aph-output")!;
     const errorEl = container.querySelector<HTMLSpanElement>("#aph-error")!;
     const copyBtn = container.querySelector<HTMLButtonElement>("#aph-copy")!;
-    const snippetCopyBtn = container.querySelector<HTMLButtonElement>("#aph-copy-snippet")!;
 
     const render = () => {
       errorEl.textContent = "";
@@ -68,11 +65,11 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     wireCopyButton(copyBtn, () => output.value);
-    wireCopyButton(snippetCopyBtn, () => psSnippet);
-    setPowerShellCode(container.querySelector<HTMLElement>("#aph-snippet")!, psSnippet);
+    const unwirePsTabs = wirePsCommandTabs(container, "aph-snippet", PS_VARIANTS);
 
     return () => {
       input.removeEventListener("input", render);
+      unwirePsTabs();
     };
   },
 };

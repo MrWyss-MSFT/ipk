@@ -1,11 +1,12 @@
 import "./style.css";
-import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse";
 
-const EXPORT_COMMAND =
-  '$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotSettings"; $Values = @{}; (Get-Item $RegPath).Property -like "*Category.Status*" | ForEach-Object { $Values[$_] = Get-ItemPropertyValue $RegPath -Name $_ }; $Values | ConvertTo-Json -Compress | Set-Clipboard -PassThru';
+const PS_VARIANTS = makePsCommandVariants("$Values | ConvertTo-Json -Compress", {
+  setup:
+    '$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotSettings"; $Values = @{}; (Get-Item $RegPath).Property -like "*Category.Status*" | ForEach-Object { $Values[$_] = Get-ItemPropertyValue $RegPath -Name $_ }; ',
+});
 
 /** Best-effort bucket for coloring a status badge; falls back to "unknown" for anything unrecognized. */
 function stateBucket(state: string): "ok" | "fail" | "progress" | "block" | "idle" | "unknown" {
@@ -73,10 +74,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="esp-tool">
         <p class="esp-step-label">1. Run this on the device — it copies the exported JSON to your clipboard</p>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("esp-cmd")}
-          ${copyButtonHtml("esp-cmd-copy")}
-        </div>
+        ${psCommandTabsHtml("esp-cmd")}
         <p class="esp-tip">
           💡 Not every device has all three phases — <strong>Device Preparation</strong> only exists on
           newer builds that use the updated Enrollment Status Page. This dumps every value under the key,
@@ -93,10 +91,7 @@ const tool: ToolDefinition = {
       </div>
     `;
 
-    const cmdEl = container.querySelector<HTMLElement>("#esp-cmd")!;
-    setPowerShellCode(cmdEl, EXPORT_COMMAND);
-    const cmdCopyBtn = container.querySelector<HTMLButtonElement>("#esp-cmd-copy")!;
-    wireCopyButton(cmdCopyBtn, () => EXPORT_COMMAND);
+    const unwirePsTabs = wirePsCommandTabs(container, "esp-cmd", PS_VARIANTS);
 
     const input = container.querySelector<HTMLTextAreaElement>("#esp-input")!;
     const statusEl = container.querySelector<HTMLDivElement>("#esp-status")!;
@@ -129,6 +124,7 @@ const tool: ToolDefinition = {
 
     return () => {
       input.removeEventListener("input", render);
+      unwirePsTabs();
     };
   },
 };
