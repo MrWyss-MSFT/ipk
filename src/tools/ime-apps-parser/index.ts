@@ -76,6 +76,11 @@ function targetTypeIcon(targetType: number | null): string {
   return targetType !== null && TARGET_TYPE_ICON[targetType] ? TARGET_TYPE_ICON[targetType] : "";
 }
 
+/** Drops the trailing " (n)" raw-value suffix from intentLabel()/targetTypeLabel() — the icon already conveys it. */
+function stripNumberSuffix(label: string): string {
+  return label.replace(/\s*\(\d+\)$/, "");
+}
+
 /**
  * Many app fields are themselves JSON *strings* (e.g. `InstallEx`,
  * `RequirementRules`) — attempt to parse and pretty-print them so they read
@@ -180,11 +185,10 @@ function appDiffHtml(diff: ImeAppDiff): string {
       <summary class="ima-app-summary">
         <span class="ima-badge ima-badge-${diff.status}">${STATUS_LABEL[diff.status]}</span>
         <span class="ima-app-name">${escapeHtml(diff.name)}</span>
-        <span class="ima-app-meta">${intentIcon(diff.app.intent)} ${escapeHtml(intentLabel(diff.app.intent))} · ${targetTypeIcon(diff.app.targetType)} ${escapeHtml(targetTypeLabel(diff.app.targetType))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""}</span>
+        <span class="ima-app-meta">${intentIcon(diff.app.intent)} ${escapeHtml(stripNumberSuffix(intentLabel(diff.app.intent)))} · ${targetTypeIcon(diff.app.targetType)} ${escapeHtml(stripNumberSuffix(targetTypeLabel(diff.app.targetType)))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""} · <span class="ima-app-guid mono" data-guid="${escapeHtml(diff.app.id)}" title="Click to copy">${escapeHtml(diff.app.id)}</span></span>
         ${espBadgeHtml(diff.app.raw)}
       </summary>
       <div class="ima-app-detail">
-        <p class="ima-app-id mono">${escapeHtml(diff.app.id)}</p>
         ${
           diff.fieldDiffs.length > 0
             ? `<table class="ima-diff-table">
@@ -450,9 +454,26 @@ const tool: ToolDefinition = {
     input.addEventListener("input", render);
     hideGapsInput.addEventListener("change", render);
 
+    const onTimelineClick = async (e: MouseEvent) => {
+      const guidEl = (e.target as HTMLElement).closest<HTMLElement>(".ima-app-guid");
+      if (!guidEl) return;
+      // Prevent the click from also toggling the parent <details> open/closed.
+      e.preventDefault();
+      e.stopPropagation();
+      const value = guidEl.dataset.guid ?? guidEl.textContent ?? "";
+      if (!value) return;
+      await navigator.clipboard.writeText(value);
+      guidEl.classList.remove("is-copied");
+      // Force reflow so retriggering the animation on repeated clicks restarts it.
+      void guidEl.offsetWidth;
+      guidEl.classList.add("is-copied");
+    };
+    timelineEl.addEventListener("click", onTimelineClick);
+
     return () => {
       input.removeEventListener("input", render);
       hideGapsInput.removeEventListener("change", render);
+      timelineEl.removeEventListener("click", onTimelineClick);
       unwirePsTabs();
     };
   },
