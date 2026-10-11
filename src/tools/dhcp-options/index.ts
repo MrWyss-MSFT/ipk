@@ -52,10 +52,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="dho-tool">
         <p class="ipk-hint">
-          Windows stores every DHCP option a client received under
-          <code class="mono">HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\&lt;GUID&gt;</code>
-          in a binary value named <code class="mono">DhcpInterfaceOptions</code>. Run the PowerShell snippet below on
-          the client, copy the hex for the NIC you care about, and paste it below to decode it. Based on
+          Based on
           <a href="https://www.ingmarverheij.com/read-dhcp-options-received-by-the-client/" target="_blank" rel="noopener">
             Ingmar Verheij's ReadDhcpOptions.ps1</a>.
         </p>
