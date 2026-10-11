@@ -210,7 +210,8 @@ const tool: ToolDefinition = {
       const filtered = COMMANDS.filter(
         (e: CommandEntry) => matchText([e.command, e.description, ...(e.tags ?? [])], query) && matchTags(e.tags),
       );
-      thead.innerHTML = "<tr><th>Command</th><th>Run from</th><th>Description</th><th>Tags</th></tr>";
+      thead.innerHTML =
+        "<tr><th>Command</th><th>Run from</th><th>Elevated</th><th>Description</th><th>Tags</th></tr>";
       list.innerHTML = filtered
         .map(
           (e, i) => `
@@ -231,6 +232,13 @@ const tool: ToolDefinition = {
                         : `<span class="ref-badge ref-badge-run">Run</span>${e.runOnly ? "" : `<span class="ref-badge ref-badge-cmd">cmd</span>`}`
                   }
                 </span>
+              </td>
+              <td class="ref-elevated-cell">
+                ${
+                  e.elevated
+                    ? `<span class="ref-badge ref-badge-elevated" title="Needs to run as Administrator">🛡️ Yes</span>`
+                    : `<span class="ref-badge ref-badge-not-elevated">No</span>`
+                }
               </td>
               <td class="ref-desc-cell">${e.description}</td>
               <td class="ref-tags-cell">${tagsHtml(e.tags)}</td>

@@ -78,12 +78,13 @@
 }
 
 .ref-cmd-cell {
-  white-space: nowrap;
+  width: 320px;
+  max-width: 320px;
 }
 
 .ref-cmd-cell .ref-cmd-inner {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: var(--space-2);
 }
 
@@ -92,11 +93,13 @@
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
   padding: 2px 6px;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .ref-cmd-cell .ipk-copy-btn {
   position: static;
+  flex-shrink: 0;
 }
 
 .ref-desc-cell {
@@ -135,6 +138,19 @@
 .ref-badge-ps {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+.ref-elevated-cell {
+  white-space: nowrap;
+}
+
+.ref-badge-elevated {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.ref-badge-not-elevated {
+  color: var(--text-muted);
 }
 
 .ref-keys-cell {

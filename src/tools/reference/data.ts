@@ -17,6 +17,8 @@ export interface CommandEntry {
   powershellOnly?: boolean;
   /** Set to true for a cmd.exe-internal command (e.g. doskey, dir) that the Run dialog can't launch directly. */
   cmdOnly?: boolean;
+  /** Set to true if the command needs to run elevated (as Administrator) to succeed. Best-effort guess — flag if wrong. */
+  elevated?: boolean;
 }
 
 export const COMMANDS: CommandEntry[] = [
@@ -25,31 +27,37 @@ export const COMMANDS: CommandEntry[] = [
     description: "Opens CMTrace, the ConfigMgr/MECM log viewer.",
     tags: ["ConfigMgr", "Log"],
     runOnly: true,
+    elevated: false,
   },
   {
     command: "control smscfgrc",
     description: "Opens the Configuration Manager control panel applet (client properties).",
     tags: ["ConfigMgr", "Control Panel"],
+    elevated: true,
   },
   {
     command: "lusrmgr.msc",
     description: "Opens Local Users and Groups.",
     tags: ["MMC", "Windows"],
+    elevated: true,
   },
   {
     command: "shutdown /r /fw /f /t 0",
     description: "Restarts the PC straight into UEFI/BIOS firmware settings.",
     tags: ["Windows", "Power"],
+    elevated: true,
   },
   {
     command: "perfmon /rel",
     description: "Opens Reliability Monitor directly.",
     tags: ["Windows", "Diagnostics"],
+    elevated: false,
   },
   {
     command: "osk",
     description: "Opens the On-Screen Keyboard.",
     tags: ["Windows", "Accessibility"],
+    elevated: false,
   },
   {
     command:
@@ -57,6 +65,7 @@ export const COMMANDS: CommandEntry[] = [
     description: "Triggers Microsoft Store to scan for updates and install updates.",
     tags: ["Microsoft Store", "PowerShell", "MDM"],
     powershellOnly: true,
+    elevated: true,
   },
   {
     command:
@@ -64,6 +73,7 @@ export const COMMANDS: CommandEntry[] = [
     description: "Lists UDP listening endpoints with the owning process name.",
     tags: ["PowerShell", "Network"],
     powershellOnly: true,
+    elevated: false,
   },
   {
     command:
@@ -71,6 +81,7 @@ export const COMMANDS: CommandEntry[] = [
     description: "Lists TCP connections with state and the owning process name.",
     tags: ["PowerShell", "Network"],
     powershellOnly: true,
+    elevated: false,
   },
   {
     command:
@@ -79,29 +90,50 @@ export const COMMANDS: CommandEntry[] = [
       "Shows Delivery Optimization transfer status per file (size, source, peer vs. HTTP bytes, connections) in a sortable grid view.",
     tags: ["PowerShell", "Delivery Optimization", "Windows Update"],
     powershellOnly: true,
+    elevated: false,
   },
   {
     command: "USOClient StartInteractiveScan",
     description:
       'Triggers an interactive Windows Update scan — the cmd equivalent of clicking "Check for updates" in Settings.',
     tags: ["Windows Update", "Troubleshooting"],
+    elevated: true,
   },
   {
     command: '"%ProgramFiles%\\Windows Defender\\MpCmdRun.exe" -removedefinitions -all',
     description: "Removes all Windows Defender definition updates, reverting to the platform's baseline definitions.",
     tags: ["Windows Defender", "Security", "Troubleshooting"],
+    elevated: true,
   },
   {
     command: "doskey /HISTORY",
     description: "Shows the last entered commands in the current cmd.exe session.",
     tags: ["cmd", "Windows"],
     cmdOnly: true,
+    elevated: false,
   },
   {
     command: "Export-WindowsDriver -Online -Destination D:\\drivers",
     description: "Exports all third-party drivers currently installed on the running system to the destination folder.",
     tags: ["PowerShell", "Drivers", "Windows"],
     powershellOnly: true,
+    elevated: true,
+  },
+  {
+    command:
+      'Get-ScheduledTask -TaskPath "\\Microsoft\\Windows\\EnterpriseMgmt\\$((gci HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\OMADM\\Accounts|?{(gp "$($_.PSPath)\\Protected").ServerId -eq \'MS DM Server\'}).PSChildName)\\" -TaskName "Schedule #3*" | Start-ScheduledTask',
+    description: "Triggers an immediate Intune (MDM/OMA-DM) sync by running the device's enrollment scheduled task.",
+    tags: ["Intune", "MDM", "PowerShell", "Autopilot"],
+    powershellOnly: true,
+    elevated: true,
+  },
+  {
+    command:
+      'Get-ScheduledTask -TaskPath "\\Microsoft\\Windows\\EnterpriseMgmt\\$((gci HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\OMADM\\Accounts|?{(gp "$($_.PSPath)\\Protected").ServerId -eq \'Microsoft Device Management\'}).PSChildName)\\" -TaskName "Schedule #3*" | Start-ScheduledTask',
+    description: "Triggers an immediate MMP-C sync by running the device's linked enrollment scheduled task.",
+    tags: ["Intune", "MDM", "PowerShell"],
+    powershellOnly: true,
+    elevated: true,
   },
 ];
 
