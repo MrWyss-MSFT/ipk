@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.10.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.9.0...v0.10.0) (2026-10-11)
+
+### ✨ Features
+
+* **ime-apps-parser:** parse ESPConfiguration, show check-in ESP badge, expandable unchanged apps ([ed8deb3](https://github.com/MrWyss-MSFT/ipk/commit/ed8deb3dec63281c1cab107e0510d0587132dd15))
+
 ## [0.9.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.8.0...v0.9.0) (2026-10-11)
 
 ### ✨ Features
