@@ -573,9 +573,36 @@ body.ipk-theater-mode .ipk-tool-header {
   margin-bottom: var(--space-4);
 }
 
+.ipk-tool-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .ipk-tool-header h1 {
   cursor: help;
   width: fit-content;
+}
+
+.ipk-stage-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  cursor: help;
+}
+
+.ipk-stage-alpha {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+.ipk-stage-beta {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
 }
 
 .ipk-back-link {

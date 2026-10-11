@@ -91,7 +91,14 @@ function renderTool(main: HTMLElement, id: string, itemId?: string): void {
   main.innerHTML = `
     <a class="ipk-back-link" href="#/">&larr; Back to all tools</a>
     <div class="ipk-tool-header">
-      <h1 title="${escapeHtml(tool.description)}">${escapeHtml(tool.name)}</h1>
+      <div class="ipk-tool-title">
+        <h1 title="${escapeHtml(tool.description)}">${escapeHtml(tool.name)}</h1>
+        ${
+          tool.stage
+            ? `<span class="ipk-stage-badge ipk-stage-${tool.stage}" title="This tool is ${tool.stage} — still under active work, rough edges and missing features are expected.">${tool.stage}</span>`
+            : ""
+        }
+      </div>
     </div>
     <div class="ipk-tool-body" id="ipk-tool-body"></div>
   `;

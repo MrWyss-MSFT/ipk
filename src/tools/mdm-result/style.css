@@ -1,0 +1,250 @@
+.mdm-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mdm-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+}
+
+.mdm-tool textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  resize: vertical;
+}
+
+.mdm-status {
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mdm-summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mdm-enrollments {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mdm-enrollments summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+.mdm-enrollments-list {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mdm-enrollment-id {
+  color: var(--text-muted);
+  font-size: 0.8em;
+}
+
+.mdm-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mdm-filters #mdm-filter {
+  flex: 1;
+  min-width: 220px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.mdm-scope-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.mdm-tagbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.mdm-tag {
+  font-size: 0.78rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.mdm-tag:hover {
+  border-color: hsl(var(--h) 70% 45%);
+  color: var(--text);
+}
+
+.mdm-tag.is-active {
+  color: #fff;
+  background: hsl(var(--h) 60% 40%);
+  border-color: transparent;
+}
+
+.mdm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.mdm-table th,
+.mdm-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.mdm-table th {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mdm-group-row td {
+  background: var(--bg-hover);
+  border-top: 2px solid var(--border);
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
+
+.mdm-group-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mdm-group-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.mdm-group-area {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mdm-group-count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.mdm-docs-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  opacity: 0.7;
+  filter: grayscale(1);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.mdm-docs-link:hover,
+.mdm-docs-link:focus-visible {
+  opacity: 1;
+  filter: none;
+}
+
+.mdm-name-cell {
+  white-space: nowrap;
+}
+
+.mdm-value-cell code {
+  word-break: break-all;
+}
+
+.mdm-value-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mdm-scope-cell,
+.mdm-enrollment-cell {
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.mdm-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 1px 10px;
+  white-space: nowrap;
+  color: #fff;
+  background: hsl(var(--h, 0) 60% 40%);
+}
+
+.mdm-badge-muted {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.mdm-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .mdm-table,
+  .mdm-table tbody,
+  .mdm-table tr,
+  .mdm-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .mdm-table thead {
+    display: none;
+  }
+
+  .mdm-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) 0;
+  }
+
+  .mdm-table td {
+    border-bottom: none;
+    padding: 2px 0;
+  }
+}

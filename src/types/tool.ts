@@ -37,6 +37,12 @@ export interface ToolDefinition {
   /** Inline SVG markup (preferred) or emoji fallback shown on the card. */
   icon?: string;
   /**
+   * Set to flag the tool as still under active work — shown as a small
+   * badge next to its title on the tool detail page so users know rough
+   * edges/missing features are expected. Omit once the tool is stable.
+   */
+  stage?: "alpha" | "beta";
+  /**
    * Set true to exclude this tool from the home grid, sidebar nav groups,
    * category list, and search - for app-level pages (e.g. About) that are
    * linked from elsewhere in the chrome instead of listed as a regular tool.
