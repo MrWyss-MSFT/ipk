@@ -344,7 +344,8 @@ const tool: ToolDefinition = {
         <p class="ipk-hint">
           Reads every rotated <code>AppWorkload*.log</code> file, covering both required and available
           (Company Portal) check-ins, the latter only run on sync/logon or an 8h fallback, so a newly assigned
-          app may lag behind Company Portal.
+          app may lag behind Company Portal. Inspired by
+          <a href="https://github.com/jonasatgit/IntuneDebug" target="_blank" rel="noopener">Jonas's IntuneDebug</a>.
         </p>
 
         <p class="ima-step-label">1. Run this on the device — copies to clipboard</p>
