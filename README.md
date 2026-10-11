@@ -7,7 +7,7 @@
 
 **Fast, static, client-side tools for IT Pros managing Microsoft-managed endpoints — Intune, Autopilot, Entra ID, ConfigMgr, and Windows. No installs, no backend, nothing ever leaves your browser.**
 
-🔗 **Live site:** https://mrwyss-msft.github.io/ipk/
+🔗 **Live site:** https://ipk.ittips.ch
 
 ![IPK dashboard screenshot](docs/screenshot.png)
 
