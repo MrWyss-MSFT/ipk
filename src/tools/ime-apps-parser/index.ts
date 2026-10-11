@@ -51,6 +51,31 @@ const STATUS_LABEL: Record<ImeAppDiff["status"], string> = {
   unchanged: "Unchanged",
 };
 
+/** Small visual cue next to the intent text — see `INTENT_LABELS` in parse.ts for the numeric meaning. */
+const INTENT_ICON: Record<number, string> = {
+  0: "➖",
+  1: "📥",
+  3: "📌",
+  4: "🗑️",
+  5: "🌐",
+};
+
+function intentIcon(intent: number | null): string {
+  return intent !== null && INTENT_ICON[intent] ? INTENT_ICON[intent] : "";
+}
+
+/** Small visual cue next to the target-type text — see `TARGET_TYPE_LABELS` in parse.ts for the numeric meaning. */
+const TARGET_TYPE_ICON: Record<number, string> = {
+  0: "➖",
+  1: "👤",
+  2: "🖥️",
+  3: "👤🖥️",
+};
+
+function targetTypeIcon(targetType: number | null): string {
+  return targetType !== null && TARGET_TYPE_ICON[targetType] ? TARGET_TYPE_ICON[targetType] : "";
+}
+
 /**
  * Many app fields are themselves JSON *strings* (e.g. `InstallEx`,
  * `RequirementRules`) — attempt to parse and pretty-print them so they read
@@ -154,9 +179,8 @@ function appDiffHtml(diff: ImeAppDiff): string {
     <details class="ima-app ima-app-${diff.status}">
       <summary class="ima-app-summary">
         <span class="ima-badge ima-badge-${diff.status}">${STATUS_LABEL[diff.status]}</span>
-        ${diff.app.intent === 4 ? `<span class="ima-badge ima-badge-uninstall" title="This app's current policy Intent is Uninstall (4), regardless of the Added/Removed/Changed status above">🗑️ Uninstall intent</span>` : ""}
         <span class="ima-app-name">${escapeHtml(diff.name)}</span>
-        <span class="ima-app-meta">${escapeHtml(intentLabel(diff.app.intent))} · ${escapeHtml(targetTypeLabel(diff.app.targetType))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""}</span>
+        <span class="ima-app-meta">${intentIcon(diff.app.intent)} ${escapeHtml(intentLabel(diff.app.intent))} · ${targetTypeIcon(diff.app.targetType)} ${escapeHtml(targetTypeLabel(diff.app.targetType))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""}</span>
         ${espBadgeHtml(diff.app.raw)}
       </summary>
       <div class="ima-app-detail">

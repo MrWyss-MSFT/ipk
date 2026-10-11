@@ -356,12 +356,6 @@
   border-color: transparent;
 }
 
-.ima-badge-uninstall {
-  color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 10%, var(--bg-elevated));
-  border-color: var(--danger);
-}
-
 @media (max-width: 640px) {
   .ima-detail-grid {
     grid-template-columns: 1fr;

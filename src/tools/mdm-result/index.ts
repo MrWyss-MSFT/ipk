@@ -137,11 +137,10 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="mdm-tool">
-        <p class="mdm-step-label">1. Run this on the device (as <strong>Administrator</strong>), it copies the policy report to your clipboard</p>
+        <p class="mdm-step-label">1. Run this on the device, it copies the policy report to your clipboard</p>
         ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
         <p class="ipk-hint">
-          Needs an elevated PowerShell/terminal — <code>MdmDiagnosticsTool.exe</code> requires Administrator to read
-          the policy store. Settings pushed by MDM but overridden locally or by Group Policy still show up here, with
+          Settings pushed by MDM but overridden locally or by Group Policy still show up here, with
           the "winning provider" column telling you who actually won.
         </p>
 
