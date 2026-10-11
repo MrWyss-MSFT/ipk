@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.8.0...v0.9.0) (2026-10-11)
+
+### ✨ Features
+
+* add IME Apps Parser tool for AppWorkload.log timeline diffing ([c26a853](https://github.com/MrWyss-MSFT/ipk/commit/c26a853d8330e4b0d5077f6cad6d25652df4d2f9))
+* **ui:** add PowerShell 7+/5.1 command tabs across device tools ([1547dc8](https://github.com/MrWyss-MSFT/ipk/commit/1547dc8e64dbfc0309ce471e7a1f7fc757814b81))
+* **ui:** notify returning visitors of changes since their last visit ([ba60cfc](https://github.com/MrWyss-MSFT/ipk/commit/ba60cfc4e56d9e14cb152e87a373a7484de62f79))
+
+### 🐛 Bug Fixes
+
+* **ime-apps-parser:** fix nested PS5.1 array wrapper, correct TargetType, preserve log order ([5f5272e](https://github.com/MrWyss-MSFT/ipk/commit/5f5272e975a13bd76b7b0ed845946a2b478ae900))
+
 ## [0.8.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.7.0...v0.8.0) (2026-10-10)
 
 ### ✨ Features
