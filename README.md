@@ -107,8 +107,7 @@ with how this repo actually works.
 
 ## Releases
 
-Maintainers cut a release with `npm run release` ([release-it](https://github.com/release-it/release-it)
-+ Conventional Commits), which bumps the version, regenerates
+Maintainers cut a release with `npm run release` ([release-it](https://github.com/release-it/release-it) + Conventional Commits), which bumps the version, regenerates
 `CHANGELOG.md`, and pushes a `vX.Y.Z` tag. Publishing the GitHub Release
 from that tag triggers [`docker-release.yml`](.github/workflows/docker-release.yml),
 which builds and pushes the multi-arch image to GHCR.
