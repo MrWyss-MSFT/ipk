@@ -91,6 +91,7 @@ const DETAIL_FIELDS: { key: string; label: string }[] = [
   { key: "InstallContext", label: "Install context" },
   { key: "ReevaluationInterval", label: "Re-evaluation interval (min)" },
   { key: "InstallerData", label: "Installer data" },
+  { key: "ESPConfiguration", label: "ESP configuration" },
 ];
 
 function appDetailFieldsHtml(raw: Record<string, unknown>): string {
@@ -109,13 +110,9 @@ function appDetailFieldsHtml(raw: Record<string, unknown>): string {
 
 /**
  * `ESPConfiguration.IsSelectedApp` marks a Win32 app as a "blocking" app in
- * an Enrollment Status Page profile (Autopilot technician/pre-provisioning
- * phase) — confirmed by community documentation of Intune's "Only fail
- * selected blocking apps" ESP feature. This is a per-app policy
- * configuration flag, not a signal that any *particular* check-in happened
- * during ESP itself (every check-in for a targeted app can carry it), so it
- * is shown as a per-app badge rather than used to label whole timeline
- * entries as "in ESP".
+ * an Enrollment Status Page profile — confirmed by community documentation
+ * of Intune's "Only fail selected blocking apps" ESP feature. Shown as a
+ * per-app badge.
  */
 function espBadgeHtml(raw: Record<string, unknown>): string {
   const esp = raw.ESPConfiguration;
@@ -124,6 +121,20 @@ function espBadgeHtml(raw: Record<string, unknown>): string {
   if (!isSelected) return "";
   const bestEffort = (esp as Record<string, unknown>).InstallWithBestEffort === true;
   return `<span class="ima-badge ima-badge-esp" title="ESPConfiguration.IsSelectedApp = true: configured as a blocking app in an Enrollment Status Page profile">ESP blocking${bestEffort ? " · best effort" : ""}</span>`;
+}
+
+/**
+ * The `ESPConfiguration` key itself (regardless of `IsSelectedApp`) is only
+ * present on an app's policy while the device is still going through
+ * Enrollment Status Page — once ESP completes it drops off entirely on
+ * later check-ins. So its presence on *any* app in a snapshot is a reliable
+ * check-in-level "this happened during ESP" signal, shown at the timeline
+ * entry level (separate from the per-app "blocking" badge above).
+ */
+function espCheckInBadgeHtml(snapshot: ImeSnapshot): string {
+  const inEsp = snapshot.apps.some((app) => app.raw.ESPConfiguration !== null && app.raw.ESPConfiguration !== undefined);
+  if (!inEsp) return "";
+  return `<span class="ima-badge ima-badge-esp" title="At least one app in this check-in has an ESPConfiguration, meaning the device was still going through Enrollment Status Page">In ESP</span>`;
 }
 
 function appDiffHtml(diff: ImeAppDiff): string {
@@ -157,7 +168,7 @@ function appDiffHtml(diff: ImeAppDiff): string {
               </table>`
             : ""
         }
-        ${appDetailFieldsHtml(diff.app.raw)}
+        ${diff.fieldDiffs.length === 0 ? appDetailFieldsHtml(diff.app.raw) : ""}
         <details class="ima-raw">
           <summary>Raw JSON</summary>
           <pre class="ipk-code mono">${escapeHtml(JSON.stringify(diff.app.raw, null, 2))}</pre>
@@ -167,27 +178,32 @@ function appDiffHtml(diff: ImeAppDiff): string {
   `;
 }
 
-function snapshotHtml(
-  snapshot: ImeSnapshot,
-  diffs: ImeAppDiff[],
-  isFirst: boolean,
-  onlyChanges: boolean,
-  isEmptyGap: boolean,
-): string {
-  const visibleDiffs = onlyChanges && !isFirst ? diffs.filter((d) => d.status !== "unchanged") : diffs;
+function snapshotHtml(snapshot: ImeSnapshot, diffs: ImeAppDiff[], isFirst: boolean, isLast: boolean, isEmptyGap: boolean): string {
+  // On the baseline there's no "change" concept yet (every app is reported
+  // as "unchanged" by diffApps when prevApps is null) so it always shows
+  // the full app list. The last check-in is the device's current state, so
+  // it's shown the same way for the same reason, every app matters there
+  // even if it happens to be unchanged from the previous check-in. Every
+  // other check-in hides unchanged apps by default, tucking them behind an
+  // expandable "N unchanged" pill instead.
+  const showFull = isFirst || isLast;
+  const visibleDiffs = showFull ? diffs : diffs.filter((d) => d.status !== "unchanged");
+  const hiddenUnchanged = showFull ? [] : diffs.filter((d) => d.status === "unchanged");
   const added = diffs.filter((d) => d.status === "added").length;
   const removed = diffs.filter((d) => d.status === "removed").length;
   const changed = diffs.filter((d) => d.status === "changed").length;
 
-  const summaryBadges = isFirst
-    ? `<span class="ima-badge ima-badge-baseline">Baseline · ${snapshot.apps.length} apps</span>`
-    : isEmptyGap
-      ? `<span class="ima-badge ima-badge-gap">Empty check-in · ignored</span>`
-      : [
-          added ? `<span class="ima-badge ima-badge-added">+${added}</span>` : "",
-          removed ? `<span class="ima-badge ima-badge-removed">-${removed}</span>` : "",
-          changed ? `<span class="ima-badge ima-badge-changed">${changed} changed</span>` : "",
-        ].join("");
+  const summaryBadges =
+    (isFirst
+      ? `<span class="ima-badge ima-badge-baseline">Baseline · ${snapshot.apps.length} apps</span>`
+      : isEmptyGap
+        ? `<span class="ima-badge ima-badge-gap">Empty check-in · ignored</span>`
+        : [
+            isLast ? `<span class="ima-badge ima-badge-baseline">Latest · ${snapshot.apps.length} apps</span>` : "",
+            added ? `<span class="ima-badge ima-badge-added">+${added}</span>` : "",
+            removed ? `<span class="ima-badge ima-badge-removed">-${removed}</span>` : "",
+            changed ? `<span class="ima-badge ima-badge-changed">${changed} changed</span>` : "",
+          ].join("")) + espCheckInBadgeHtml(snapshot);
 
   return `
     <li class="ima-entry">
@@ -204,10 +220,16 @@ function snapshotHtml(
               : `<p class="ima-empty">${
                   isEmptyGap
                     ? "No apps reported in this check-in, likely a transient gap in the log (e.g. mid-sync), so it isn't treated as every app being removed."
-                    : onlyChanges && !isFirst
-                      ? "No app changes in this check-in."
-                      : "No apps in this snapshot."
+                    : "No apps in this snapshot."
                 }</p>`
+          }
+          ${
+            hiddenUnchanged.length > 0
+              ? `<details class="ima-unchanged-toggle">
+                  <summary class="ima-badge ima-badge-unchanged">${hiddenUnchanged.length} unchanged, click to show</summary>
+                  ${hiddenUnchanged.map(appDiffHtml).join("")}
+                </details>`
+              : ""
           }
         </div>
       </div>
@@ -230,6 +252,7 @@ function unchangedRunHtml(snapshots: ImeSnapshot[]): string {
           <div class="ima-entry-header">
             <span class="ima-entry-time">${escapeHtml(formatSnapshotLabel(snapshots[0]))}</span>
             <span class="ima-badge ima-badge-unchanged">No changes</span>
+            ${espCheckInBadgeHtml(snapshots[0])}
           </div>
         </div>
       </li>
@@ -243,6 +266,7 @@ function unchangedRunHtml(snapshots: ImeSnapshot[]): string {
         <div class="ima-run-row">
           <span class="ima-entry-time">${escapeHtml(formatSnapshotLabel(s))}</span>
           <span class="ima-badge ima-badge-unchanged">No changes</span>
+          ${espCheckInBadgeHtml(s)}
         </div>
       `,
     )
@@ -302,10 +326,6 @@ const tool: ToolDefinition = {
 
         <div class="ima-toggles" id="ima-toggle-wrap" hidden>
           <label class="ima-toggle">
-            <input type="checkbox" id="ima-only-changes" checked />
-            Only show added / removed / changed apps after the first check-in
-          </label>
-          <label class="ima-toggle">
             <input type="checkbox" id="ima-hide-gaps" />
             Hide empty check-ins (ignored gaps)
           </label>
@@ -321,7 +341,6 @@ const tool: ToolDefinition = {
     const statusEl = container.querySelector<HTMLDivElement>("#ima-status")!;
     const timelineEl = container.querySelector<HTMLOListElement>("#ima-timeline")!;
     const toggleWrap = container.querySelector<HTMLDivElement>("#ima-toggle-wrap")!;
-    const onlyChangesInput = container.querySelector<HTMLInputElement>("#ima-only-changes")!;
     const hideGapsInput = container.querySelector<HTMLInputElement>("#ima-hide-gaps")!;
 
     const render = () => {
@@ -347,7 +366,6 @@ const tool: ToolDefinition = {
         statusEl.innerHTML = errorsHtml(errors) + tzNote;
         toggleWrap.hidden = snapshots.length < 2;
 
-        const onlyChanges = onlyChangesInput.checked;
         const hideGaps = hideGapsInput.checked;
         let prevApps: ImeSnapshot["apps"] | null = null;
         // Consecutive check-ins with nothing actionable (no adds/removes/
@@ -383,15 +401,16 @@ const tool: ToolDefinition = {
           }
 
           const isFirst = i === 0;
+          const isLast = i === snapshots.length - 1;
           const hasChanges = diffs.some((d) => d.status !== "unchanged");
-          const isCollapsible = !isFirst && !isEmptyGap && !hasChanges;
+          const isCollapsible = !isFirst && !isLast && !isEmptyGap && !hasChanges;
 
           if (isCollapsible) {
             unchangedRun.push(snapshot);
             return;
           }
           flushRun();
-          html.push(snapshotHtml(snapshot, diffs, isFirst, onlyChanges, isEmptyGap));
+          html.push(snapshotHtml(snapshot, diffs, isFirst, isLast, isEmptyGap));
         });
         flushRun();
 
@@ -404,12 +423,10 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", render);
-    onlyChangesInput.addEventListener("change", render);
     hideGapsInput.addEventListener("change", render);
 
     return () => {
       input.removeEventListener("input", render);
-      onlyChangesInput.removeEventListener("change", render);
       hideGapsInput.removeEventListener("change", render);
       unwirePsTabs();
     };
