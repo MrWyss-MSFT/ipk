@@ -1,6 +1,6 @@
 import "./style.css";
+import { codeBlockHtml, setCode } from "@/app/code-block";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { highlightCode } from "@/app/highlight";
 import type { ToolDefinition } from "@/types/tool";
 import { parseRegFile, type RegKeyNode, type RegValue } from "./parser";
 
@@ -81,11 +81,16 @@ const tool: ToolDefinition = {
 
         <p class="rgp-step-label">
           1. Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
-          <span class="rgp-sample-cmd">
-            <code class="mono" id="rgp-export-cmd"></code>
-            ${copyButtonHtml("rgp-export-copy", 'Copy "reg export" command')}
-          </span>
         </p>
+        <div class="ipk-ps-command">
+          <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
+            <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">Command Prompt</button>
+          </div>
+          <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
+            ${codeBlockHtml("rgp-export-cmd")}
+            ${copyButtonHtml("rgp-export-copy", 'Copy "reg export" command')}
+          </div>
+        </div>
 
         <label class="rgp-step-label" for="rgp-input">2. Load or paste the .reg file here</label>
         <div class="rgp-input-row">
@@ -126,7 +131,7 @@ const tool: ToolDefinition = {
     const countEl = container.querySelector<HTMLSpanElement>("#rgp-count")!;
     const exportCmdEl = container.querySelector<HTMLElement>("#rgp-export-cmd")!;
     const exportCopyBtn = container.querySelector<HTMLButtonElement>("#rgp-export-copy")!;
-    exportCmdEl.innerHTML = highlightCode(EXPORT_COMMAND, "cmd");
+    setCode(exportCmdEl, EXPORT_COMMAND, "cmd");
     const input = container.querySelector<HTMLTextAreaElement>("#rgp-input")!;
     const errorsEl = container.querySelector<HTMLDivElement>("#rgp-errors")!;
     const treeEl = container.querySelector<HTMLDivElement>("#rgp-tree")!;
