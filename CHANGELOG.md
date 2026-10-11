@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.10.0...v0.11.0) (2026-10-11)
+
+### ✨ Features
+
+* **device-gid:** equal-level field layout and rewrite hint ([de2ad85](https://github.com/MrWyss-MSFT/ipk/commit/de2ad8510025783734dc314c166b494e6cd6b628))
+* **ime-apps-parser:** move app GUID into summary, make it click-to-copy ([d877d57](https://github.com/MrWyss-MSFT/ipk/commit/d877d576c99aa4ffc848d45ee8fcf9c5605aea2c))
+* **ime-apps-parser:** replace uninstall badge with inline intent/target icons ([b9584d1](https://github.com/MrWyss-MSFT/ipk/commit/b9584d1374f930e6624f9fb9f8daa1d3bb4d3262))
+* **ime-apps-parser:** surface Uninstall intent as a distinct badge ([c596d84](https://github.com/MrWyss-MSFT/ipk/commit/c596d849f654f2dad14b3836b4dc9df9aab533a2))
+* **mdm-result:** add MDM Result tool for filterable CSP policy reports ([2c7025d](https://github.com/MrWyss-MSFT/ipk/commit/2c7025d18b20e29beb307f8618f599f7b9613915))
+* **reference:** add Elevated column and MDM/MMP-C sync commands ([b3e78f9](https://github.com/MrWyss-MSFT/ipk/commit/b3e78f98979a631ffb380518238bd81c4fc1142f))
+* **registry-preview:** match reg export command box to PowerShell tabs ([c22e59a](https://github.com/MrWyss-MSFT/ipk/commit/c22e59ac3086b3f0bfd1f87fcfe08c5c90b2c239))
+
+### 🐛 Bug Fixes
+
+* **mdm-result:** escape copy-button labels and add reusable admin badge ([dad5b3a](https://github.com/MrWyss-MSFT/ipk/commit/dad5b3af12d9d8f3d488c6be6a1841fe3b200ee5))
+
 ## [0.10.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.9.0...v0.10.0) (2026-10-11)
 
 ### ✨ Features
