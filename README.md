@@ -1,5 +1,10 @@
 <img src="docs/logo.png" alt="IPK - IT Pro Kit" width="300" />
 
+[![GitHub Release](https://img.shields.io/github/v/release/MrWyss-MSFT/ipk?label=version)](https://github.com/MrWyss-MSFT/ipk/releases/latest)
+[![Deploy GitHub Pages](https://github.com/MrWyss-MSFT/ipk/actions/workflows/pages.yml/badge.svg)](https://github.com/MrWyss-MSFT/ipk/actions/workflows/pages.yml)
+[![Docker Release](https://github.com/MrWyss-MSFT/ipk/actions/workflows/docker-release.yml/badge.svg)](https://github.com/MrWyss-MSFT/ipk/actions/workflows/docker-release.yml)
+[![License: MIT](https://img.shields.io/github/license/MrWyss-MSFT/ipk)](LICENSE)
+
 **Fast, static, client-side tools for IT Pros managing Microsoft-managed endpoints — Intune, Autopilot, Entra ID, ConfigMgr, and Windows. No installs, no backend, nothing ever leaves your browser.**
 
 🔗 **Live site:** https://mrwyss-msft.github.io/ipk/
