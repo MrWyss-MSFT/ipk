@@ -204,7 +204,16 @@ textarea:focus {
 
 .ipk-ps-tabs {
   display: flex;
+  align-items: center;
   gap: 2px;
+}
+
+.ipk-ps-admin-badge {
+  margin-left: auto;
+  padding: 2px var(--space-2);
+  font-size: 0.75rem;
+  color: var(--danger);
+  cursor: help;
 }
 
 .ipk-ps-tab {

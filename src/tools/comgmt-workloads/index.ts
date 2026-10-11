@@ -28,7 +28,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="cmw-tool">
         <label class="cmw-label" for="cmw-snippet">Get the value on a co-managed device (PowerShell — copies the value to your clipboard)</label>
-        ${psCommandTabsHtml("cmw-snippet")}
+        ${psCommandTabsHtml("cmw-snippet", { requiresAdmin: true })}
         <label class="cmw-label" for="cmw-input">ComgmtWorkloads value (decimal or hex, e.g. 8193 or 0x2001)</label>
         <input id="cmw-input" class="mono" type="text" placeholder="e.g. 8193" value="8193" />
         <span class="cmw-error" id="cmw-error" role="alert"></span>

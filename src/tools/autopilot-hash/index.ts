@@ -29,7 +29,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="aph-tool">
         <label class="aph-label" for="aph-snippet">Get the hardware hash on a Windows device (PowerShell — copies it to your clipboard)</label>
-        ${psCommandTabsHtml("aph-snippet")}
+        ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
         <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
         <textarea id="aph-input" class="mono" rows="6" placeholder="Paste the Base64 hardware hash here..."></textarea>
         <span class="aph-error" id="aph-error" role="alert"></span>

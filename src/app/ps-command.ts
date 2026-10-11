@@ -40,12 +40,14 @@ export function makePsCommandVariants(valueExpr: string, options: MakePsCommandV
   };
 }
 
-export function psCommandTabsHtml(id: string): string {
+export function psCommandTabsHtml(id: string, options: { requiresAdmin?: boolean } = {}): string {
+  const { requiresAdmin = false } = options;
   return `
     <div class="ipk-ps-command">
       <div class="ipk-ps-tabs" role="tablist" aria-label="PowerShell version">
         <button type="button" class="ipk-ps-tab is-active" id="${id}-tab-ps7" role="tab" aria-selected="true">PowerShell 7+</button>
         <button type="button" class="ipk-ps-tab" id="${id}-tab-ps51" role="tab" aria-selected="false">Windows PowerShell 5.1</button>
+        ${requiresAdmin ? `<span class="ipk-ps-admin-badge" title="Needs an elevated PowerShell/terminal (Run as Administrator)">🛡️ Admin</span>` : ""}
       </div>
       <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
         ${codeBlockHtml(`${id}-code`)}

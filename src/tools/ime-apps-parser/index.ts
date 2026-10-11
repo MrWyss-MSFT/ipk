@@ -314,7 +314,7 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="ima-tool">
         <p class="ima-step-label">1. Run this on the device, it copies every "Get policies" snapshot to your clipboard</p>
-        ${psCommandTabsHtml("ima-cmd")}
+        ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
         <p class="ipk-hint">
           Reads every rotated <code>AppWorkload*.log</code> file, covering both required and available
           (Company Portal) check-ins, the latter only run on sync/logon or an 8h fallback, so a newly assigned

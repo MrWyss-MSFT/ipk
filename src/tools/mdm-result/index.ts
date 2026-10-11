@@ -1,6 +1,5 @@
 import "./style.css";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
-import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import type { ToolDefinition } from "@/types/tool";
 import { parseMdmDiagReport, type CspPolicyRow } from "./parse";
 
@@ -43,7 +42,9 @@ const PS_VARIANTS = makePsCommandVariants("$Xml.OuterXml", {
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
   div.textContent = value;
-  return div.innerHTML;
+  // innerHTML only escapes &, <, > — also escape quotes so this is safe to
+  // interpolate into double- or single-quoted HTML attributes (e.g. title=).
+  return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 /** Deterministic hue (0-359) for a string, so the same value always gets the same badge color. */
@@ -137,9 +138,9 @@ const tool: ToolDefinition = {
     container.innerHTML = `
       <div class="mdm-tool">
         <p class="mdm-step-label">1. Run this on the device (as <strong>Administrator</strong>), it copies the policy report to your clipboard</p>
-        ${psCommandTabsHtml("mdm-cmd")}
+        ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
         <p class="ipk-hint">
-          🛡️ Needs an elevated PowerShell/terminal — <code>MdmDiagnosticsTool.exe</code> requires Administrator to read
+          Needs an elevated PowerShell/terminal — <code>MdmDiagnosticsTool.exe</code> requires Administrator to read
           the policy store. Settings pushed by MDM but overridden locally or by Group Policy still show up here, with
           the "winning provider" column telling you who actually won.
         </p>
@@ -255,7 +256,6 @@ const tool: ToolDefinition = {
       }
       const areaNames = Array.from(groups.keys()).sort((a, b) => a.localeCompare(b));
 
-      const orderedRows: CspPolicyRow[] = [];
       rowsEl.innerHTML = areaNames
         .map((area) => {
           const groupRows = groups.get(area)!;
@@ -273,8 +273,6 @@ const tool: ToolDefinition = {
           `;
           const bodyHtml = groupRows
             .map((r) => {
-              orderedRows.push(r);
-              const i = orderedRows.length - 1;
               const title = metadataTitle(r);
               return `
                 <tr>
@@ -283,10 +281,7 @@ const tool: ToolDefinition = {
                     ${hasPolicyCspDocsPage(r.area) ? docsLinkHtml(policyDocsUrl(r.area, r.name), r.name) : ""}
                   </td>
                   <td class="mdm-value-cell">
-                    <span class="mdm-value-inner">
-                      <code class="mono">${escapeHtml(r.value)}</code>
-                      ${copyButtonHtml(`mdm-copy-${i}`, `Copy "${r.value}"`)}
-                    </span>
+                    <code class="mono">${escapeHtml(r.value)}</code>
                   </td>
                   <td class="mdm-provider-cell">${winningProviderBadgeHtml(r.winningProvider)}</td>
                   <td class="mdm-scope-cell">${escapeHtml(scopeLabel(r))}</td>
@@ -298,9 +293,6 @@ const tool: ToolDefinition = {
           return headerHtml + bodyHtml;
         })
         .join("");
-      rowsEl.querySelectorAll<HTMLButtonElement>(".ipk-copy-btn").forEach((btn, i) => {
-        wireCopyButton(btn, () => orderedRows[i].value);
-      });
       emptyEl.hidden = filtered.length > 0;
     }
 
