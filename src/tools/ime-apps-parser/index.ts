@@ -154,6 +154,7 @@ function appDiffHtml(diff: ImeAppDiff): string {
     <details class="ima-app ima-app-${diff.status}">
       <summary class="ima-app-summary">
         <span class="ima-badge ima-badge-${diff.status}">${STATUS_LABEL[diff.status]}</span>
+        ${diff.app.intent === 4 ? `<span class="ima-badge ima-badge-uninstall" title="This app's current policy Intent is Uninstall (4), regardless of the Added/Removed/Changed status above">🗑️ Uninstall intent</span>` : ""}
         <span class="ima-app-name">${escapeHtml(diff.name)}</span>
         <span class="ima-app-meta">${escapeHtml(intentLabel(diff.app.intent))} · ${escapeHtml(targetTypeLabel(diff.app.targetType))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""}</span>
         ${espBadgeHtml(diff.app.raw)}
