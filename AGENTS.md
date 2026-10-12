@@ -188,6 +188,12 @@ Versioning and the changelog are automated with
   and the version bump (major/minor/patch) are both derived from these commit
   messages, so unconventional messages won't show up in `CHANGELOG.md` and
   won't influence the bump.
+- **Brand-new tool squash-merge commits** use a special `feat:` subject so
+  they stand out in the changelog while still grouping under "✨ Features":
+  `feat: 🎉 New Tool: <tool icon> <Tool Name>` (e.g.
+  `feat: 🎉 New Tool: 🏷️ MAC Address Converter`). Use the same icon the tool
+  defines in its `index.ts`. Regular (non-new-tool) commits keep the plain
+  `feat: <description>` / `fix: <description>` style.
 - **Cut a release**: `npm run release` (interactive - prompts for the next
   version based on your commits since the last tag, then updates
   `package.json`'s version, prepends to `CHANGELOG.md`, and creates a git
