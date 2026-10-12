@@ -1,0 +1,372 @@
+.uhe-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.uhe-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
+}
+
+.uhe-tool textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  resize: vertical;
+}
+
+.uhe-status {
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.uhe-warn {
+  margin: 0;
+  color: var(--danger, #e05252);
+}
+
+.uhe-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.uhe-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.uhe-filter-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.uhe-filter-hint {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.uhe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.uhe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.uhe-chip-mark {
+  width: 0.9em;
+  text-align: center;
+}
+
+.uhe-chip-mark::before {
+  content: "";
+}
+
+.uhe-chip[data-mode="include"] {
+  background: var(--success, #2e9e5b);
+  border-color: transparent;
+  color: #fff;
+}
+
+.uhe-chip[data-mode="include"] .uhe-chip-mark::before {
+  content: "+";
+}
+
+.uhe-chip[data-mode="exclude"] {
+  background: var(--danger, #e05252);
+  border-color: transparent;
+  color: #fff;
+}
+
+.uhe-chip[data-mode="exclude"] .uhe-chip-mark::before {
+  content: "−";
+}
+
+.uhe-column-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.uhe-column-filter {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px var(--space-2);
+  font-size: 0.8rem;
+}
+
+.uhe-column-filter label {
+  color: var(--text-muted);
+}
+
+.uhe-column-filter input {
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.uhe-date-range {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.uhe-date-range label {
+  color: var(--text-muted);
+}
+
+.uhe-date-range input {
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.uhe-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.uhe-count {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.uhe-results-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.uhe-view-toggle {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.uhe-view-toggle .btn {
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}
+
+.uhe-copy-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.uhe-copy-btn {
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}
+
+.uhe-copy-btn.is-copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* Vertical timeline view, grouped by day then time (mirrors the IME Apps
+   Parser timeline pattern, with an added day-grouping level). */
+.uhe-timeline {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0 0 0 var(--space-2);
+}
+
+.uhe-timeline-day {
+  position: relative;
+  padding-bottom: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border);
+}
+
+.uhe-timeline-day:last-child {
+  border-left-color: transparent;
+}
+
+.uhe-timeline-day-dot {
+  position: absolute;
+  left: -8px;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+}
+
+.uhe-timeline-day-body {
+  min-width: 0;
+}
+
+.uhe-timeline-day-header {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.uhe-timeline-day-count {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.uhe-timeline-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--space-2);
+}
+
+.uhe-timeline-entry {
+  position: relative;
+  padding-bottom: var(--space-3);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border);
+}
+
+.uhe-timeline-entry:last-child {
+  padding-bottom: 0;
+  border-left-color: transparent;
+}
+
+.uhe-timeline-dot {
+  position: absolute;
+  left: -6px;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  border: 2px solid var(--bg);
+}
+
+.uhe-timeline-body {
+  min-width: 0;
+}
+
+.uhe-timeline-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.uhe-timeline-time {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.uhe-timeline-title {
+  font-size: 0.9rem;
+}
+
+.uhe-timeline-categories {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.uhe-timeline-meta {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.uhe-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.uhe-table th,
+.uhe-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.85rem;
+}
+
+.uhe-table th {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.uhe-nowrap {
+  white-space: nowrap;
+}
+
+.uhe-muted {
+  color: var(--text-muted);
+}
+
+.uhe-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .uhe-table,
+  .uhe-table tbody,
+  .uhe-table tr,
+  .uhe-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .uhe-table thead {
+    display: none;
+  }
+
+  .uhe-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) 0;
+  }
+
+  .uhe-table td {
+    border-bottom: none;
+    padding: 2px 0;
+  }
+}
