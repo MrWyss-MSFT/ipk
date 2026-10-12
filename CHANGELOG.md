@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.11.0...v0.12.0) (2026-10-12)
+
+### ✨ Features
+
+* add MAC address converter tool ([bfef951](https://github.com/MrWyss-MSFT/ipk/commit/bfef951da659857da554f13dc78a08b15cb17997))
+* **update-history-explorer:** add Windows Update History Explorer tool ([8650541](https://github.com/MrWyss-MSFT/ipk/commit/865054152557d2e03d184a4136c17fbb41032403))
+
 ## [0.11.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.10.0...v0.11.0) (2026-10-11)
 
 ### ✨ Features
