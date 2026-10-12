@@ -1,0 +1,48 @@
+.mac-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mac-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.mac-tool textarea {
+  width: 100%;
+  overflow: hidden;
+  resize: none;
+}
+
+.mac-format-radios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.mac-format-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mac-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  min-height: 1.1em;
+}
+
+.mac-section-label {
+  font-weight: 600;
+  margin: var(--space-3) 0 0;
+  color: var(--text);
+}
+
+.mac-case {
+  display: flex;
+  gap: var(--space-2);
+}
