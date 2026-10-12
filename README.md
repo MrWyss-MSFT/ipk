@@ -9,8 +9,6 @@
 
 🔗 **Live site:** https://ipk.ittips.ch
 
-![IPK dashboard screenshot](docs/screenshot.png)
-
 ![Light/dark theme toggle animation](docs/theme-toggle.gif)
 
 ## Why
