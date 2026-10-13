@@ -1,5 +1,6 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { codeBlockHtml, setCode } from "@/app/code-block";
 import type { ToolDefinition } from "@/types/tool";
 import {
   formatMac,
@@ -10,6 +11,8 @@ import {
   type MacCase,
   type MacFormat,
 } from "./parse";
+
+const GETMAC_COMMAND = "getmac /v /fo list";
 
 const ALL_FORMATS: MacFormat[] = [...MAC_FORMATS, ...MAC_DERIVED_FORMATS];
 
@@ -47,11 +50,21 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="mac-tool">
-        <p class="mac-hint ipk-hint">
-          Paste one MAC address, or a whole list (one per line, or comma/semicolon-separated). Any common
-          format is accepted — colon, hyphen, Cisco dot-grouped, plain hex, with or without a
-          <code class="mono">0x</code> prefix, any case. Pick an output format below to convert them all.
-        </p>
+        <div class="mac-hint ipk-hint">
+          <p>
+            Paste one MAC address, or a whole list (one per line, or comma/semicolon-separated). Any common
+            format is accepted — colon, hyphen, Cisco dot-grouped, plain hex, with or without a
+            <code class="mono">0x</code> prefix, any case. Pick an output format below to convert them all.
+          </p>
+          <p>
+            Don't know your MAC address(es)? Run <code class="mono">${GETMAC_COMMAND}</code> in a Windows
+            command prompt to list every network interface's MAC address.
+          </p>
+          <div class="ipk-copy-wrap mac-getmac-wrap">
+            ${codeBlockHtml("mac-getmac-cmd")}
+            ${copyButtonHtml("mac-getmac-copy")}
+          </div>
+        </div>
 
         <label class="mac-label" for="mac-input">MAC address(es)</label>
         <textarea id="mac-input" class="mono" rows="6" placeholder="Paste one or more MAC addresses, one per line..."></textarea>
@@ -84,6 +97,11 @@ const tool: ToolDefinition = {
 
     const listCopyBtn = container.querySelector<HTMLButtonElement>("#mac-list-copy")!;
     wireCopyButton(listCopyBtn, () => listOutput.value);
+
+    const getmacCode = container.querySelector<HTMLPreElement>("#mac-getmac-cmd")!;
+    const getmacCopyBtn = container.querySelector<HTMLButtonElement>("#mac-getmac-copy")!;
+    setCode(getmacCode, GETMAC_COMMAND, "cmd");
+    wireCopyButton(getmacCopyBtn, () => GETMAC_COMMAND);
 
     let caseMode: MacCase = "upper";
 
