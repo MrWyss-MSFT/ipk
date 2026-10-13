@@ -62,9 +62,24 @@
   cursor: pointer;
 }
 
-.cmw-hex {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+.cmw-checkbox:disabled {
+  cursor: default;
+  accent-color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.cmw-locked-row td {
   color: var(--text-muted);
+}
+
+.cmw-force-all-row td {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.cmw-implied-hidden {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+  cursor: help;
 }
