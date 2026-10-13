@@ -20,7 +20,7 @@ function normalizePatterns(raw: string): string {
 
 const tool: ToolDefinition = {
   id: "cmd-findstr-search",
-  name: "Find Text in Files (cmd command)",
+  name: "Find Text in Files",
   description:
     "Build a Windows cmd.exe one-liner that recursively searches files for a text string using for /r and findstr.",
   category: "Generators",
@@ -46,9 +46,14 @@ const tool: ToolDefinition = {
         <span class="cfs-error" id="cfs-error" role="alert"></span>
 
         <label class="cfs-label" for="cfs-output">cmd.exe command</label>
-        <div class="ipk-copy-wrap">
-          ${codeBlockHtml("cfs-output")}
-          ${copyButtonHtml("cfs-copy")}
+        <div class="ipk-ps-command">
+          <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
+            <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">Command Prompt</button>
+          </div>
+          <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
+            ${codeBlockHtml("cfs-output")}
+            ${copyButtonHtml("cfs-copy")}
+          </div>
         </div>
         <p class="cfs-note">
           Paste directly into cmd.exe. Inside a .bat/.cmd file, double every <code>%F</code> to <code>%%F</code>.
