@@ -268,3 +268,18 @@ grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
   if you still need a tool-specific class for child-selector rules (links,
   `<code>`, layout); otherwise `ipk-hint` alone is enough. Don't repeat the
   box's `background`/`border`/`padding`/`border-radius` in your own CSS.
+- **Any generated PowerShell or cmd.exe command gets the standard shell-tab
+  decoration**, unless a tool has an explicit reason not to: wrap the code
+  block in `.ipk-ps-command` > `.ipk-ps-tabs` (`role="tablist"`,
+  `aria-label="Command shell"`) containing one `.ipk-ps-tab.is-active` button
+  per shell variant (e.g. a single static "Command Prompt" tab for a cmd-only
+  command, or the PS7+/PS5.1 pair via `psCommandTabsHtml()`/
+  `wirePsCommandTabs()` from `@/app/ps-command` when a command differs
+  between PowerShell versions), with an `.ipk-ps-admin-badge` added to the
+  tab only when the command needs elevation. The code block + copy button
+  then go in `.ipk-copy-wrap.ipk-copy-wrap-tabbed` below the tab bar. See
+  `src/tools/registry-preview/index.ts` and `src/tools/cmd-findstr-search/index.ts`
+  (single static tab, no admin badge) or `src/tools/playbooks/index.ts`
+  (single tab, conditional admin badge) for the hand-rolled pattern, and any
+  tool using `psCommandTabsHtml()` for the two-tab PS7/PS5.1 switcher. CSS
+  lives in `src/styles/components.css` (`.ipk-ps-command` and friends).
