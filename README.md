@@ -23,6 +23,10 @@ converting Entra ID GUIDs to SIDs, browsing exported `.reg` files, and more.
 - 🌗 **Dark & light mode** — follows your system theme or toggle manually.
 - 🧩 **Trivially extensible** — adding a tool means "drop a folder", nothing
   else to wire up.
+- 🏕️ **Living off the land (LotL)** — any script/command a tool hands you
+  uses only built-in Windows tools (PowerShell, `cmd`, WMI, …), no
+  third-party installs, with a few explicitly-noted exceptions (e.g.
+  CMTrace).
 - 🐳 **Run anywhere** — use the hosted static build, run it in Docker/WSL, or
   just `npm run dev` locally.
 

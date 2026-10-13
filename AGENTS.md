@@ -111,6 +111,16 @@ the "Playbooks" tool as a whole) shows up as its own result when you search
 
 ## Conventions established in this project
 
+- **Living off the land (LotL).** Any script/command a tool generates for
+  the user to run must use only tools already built into Windows —
+  PowerShell (built-in cmdlets/modules), `cmd`, WMI/CIM, the registry, etc.
+  Don't generate commands that assume a third-party tool, module, or
+  executable is installed (e.g. `Install-Module`, RSAT-only cmdlets, a
+  random GitHub script). The only acceptable exceptions are well-known,
+  Microsoft-adjacent, commonly-already-present admin tools called out
+  explicitly in that tool's own hint/comment (e.g. CMTrace for reading
+  ConfigMgr/MDM logs) — never assume silently that something extra is
+  installed.
 - **No network calls from tools.** A tool that needs to fetch from the
   internet (e.g. an earlier "Windows Version Info" tool hitting
   `learn.microsoft.com`) will get CORS-blocked in real browser usage and was
