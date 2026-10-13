@@ -4,13 +4,13 @@ summary: Capture all network traffic with the built-in pktmon tool and convert i
 tags: Network, Wireshark, pktmon, Troubleshooting
 ---
 
-1. From an elevated prompt, start a full capture (captures every interface, full packet size, no filters):
+1. 🛡️ From an elevated prompt, start a full capture (captures every interface, full packet size, no filters):
 
 ```cmd
 pktmon start --capture --pkt-size 0 -f C:\temp\capture.etl
 ```
 
-2. Reproduce the issue, then stop the capture:
+2. 🛡️ Reproduce the issue, then stop the capture:
 
 ```cmd
 pktmon stop

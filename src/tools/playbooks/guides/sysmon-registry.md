@@ -4,7 +4,7 @@ summary: Watch a specific registry key for changes and review the events in Even
 tags: Sysmon, Registry, Troubleshooting
 ---
 
-1. Enable the built-in Sysmon optional feature.
+1. 🛡️ Enable the built-in Sysmon optional feature.
 
 ```powershell
 Enable-WindowsOptionalFeature -Online -FeatureName Sysmon
@@ -27,7 +27,7 @@ Enable-WindowsOptionalFeature -Online -FeatureName Sysmon
 </Sysmon>
 ```
 
-3. Load the config:
+3. 🛡️ Load the config:
 
 ```cmd
 sysmon -i path\to\file.xml
