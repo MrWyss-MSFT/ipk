@@ -33,6 +33,57 @@ function formatHex(bytes: number[]): string {
   return bytes.map((b) => b.toString(16).padStart(2, "0").toUpperCase()).join(" ");
 }
 
+/**
+ * Decodes option 81 (Client FQDN, RFC 4702): 1 flags byte, 2 deprecated
+ * RCODE bytes, then the domain name - either plain ASCII with dots, or (if
+ * the flags' "E" bit is set) canonical DNS wire format (length-prefixed
+ * labels), which this also unpacks into dotted form.
+ */
+function decodeFqdn(bytes: number[]): string {
+  if (bytes.length < 3) return formatHex(bytes);
+  const flags = bytes[0];
+  const nameBytes = bytes.slice(3);
+  const isBinaryEncoded = (flags & 0x04) !== 0;
+
+  let name: string;
+  if (isBinaryEncoded) {
+    const labels: string[] = [];
+    let i = 0;
+    while (i < nameBytes.length) {
+      const labelLength = nameBytes[i];
+      if (labelLength === 0) break;
+      i += 1;
+      labels.push(new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(nameBytes.slice(i, i + labelLength))));
+      i += labelLength;
+    }
+    name = labels.join(".");
+  } else {
+    name = new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(nameBytes)).replace(/\0/g, "");
+  }
+
+  return name || formatHex(bytes);
+}
+
+/**
+ * Formats a seconds count (e.g. lease/T1/T2 time) as a compact human-readable
+ * duration ("1d 3h" ...). Returns "" for under a minute, since "30 seconds
+ * (30s)" wouldn't add anything over the raw value already shown.
+ */
+function humanizeSeconds(totalSeconds: number): string {
+  if (totalSeconds < 60) return "";
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts: string[] = [];
+  if (days) parts.push(`${days}d`);
+  if (hours) parts.push(`${hours}h`);
+  if (minutes) parts.push(`${minutes}m`);
+  if (seconds) parts.push(`${seconds}s`);
+  return parts.join(" ");
+}
+
 function decodeValue(bytes: number[], meta: DhcpOptionMeta): string {
   if (bytes.length === 0) return "";
   switch (meta.type) {
@@ -48,11 +99,14 @@ function decodeValue(bytes: number[], meta: DhcpOptionMeta): string {
       return new TextDecoder("utf-8", { fatal: false }).decode(new Uint8Array(bytes)).replace(/\0/g, "");
     case "time": {
       if (bytes.length < 4) return formatHex(bytes);
-      const seconds = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
-      return `${seconds >>> 0} seconds`;
+      const seconds = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+      const readable = humanizeSeconds(seconds);
+      return readable ? `${seconds} seconds (${readable})` : `${seconds} seconds`;
     }
     case "dhcpmsgtype":
       return `${bytes[0]} (${DHCP_MESSAGE_TYPES[bytes[0]] ?? "unknown"})`;
+    case "fqdn":
+      return decodeFqdn(bytes);
     default:
       return formatHex(bytes);
   }
