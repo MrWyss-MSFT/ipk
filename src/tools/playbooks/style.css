@@ -81,37 +81,12 @@
   margin: 0 0 var(--space-1);
 }
 
-.pbk-code-wrap {
-  position: relative;
-}
-
-.pbk-lang {
-  position: absolute;
-  top: var(--space-1);
-  right: calc(var(--space-1) + 32px);
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0 7px;
-  background: var(--bg-elevated);
-}
-
-.pbk-code {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 0.85rem;
+.pbk-step-text code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
-  padding-right: var(--space-6);
-}
-
-.pbk-code-wrap .ipk-copy-btn {
-  position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
+  padding: 1px 5px;
 }
 
 .pbk-empty {

@@ -14,19 +14,39 @@ function matchText(haystack: (string | undefined)[], query: string): boolean {
   return haystack.some((h) => (h ?? "").toLowerCase().includes(q));
 }
 
+const ADMIN_PREFIX = "🛡️ ";
+
+/** Friendlier tab label for a step's fence language, mirroring `psCommandTabsHtml`'s single-tab usage (see registry-preview). Falls back to the fence's own label (e.g. "PowerShell", "XML"). */
+const TAB_LABELS: Record<string, string> = {
+  cmd: "Command Prompt",
+};
+
+/** Escapes a step's plain-text instruction and renders single-backtick inline code (e.g. `` `-numiterations` ``) as `<code>`, the one bit of inline Markdown Playbooks supports. */
+function stepTextHtml(text: string): string {
+  return escapeHtml(text).replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+
 function stepHtml(guide: GuideEntry, stepIndex: number): string {
   const step = guide.steps[stepIndex];
+  const requiresAdmin = step.text.startsWith(ADMIN_PREFIX);
+  const text = requiresAdmin ? step.text.slice(ADMIN_PREFIX.length) : step.text;
   const copyId = `pbk-copy-${guide.id}-${stepIndex}`;
   const codeHtml = step.code ? (step.codeLang ? highlightCode(step.code, step.codeLang) : escapeHtml(step.code)) : "";
+  const tabLabel = step.lang ? (TAB_LABELS[step.lang.toLowerCase()] ?? step.lang) : "Command";
   return `
     <li class="pbk-step">
-      <p class="pbk-step-text">${step.text}</p>
+      <p class="pbk-step-text">${stepTextHtml(text)}</p>
       ${
         step.code
-          ? `<div class="pbk-code-wrap">
-               ${step.lang ? `<span class="pbk-lang">${step.lang}</span>` : ""}
-               <pre class="mono pbk-code"><code>${codeHtml}</code></pre>
-               ${copyButtonHtml(copyId, `Copy "${step.text}"`)}
+          ? `<div class="ipk-ps-command">
+               <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
+                 <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">${tabLabel}</button>
+                 ${requiresAdmin ? `<span class="ipk-ps-admin-badge" title="Needs an elevated Command Prompt (Run as Administrator)">🛡️ Admin</span>` : ""}
+               </div>
+               <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
+                 <pre class="ipk-code mono"><code>${codeHtml}</code></pre>
+                 ${copyButtonHtml(copyId, `Copy "${text}"`)}
+               </div>
              </div>`
           : ""
       }
