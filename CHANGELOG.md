@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.12.0...v0.13.0) (2026-10-13)
+
+### ✨ Features
+
+* add fsutil test-file command to reference ([0ecf21a](https://github.com/MrWyss-MSFT/ipk/commit/0ecf21a717abd0d7c9c10acdf701d860a1542db6))
+* add Microsoft Defender performance diagnosis playbook ([875ba15](https://github.com/MrWyss-MSFT/ipk/commit/875ba159602f4a879251b8f401452a804b519f85))
+* add WPR boot/shutdown/standby trace playbook ([eff3ca7](https://github.com/MrWyss-MSFT/ipk/commit/eff3ca75d051a35171f03daac5da79868aeb3572))
+* **mac-address-converter:** add getmac command hint to find local MAC addresses ([88cf8d0](https://github.com/MrWyss-MSFT/ipk/commit/88cf8d0bec130d547af392c54b6e4ad6005a3d24))
+* mark elevated steps in sysmon and pktmon playbooks with Admin badge ([468cfc4](https://github.com/MrWyss-MSFT/ipk/commit/468cfc43ef2bae6a05567a8d91ea1a0801a3e1bd))
+* register IPK as a browser search-engine provider ([d921aba](https://github.com/MrWyss-MSFT/ipk/commit/d921aba3be58de75bc43ffaee216fdfd301227c6))
+
+### 🐛 Bug Fixes
+
+* decode more DHCP options in the DHCP Options Decoder ([4e31d2c](https://github.com/MrWyss-MSFT/ipk/commit/4e31d2ca0b8f97d5b6e33a6cdec62d865021967b))
+* refine comgmt-workloads Force-all and implied-workload handling ([b942704](https://github.com/MrWyss-MSFT/ipk/commit/b9427047d9e0dff5d1f1b93afb53a09e02572660))
+
 ## [0.12.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.11.0...v0.12.0) (2026-10-12)
 
 ### ✨ Features
