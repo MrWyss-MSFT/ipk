@@ -4,7 +4,12 @@ import { persistFormState } from "@/app/state-persistence";
 import { relocateHintsToTitle } from "@/app/hint-popover";
 import { getResolvedTheme, onSystemThemeChange, toggleTheme } from "@/app/theme";
 import { hasUnseenChanges } from "@/app/whats-new";
+import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { getSearchEngineUrl } from "@/app/search-provider";
 import type { ToolDefinition, ToolSearchItem } from "@/types/tool";
+
+const DEFAULT_SEARCH_KEYWORD = "ipk";
+const DEFAULT_SEARCH_NAME = "IT Pro Kit";
 
 const THEME_ICONS: Record<string, string> = {
   light: "☀️",
@@ -115,6 +120,22 @@ function renderTool(main: HTMLElement, id: string, itemId?: string): void {
     stopPersisting();
     stopHintPopovers();
   };
+}
+
+/**
+ * Puts the home page in a prefilled, filtered-search state - used when an
+ * incoming `?q=` lands on zero or multiple matches. Mirrors what the header
+ * search box's own `input` listener does, but callable from outside layout.ts
+ * (e.g. the app bootstrap in main.ts) without relying on dispatching a
+ * synthetic event that could race the router's async hashchange handling.
+ */
+export function showHomeSearch(main: HTMLElement, query: string): void {
+  if (window.location.hash && window.location.hash !== "#/") {
+    navigateHome();
+  }
+  const input = document.querySelector<HTMLInputElement>("#ipk-search");
+  if (input) input.value = query;
+  renderHome(main, query);
 }
 
 export function renderRoute(main: HTMLElement, route: Route): void {
@@ -242,11 +263,54 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
         </div>
       </div>
       <div class="ipk-search">
-        <svg class="ipk-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" />
-          <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        </svg>
-        <input type="search" id="ipk-search" placeholder="Search..." aria-label="Search" />
+        <form id="ipk-search-form" method="get" autocomplete="off">
+          <svg class="ipk-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" />
+            <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <input type="search" id="ipk-search" name="q" placeholder="Search..." aria-label="Search" />
+        </form>
+        <button
+          type="button"
+          class="ipk-search-engine-btn"
+          id="ipk-search-engine-btn"
+          title="Add IPK as a browser search engine"
+          aria-label="Add IPK as a browser search engine"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="ipk-search-engine-popover"
+        ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <line x1="8" y1="2.5" x2="8" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="2.5" y1="8" x2="13.5" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg></button>
+        <div class="ipk-search-engine-popover" id="ipk-search-engine-popover" role="dialog" aria-label="Add IPK as a browser search engine" hidden>
+          <p>
+            Search here once, then most browsers can add IPK as a shortcut: in Chrome/Edge, type this site's
+            address and press Tab; in Firefox, click "Add Search Engine" next to the address bar. Or add it
+            manually with these fields:
+          </p>
+          <div class="ipk-search-engine-field">
+            <label class="ipk-search-engine-label" for="ipk-search-engine-name">Name</label>
+            <div class="ipk-copy-wrap">
+              <input type="text" id="ipk-search-engine-name" class="mono" readonly value="${DEFAULT_SEARCH_NAME}" />
+              ${copyButtonHtml("ipk-search-engine-copy-name")}
+            </div>
+          </div>
+          <div class="ipk-search-engine-field">
+            <label class="ipk-search-engine-label" for="ipk-search-engine-keyword">Keyword / shortcut</label>
+            <div class="ipk-copy-wrap">
+              <input type="text" id="ipk-search-engine-keyword" class="mono" readonly value="${DEFAULT_SEARCH_KEYWORD}" />
+              ${copyButtonHtml("ipk-search-engine-copy-keyword")}
+            </div>
+          </div>
+          <div class="ipk-search-engine-field">
+            <label class="ipk-search-engine-label" for="ipk-search-engine-url">URL</label>
+            <div class="ipk-copy-wrap">
+              <input type="text" id="ipk-search-engine-url" class="mono" readonly value="" />
+              ${copyButtonHtml("ipk-search-engine-copy-url")}
+            </div>
+          </div>
+        </div>
       </div>
       <div class="ipk-header-end">
         <button type="button" class="btn" id="ipk-theme-toggle"></button>
@@ -350,6 +414,50 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
       navigateHome();
     }
     renderHome(main, searchInput.value);
+  });
+
+  const searchEngineBtn = root.querySelector<HTMLButtonElement>("#ipk-search-engine-btn")!;
+  const searchEnginePopover = root.querySelector<HTMLElement>("#ipk-search-engine-popover")!;
+  const searchEngineNameInput = root.querySelector<HTMLInputElement>("#ipk-search-engine-name")!;
+  const searchEngineKeywordInput = root.querySelector<HTMLInputElement>("#ipk-search-engine-keyword")!;
+  const searchEngineUrlInput = root.querySelector<HTMLInputElement>("#ipk-search-engine-url")!;
+  wireCopyButton(root.querySelector<HTMLButtonElement>("#ipk-search-engine-copy-name")!, () => searchEngineNameInput.value);
+  wireCopyButton(root.querySelector<HTMLButtonElement>("#ipk-search-engine-copy-keyword")!, () => searchEngineKeywordInput.value);
+  wireCopyButton(root.querySelector<HTMLButtonElement>("#ipk-search-engine-copy-url")!, () => searchEngineUrlInput.value);
+
+  const closeSearchEnginePopover = () => {
+    searchEnginePopover.hidden = true;
+    searchEngineBtn.setAttribute("aria-expanded", "false");
+  };
+  const openSearchEnginePopover = () => {
+    // Recomputed on each open so it always reflects this deployment's real
+    // location, even if the user somehow navigated to a different origin.
+    searchEngineUrlInput.value = getSearchEngineUrl();
+    searchEnginePopover.hidden = false;
+    searchEngineBtn.setAttribute("aria-expanded", "true");
+  };
+  searchEngineBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (searchEnginePopover.hidden) {
+      openSearchEnginePopover();
+    } else {
+      closeSearchEnginePopover();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (
+      !searchEnginePopover.hidden &&
+      !searchEnginePopover.contains(event.target as Node) &&
+      event.target !== searchEngineBtn
+    ) {
+      closeSearchEnginePopover();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !searchEnginePopover.hidden) {
+      closeSearchEnginePopover();
+      searchEngineBtn.focus();
+    }
   });
 
   // Clicking a card uses a plain <a href="#/tool/...">; keep navigateToTool
