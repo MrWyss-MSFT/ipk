@@ -54,6 +54,14 @@ export const COMMANDS: CommandEntry[] = [
     elevated: false,
   },
   {
+    command: "fsutil file createnew test.bin (100MB)",
+    description:
+      "Creates a 100 MiB test file. Run in PowerShell so (100MB) expands to 104,857,600 bytes - that's MiB, not a decimal 100,000,000-byte MB.",
+    tags: ["PowerShell", "Disk", "Testing"],
+    powershellOnly: true,
+    elevated: false,
+  },
+  {
     command: "osk",
     description: "Opens the On-Screen Keyboard.",
     tags: ["Windows", "Accessibility"],

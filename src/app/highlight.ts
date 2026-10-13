@@ -22,6 +22,11 @@ Prism.languages.insertBefore("powershell", "operator", {
     lookbehind: true,
     alias: "attr-name",
   },
+  // Stock Prism has no "number" rule at all for PowerShell, so literals like
+  // plain integers or size literals (`100MB`, `1.5GB`) render as unstyled
+  // plain text. Recognize them (including the KB/MB/GB/TB/PB multiplier
+  // suffix PowerShell parses as part of the numeric literal) as `number`.
+  number: /\b\d+(?:\.\d+)?(?:kb|mb|gb|tb|pb)?\b/i,
 });
 
 export type CodeLang = "powershell" | "cmd" | "xml";

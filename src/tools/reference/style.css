@@ -80,6 +80,10 @@
 .ref-cmd-cell {
   width: 320px;
   max-width: 320px;
+  /* Auto table layout otherwise lets a long Description column squeeze this
+     one down to its min-content (a single word), wrapping the command
+     character-by-character when a filter narrows the results to one row. */
+  min-width: 200px;
 }
 
 .ref-cmd-cell .ref-cmd-inner {
