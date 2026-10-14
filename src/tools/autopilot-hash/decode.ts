@@ -338,12 +338,20 @@ function readDiskInfo(b: Uint8Array, o: number) {
   };
 }
 
+/**
+ * Confirmed against oa3tool.exe's NetworkAdapters writer (FUN_14001c0dc):
+ * the 4-byte field previously labeled "DataTodo" is simply the byte length
+ * (including the UTF-16 null terminator) of the `BusType` string that
+ * immediately follows - i.e. a redundant length-prefix, not an opaque flag.
+ * It always equals `remDataLength - 0x0e`, which is also how `BusType`'s
+ * own length is computed below.
+ */
 function readNetworkAdapterInfo(b: Uint8Array, o: number, remDataLength: number) {
   const busTypeLenBytes = remDataLength - 0x0e;
   return {
     PhysicalMedium: resolvePhysicalMedium(u32le(b, o)),
     Mac: formatMacAddress(b, o + 4),
-    DataTodo: u32le(b, o + 10),
+    BusTypeByteLength: u32le(b, o + 10),
     BusType: getUtf16String(b, o + 14, busTypeLenBytes),
   };
 }
@@ -412,6 +420,56 @@ function readCpuEfficiencyClasses(b: Uint8Array, o: number, remDataLength: numbe
     NumEfficiencyClass: numEfficiencyClass,
     Classes: null,
     RawHexData: formatRawHex(b, o, remDataLength),
+  };
+}
+
+/**
+ * Type 35: SecuredCore criteria. 3-byte payload, fully confirmed against
+ * oa3tool.exe's writer (FUN_14001d95c, SecuredCore) *and* its separate
+ * status-printing function (FUN_140023394, which names every field):
+ *   byte 0        - CriteriaVersion
+ *   bytes 1-2 u16 - 11 packed 1-bit booleans (LE), bit0 = LSB:
+ *                   0 UEFIStamp, 1 SecuredCoreStatus, 2 TPM20,
+ *                   3 SecureBoot(not required), 4 MemoryAccessProtection,
+ *                   5 EnhancedSignIn, 6 MemoryIntegrity, 7 FWVirtualSupport,
+ *                   8 SMM(not required on ARM), 9 DRTM(not required on ARM),
+ *                   10 SystemGuard.
+ * Earlier analysis incorrectly concluded oa3tool.exe never writes this type;
+ * it does, whenever the underlying SecuredCore criteria data is available.
+ */
+function readSecuredCore(b: Uint8Array, o: number) {
+  const flags = u16le(b, o + 1);
+  const bit = (n: number) => Boolean((flags >> n) & 1);
+  return {
+    CriteriaVersion: b[o],
+    UEFIStamp: bit(0),
+    SecuredCoreStatus: bit(1),
+    TPM20: bit(2),
+    SecureBoot: bit(3),
+    MemoryAccessProtection: bit(4),
+    EnhancedSignIn: bit(5),
+    MemoryIntegrity: bit(6),
+    FWVirtualSupport: bit(7),
+    SMM: bit(8),
+    DRTM: bit(9),
+    SystemGuard: bit(10),
+  };
+}
+
+/**
+ * Type 36: LanguageRegion. UTF-16 pipe-delimited string built from the
+ * format `"%s|%s|%s|%s|%s"` in oa3tool.exe's writer (FUN_14001df1c), but
+ * only the first two arguments (language, region) are ever actually
+ * substituted in every call site observed - the remaining 3 placeholders'
+ * behavior is unconfirmed (never observed populated).
+ */
+function readLanguageRegion(b: Uint8Array, o: number, remDataLength: number) {
+  const raw = getUtf16String(b, o, remDataLength);
+  const parts = raw.split("|");
+  return {
+    Language: parts[0] ?? "",
+    Region: parts[1] ?? "",
+    RawValue: raw,
   };
 }
 
@@ -497,9 +555,17 @@ export interface DecodedAutopilotHash {
   ProductKeyID: string | null;
   TpmEkPubBase64: string | null;
   ProductKeyPkPn: string | null;
-  FourBytesFFsOr00s: string | null;
+  /**
+   * Type 27, confirmed per-monitor (not a single global field, despite the
+   * earlier name/shape): written once per Monitors loop iteration,
+   * immediately after that monitor's DisplayResolutions (Type 9) entry, so
+   * entries pair up positionally with `DisplayResolutions`.
+   */
+  MonitorExtraData: string[];
   VideoDetails: ReturnType<typeof readVideoDetails>[];
   VideoCards: ReturnType<typeof readVideoCardInfo>[];
+  SecuredCore: ReturnType<typeof readSecuredCore> | null;
+  LanguageRegion: ReturnType<typeof readLanguageRegion> | null;
   SppHwidBase64: string | null;
   UnknownTypes: { Type: number; Offset: number; HexData: string }[];
   ChecksumSha256: string | null;
@@ -544,9 +610,11 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
     ProductKeyID: null,
     TpmEkPubBase64: null,
     ProductKeyPkPn: null,
-    FourBytesFFsOr00s: null,
+    MonitorExtraData: [],
     VideoDetails: [],
     VideoCards: [],
+    SecuredCore: null,
+    LanguageRegion: null,
     SppHwidBase64: null,
     UnknownTypes: [],
     ChecksumSha256: null,
@@ -663,7 +731,7 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
         result.ProductKeyPkPn = getNullStrippedString(bytes, dataOffset, remDataLength);
         break;
       case 27:
-        result.FourBytesFFsOr00s = `0x${u32le(bytes, dataOffset).toString(16).toUpperCase().padStart(8, "0")}`;
+        result.MonitorExtraData.push(`0x${u32le(bytes, dataOffset).toString(16).toUpperCase().padStart(8, "0")}`);
         break;
       case 28:
         result.DiskSSNKernel.push(getNullStrippedString(bytes, dataOffset, remDataLength));
@@ -677,13 +745,20 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
       case 34:
         result.Processor.EfficiencyClasses = readCpuEfficiencyClasses(bytes, dataOffset, remDataLength);
         break;
+      case 35:
+        result.SecuredCore = readSecuredCore(bytes, dataOffset);
+        break;
+      case 36:
+        result.LanguageRegion = readLanguageRegion(bytes, dataOffset, remDataLength);
+        break;
       case 37:
         result.SppHwidBase64 = readSppHwid(bytes, dataOffset, remDataLength).SppHwidBase64;
         break;
       default:
-        // Includes types 35, 38 (and any other unknown type), which aren't
-        // decoded yet - see the hexpat source for notes on what's been
-        // ruled out so far.
+        // Types 31-33 and 38 are confirmed (via exhaustive call-graph
+        // analysis of oa3tool.exe) to never be written by this build - no
+        // decoder exists for them because there is nothing to decode. Any
+        // other unrecognized type falls here too, surfaced as raw hex.
         result.UnknownTypes.push({
           Type: type,
           Offset: off,
