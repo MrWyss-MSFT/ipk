@@ -42,3 +42,96 @@
   color: var(--danger);
   font-size: 0.85rem;
 }
+
+.aph-output {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  overflow-x: auto;
+}
+
+.aph-node {
+  margin: 1px 0;
+}
+
+.aph-node-label {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: revert;
+  padding: 1px 0;
+}
+
+.aph-node-label::marker {
+  color: var(--text-muted);
+}
+
+.aph-children {
+  margin-left: 0.55rem;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--border);
+}
+
+.aph-leaf-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 1px 0;
+}
+
+.aph-leaf-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.aph-leaf-label::after {
+  content: ":";
+}
+
+.aph-leaf-value {
+  min-width: 0;
+  word-break: break-word;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.aph-leaf-value:hover {
+  color: var(--text);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.aph-leaf-value.is-copied {
+  color: var(--success);
+  animation: aph-leaf-copied 0.5s ease;
+}
+
+@keyframes aph-leaf-copied {
+  0% {
+    background-color: color-mix(in srgb, var(--success) 25%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.aph-empty {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.aph-raw {
+  margin-top: var(--space-2);
+}
+
+.aph-raw > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.aph-raw .ipk-code {
+  margin-top: var(--space-2);
+  max-height: 420px;
+  overflow: auto;
+}
