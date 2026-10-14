@@ -384,6 +384,54 @@ function readVideoDetails(b: Uint8Array, o: number) {
   };
 }
 
+/**
+ * Type 34: CPU efficiency-class (big.LITTLE/hybrid core) breakdown.
+ * Confirmed against oa3tool.exe's own `/DecodeHwHash` output, which emits
+ * equivalent `NumEfficiencyClass` / `EfficiencyClassN.NumberCores` /
+ * `EfficiencyClassN.NumberThreads` fields. Only ever observed with exactly 2
+ * efficiency classes so far (absent entirely on symmetric/non-hybrid CPUs);
+ * the single byte between the two class entries is still unidentified
+ * (possibly a per-class id/flag - oa3tool's own report doesn't surface it
+ * either).
+ */
+function readCpuEfficiencyClasses(b: Uint8Array, o: number, remDataLength: number) {
+  const numEfficiencyClass = u16le(b, o);
+  if (numEfficiencyClass === 2 && remDataLength === 11) {
+    return {
+      NumEfficiencyClass: numEfficiencyClass,
+      Classes: [
+        { NumberCores: u16le(b, o + 2), NumberThreads: u16le(b, o + 4) },
+        { NumberCores: u16le(b, o + 7), NumberThreads: u16le(b, o + 9) },
+      ],
+      UnidentifiedByte: b[o + 6],
+    };
+  }
+  // Unconfirmed shape (never observed with a different NumEfficiencyClass
+  // count) - fall back to exposing the raw bytes alongside the class count.
+  return {
+    NumEfficiencyClass: numEfficiencyClass,
+    Classes: null,
+    RawHexData: formatRawHex(b, o, remDataLength),
+  };
+}
+
+/**
+ * Type 37: SppHwid (Software Protection Platform Hardware ID).
+ * Confirmed byte-for-byte against oa3tool.exe's own `/DecodeHwHash` output
+ * (its `SppHwid` field). The TLV payload is a 4-byte little-endian length
+ * prefix (matching the SppHwid blob's own length) followed by the raw
+ * SppHwid bytes - itself an undocumented Microsoft licensing/activation
+ * structure, so only the base64 blob is exposed here (no further internal
+ * decoding).
+ */
+function readSppHwid(b: Uint8Array, o: number, remDataLength: number) {
+  const declaredLength = u32le(b, o);
+  const length = Math.min(declaredLength, Math.max(remDataLength - 4, 0));
+  return {
+    SppHwidBase64: bytesToBase64(b.slice(o + 4, o + 4 + length)),
+  };
+}
+
 function readVideoCardInfo(b: Uint8Array, o: number, remDataLength: number) {
   let i = 0;
   while (true) {
@@ -422,6 +470,7 @@ export interface DecodedAutopilotHash {
     PackagesCores: ReturnType<typeof readProcessorPackagesCores> | null;
     Manufacturer: string | null;
     Model: string | null;
+    EfficiencyClasses: ReturnType<typeof readCpuEfficiencyClasses> | null;
   };
   RamInfo: ReturnType<typeof readRamInfo> | null;
   Disks: ReturnType<typeof readDiskInfo>[];
@@ -451,6 +500,7 @@ export interface DecodedAutopilotHash {
   FourBytesFFsOr00s: string | null;
   VideoDetails: ReturnType<typeof readVideoDetails>[];
   VideoCards: ReturnType<typeof readVideoCardInfo>[];
+  SppHwidBase64: string | null;
   UnknownTypes: { Type: number; Offset: number; HexData: string }[];
   ChecksumSha256: string | null;
   ParseWarnings: string[];
@@ -468,7 +518,7 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
     FileType: fileType,
     TotalLength: totalLength,
     ToolBuildOSBuild: null,
-    Processor: { PackagesCores: null, Manufacturer: null, Model: null },
+    Processor: { PackagesCores: null, Manufacturer: null, Model: null, EfficiencyClasses: null },
     RamInfo: null,
     Disks: [],
     DiskSerialNumbers: [],
@@ -497,6 +547,7 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
     FourBytesFFsOr00s: null,
     VideoDetails: [],
     VideoCards: [],
+    SppHwidBase64: null,
     UnknownTypes: [],
     ChecksumSha256: null,
     ParseWarnings: [],
@@ -623,9 +674,16 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
       case 30:
         result.VideoCards.push(readVideoCardInfo(bytes, dataOffset, remDataLength));
         break;
+      case 34:
+        result.Processor.EfficiencyClasses = readCpuEfficiencyClasses(bytes, dataOffset, remDataLength);
+        break;
+      case 37:
+        result.SppHwidBase64 = readSppHwid(bytes, dataOffset, remDataLength).SppHwidBase64;
+        break;
       default:
-        // Includes types 34, 35, 37, 38, which aren't fully decoded yet
-        // upstream (see the hexpat source), plus any other unknown type.
+        // Includes types 35, 38 (and any other unknown type), which aren't
+        // decoded yet - see the hexpat source for notes on what's been
+        // ruled out so far.
         result.UnknownTypes.push({
           Type: type,
           Offset: off,
