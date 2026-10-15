@@ -283,3 +283,42 @@ grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
   (single tab, conditional admin badge) for the hand-rolled pattern, and any
   tool using `psCommandTabsHtml()` for the two-tab PS7/PS5.1 switcher. CSS
   lives in `src/styles/components.css` (`.ipk-ps-command` and friends).
+- **"Paste something generated on a device" tools follow one stepped
+  pattern** — see `src/tools/autopilot-hash` as the reference implementation
+  and copy its structure for any new tool shaped like it:
+  - **Step 1** is a bold `<p class="xyz-step-label">1. Get the &lt;thing&gt;
+    …</p>`, phrased as "Get the \<thing\>" (not "Run this on the device"),
+    followed by the generated command (see the PowerShell/cmd.exe bullet
+    above). If the command only copies to clipboard and nothing more exotic,
+    say so with the shared `.ipk-step-note` class for a de-emphasized
+    trailing note: `` Get the hardware hash <span class="ipk-step-note">(copies
+    to clipboard)</span> ``. Don't repeat the output format (e.g. "as JSON",
+    "as hex") in that note — keep it just "(copies to clipboard)" unless a
+    step genuinely needs an extra instruction (e.g. dhcp-options' "pick the
+    NIC you care about from the output"). Don't mention an OS/device type
+    (e.g. "on a Windows device") in step 1 — that's implied by the
+    PowerShell/cmd.exe command itself.
+  - **Step 2** is always exactly `<p class="xyz-step-label">2. Paste anywhere
+    on the page</p>` — the input field's own label (see next bullet) carries
+    the "what goes here" explanation, so step 2 never needs to restate it.
+  - **The field label above the input** is a separate, plain (non-bold)
+    `<label class="xyz-field-label" for="xyz-input">…</label>` describing
+    what the field expects (e.g. "Base64 hardware hash
+    (DeviceHardwareData)"). Give it `margin: 0 0 calc(var(--space-1) -
+    var(--space-N))` where `--space-N` matches your tool's root container's
+    flex `gap`, so the visible label-to-input gap ends up a consistent
+    `--space-1` (4px) everywhere — don't just use `margin-top`. If the same
+    class name is also used in a different nested context with a different
+    parent `gap` (e.g. inside a result card), give that context its own
+    class/override instead of changing the shared one.
+  - **Wire global paste** with `wireGlobalPaste(input)` from
+    `@/app/global-paste` on the primary input so `Ctrl+V` works anywhere on
+    the page, not just when that field has focus (call its returned cleanup
+    function from your `mount()`'s unmount callback).
+  - **Error/status messages use the plain `.xyz-error` style**: `color:
+    var(--danger); font-size: 0.85rem;` on a `<span>`/`<p>`/`<div
+    role="alert">` — no `min-height` reservation, no `var(--danger,
+    #fallback)` color fallback (the `--danger` variable is always defined).
+    Keep a dedicated error element distinct from any soft/partial warning
+    (e.g. "N lines were skipped"), which may use `--warning` instead since
+    it's a different, non-fatal severity.
