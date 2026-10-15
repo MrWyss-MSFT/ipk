@@ -152,7 +152,7 @@ const tool: ToolDefinition = {
           placeholder="devicelink:/1/?sn=...&amp;data=...&#10;&#10;or paste the contents of a .devicelink.csv file"
         ></textarea>
 
-        <p class="adl-warning" id="adl-error" role="alert" hidden></p>
+        <p class="adl-error" id="adl-error" role="alert" hidden></p>
 
         <div class="adl-results" id="adl-results"></div>
       </div>

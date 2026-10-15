@@ -16,10 +16,9 @@
   resize: vertical;
 }
 
-.adl-warning {
-  margin: 0;
-  font-size: 0.85rem;
+.adl-error {
   color: var(--danger);
+  font-size: 0.85rem;
 }
 
 .adl-results {

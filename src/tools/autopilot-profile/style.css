@@ -28,9 +28,8 @@
 }
 
 .apc-status {
-  min-height: 1.2em;
+  color: var(--danger);
   font-size: 0.85rem;
-  color: var(--danger, #e05252);
 }
 
 .apc-section {

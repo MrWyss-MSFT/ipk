@@ -28,9 +28,8 @@
 }
 
 .mdm-status {
-  min-height: 1.2em;
+  color: var(--danger);
   font-size: 0.85rem;
-  color: var(--text-muted);
 }
 
 .mdm-summary {

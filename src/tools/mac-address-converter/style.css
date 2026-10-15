@@ -34,7 +34,6 @@
 .mac-error {
   color: var(--danger);
   font-size: 0.85rem;
-  min-height: 1.1em;
 }
 
 .mac-section-label {

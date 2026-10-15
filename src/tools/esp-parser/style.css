@@ -28,14 +28,13 @@
 }
 
 .esp-status {
-  min-height: 1.2em;
+  color: var(--danger);
   font-size: 0.85rem;
-  color: var(--text-muted);
 }
 
 .esp-warn {
   margin: 0;
-  color: var(--danger, #e05252);
+  color: var(--danger);
 }
 
 .esp-phase {
