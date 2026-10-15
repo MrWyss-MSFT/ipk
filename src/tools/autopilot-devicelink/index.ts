@@ -2,6 +2,7 @@ import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireFileDrop } from "@/app/file-drop";
 import {
   isDeviceLinkPayload,
   parseDeviceLinkUrl,
@@ -131,19 +132,21 @@ const tool: ToolDefinition = {
     "decoder",
     "qr code",
     "windows autopilot",
+    "drag and drop",
   ],
   icon: "🔗",
   mount(container) {
     container.innerHTML = `
       <div class="adl-tool">
         <p class="adl-step-label">
-          1.
-          <label class="btn" for="adl-file">📂 Upload .devicelink.csv file</label>
-          <input type="file" id="adl-file" accept=".csv,text/csv" hidden />
-          or scan a DeviceLink QR code with the <a href="#/tool/qr-scanner">QR Code Scanner</a> tool
+          1. Get the DeviceLink
+          <span class="ipk-step-note">
+            with the <a class="btn" href="#/tool/qr-scanner">📷 QR Code Scanner</a> tool,
+            <label class="btn" for="adl-file">📂 Upload</label>
+            <input type="file" id="adl-file" accept=".csv,text/csv" hidden />
+            or drop the .devicelink.csv file, or paste anywhere on the page
+          </span>
         </p>
-
-        <p class="adl-step-label">2. Paste anywhere on the page</p>
         <label class="adl-input-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
         <textarea
           id="adl-input"
@@ -235,18 +238,26 @@ const tool: ToolDefinition = {
     // Setting .value programmatically doesn't fire a native "input" event, which is what both
     // our own listener above and the generic sessionStorage persistence (wired in layout.ts) rely
     // on - dispatch one explicitly so file-loaded content decodes and survives switching tools/apps.
+    async function loadFile(file: File) {
+      input.value = decodeTextFileBytes(await file.arrayBuffer());
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files?.[0];
       if (!file) return;
-      input.value = decodeTextFileBytes(await file.arrayBuffer());
+      await loadFile(file);
       fileInput.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
+    const unwireFileDrop = wireFileDrop(container.querySelector<HTMLElement>(".adl-tool")!, (file) =>
+      void loadFile(file),
+    );
 
     void decode();
 
     return () => {
       unwireGlobalPaste();
+      unwireFileDrop();
     };
   },
 };

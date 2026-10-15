@@ -4,6 +4,12 @@
   gap: var(--space-4);
 }
 
+.adl-tool.is-drag-over {
+  outline: 2px dashed var(--accent);
+  outline-offset: var(--space-2);
+  border-radius: var(--radius-lg);
+}
+
 .adl-step-label {
   font-weight: 600;
   margin: var(--space-2) 0 0;
@@ -102,8 +108,4 @@
   margin: 0;
   font-size: 0.85rem;
   color: var(--danger);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
 }
