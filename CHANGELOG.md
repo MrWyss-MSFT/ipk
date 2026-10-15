@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.14.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.13.0...v0.14.0) (2026-10-15)
+
+### ✨ Features
+
+* decode Autopilot hash Type 34 (CPU efficiency classes) and Type 37 (SppHwid) ([9a82a27](https://github.com/MrWyss-MSFT/ipk/commit/9a82a279cc14697da1ef1965d0c115156251fdf1))
+
+### 🐛 Bug Fixes
+
+* 🌳 Treeview-style JSON output for Autopilot Hash Decoder ([2e06f02](https://github.com/MrWyss-MSFT/ipk/commit/2e06f02528fac46f1e1f114fcefd0bc4c457b3ea))
+* decode Autopilot hash Types 35/36, fix Type 27 monitor pairing ([03ed97c](https://github.com/MrWyss-MSFT/ipk/commit/03ed97c539bd8968802062a57cc966486d82af34))
+* rename Find Text in Files tool and add command decoration ([018669b](https://github.com/MrWyss-MSFT/ipk/commit/018669b329ca94093cf88096278fbfb037ab4fb9))
+
+### 📝 Documentation
+
+* document standard command-decoration convention in AGENTS.md ([f27b38f](https://github.com/MrWyss-MSFT/ipk/commit/f27b38f038300c00d69062db4c4b7029655e0a9d))
+
+### 🔧 Chores
+
+* upgrade Vite to v8, release-it to v21, fix basic-ftp CVE ([4a4af08](https://github.com/MrWyss-MSFT/ipk/commit/4a4af08d53ccc50b059d80bbc143fae9f6c6ac6a))
+
 ## [0.13.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.12.0...v0.13.0) (2026-10-13)
 
 ### ✨ Features
