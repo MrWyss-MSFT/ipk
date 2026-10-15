@@ -457,6 +457,27 @@ function readSecuredCore(b: Uint8Array, o: number) {
 }
 
 /**
+ * Type 38: SecureBootEncoded. Name and position confirmed directly from
+ * oa3tool.exe's own `/DecodeHwHash` output (its `SecureBootEncoded` field,
+ * emitted between SecuredCoreCriteria and SppHwid) across several real
+ * devices, matching the writer traced in a newer ARM64 build
+ * (FUN_140025bc0): normally a fixed 20-byte binary blob copied field-by-field
+ * from an internal Secure Boot-related struct (an unconfirmed fallback path
+ * would instead write a plain string, if the source struct carried one -
+ * never observed in practice). Several sub-fields were constant across every
+ * sample seen (byte 0 = 6, a u16 = 12, a u16 = 20, byte 10 = 6, and the
+ * trailing 9 bytes = 0) while a u32 (bytes 1-4) and one byte (byte 9) varied
+ * per device - consistent with an embedded CRC/hash plus a status byte, but
+ * that internal layout isn't confirmed semantically, so only the raw bytes
+ * are exposed here.
+ */
+function readSecureBootEncoded(b: Uint8Array, o: number, remDataLength: number) {
+  return {
+    RawHexData: formatRawHex(b, o, remDataLength),
+  };
+}
+
+/**
  * Type 36: LanguageRegion. UTF-16 pipe-delimited string built from the
  * format `"%s|%s|%s|%s|%s"` in oa3tool.exe's writer (FUN_14001df1c), but
  * only the first two arguments (language, region) are ever actually
@@ -565,6 +586,7 @@ export interface DecodedAutopilotHash {
   VideoDetails: ReturnType<typeof readVideoDetails>[];
   VideoCards: ReturnType<typeof readVideoCardInfo>[];
   SecuredCore: ReturnType<typeof readSecuredCore> | null;
+  SecureBootEncoded: ReturnType<typeof readSecureBootEncoded> | null;
   LanguageRegion: ReturnType<typeof readLanguageRegion> | null;
   SppHwidBase64: string | null;
   UnknownTypes: { Type: number; Offset: number; HexData: string }[];
@@ -614,6 +636,7 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
     VideoDetails: [],
     VideoCards: [],
     SecuredCore: null,
+    SecureBootEncoded: null,
     LanguageRegion: null,
     SppHwidBase64: null,
     UnknownTypes: [],
@@ -754,11 +777,14 @@ export function decodeAutopilotHash(bytes: Uint8Array): DecodedAutopilotHash {
       case 37:
         result.SppHwidBase64 = readSppHwid(bytes, dataOffset, remDataLength).SppHwidBase64;
         break;
+      case 38:
+        result.SecureBootEncoded = readSecureBootEncoded(bytes, dataOffset, remDataLength);
+        break;
       default:
-        // Types 31-33 and 38 are confirmed (via exhaustive call-graph
-        // analysis of oa3tool.exe) to never be written by this build - no
-        // decoder exists for them because there is nothing to decode. Any
-        // other unrecognized type falls here too, surfaced as raw hex.
+        // Types 31-33 are confirmed (via exhaustive call-graph analysis of
+        // oa3tool.exe) to never be written by this build - no decoder exists
+        // for them because there is nothing to decode. Any other
+        // unrecognized type falls here too, surfaced as raw hex.
         result.UnknownTypes.push({
           Type: type,
           Offset: off,
