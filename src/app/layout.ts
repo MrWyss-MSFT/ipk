@@ -39,8 +39,10 @@ function escapeHtml(value: string): string {
 function renderCard(tool: ToolDefinition): string {
   return `
     <a class="ipk-card" href="#/tool/${encodeURIComponent(tool.id)}" data-tool-id="${tool.id}">
-      <div class="ipk-card-icon">${tool.icon ?? "🧰"}</div>
-      <h3>${escapeHtml(tool.name)}</h3>
+      <div class="ipk-card-head">
+        <div class="ipk-card-icon">${tool.icon ?? "🧰"}</div>
+        <h3>${escapeHtml(tool.name)}</h3>
+      </div>
       <p>${escapeHtml(tool.description)}</p>
       <span class="ipk-badge">${escapeHtml(tool.category)}</span>
     </a>
@@ -50,8 +52,10 @@ function renderCard(tool: ToolDefinition): string {
 function renderItemCard(tool: ToolDefinition, item: ToolSearchItem): string {
   return `
     <a class="ipk-card" href="#/tool/${encodeURIComponent(tool.id)}/${encodeURIComponent(item.id)}" data-tool-id="${tool.id}">
-      <div class="ipk-card-icon">${tool.icon ?? "🧰"}</div>
-      <h3>${escapeHtml(item.title)}</h3>
+      <div class="ipk-card-head">
+        <div class="ipk-card-icon">${tool.icon ?? "🧰"}</div>
+        <h3>${escapeHtml(item.title)}</h3>
+      </div>
       <p>${escapeHtml(item.description ?? "")}</p>
       <span class="ipk-badge">${escapeHtml(tool.name)}</span>
     </a>
