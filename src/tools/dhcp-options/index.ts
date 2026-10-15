@@ -1,6 +1,7 @@
 import "./style.css";
 import { autoGrowTextarea } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { hexToBytes, parseDhcpInterfaceOptions, type ParsedDhcpOption } from "./parser";
@@ -19,7 +20,7 @@ const EXAMPLE_HEX =
   "33 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 01 51 80 " +
   "01 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 FF FF FF 00 " +
   "03 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 C0 A8 01 01 " +
-  "0F 00 00 00 00 00 00 00 0B 00 00 00 00 00 00 00 00 00 00 00 63 6F 6E 74 6F 73 6F 2E 63 6F 6D 00";
+  "0F 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00 69 70 6B 69 74 70 72 6F 6B 69 74 2E 63 6F 6D 00";
 
 function renderRow(opt: ParsedDhcpOption): string {
   return `
@@ -62,7 +63,10 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("dho-ps")}
 
         <p class="dho-step-label">2. Paste anywhere on the page</p>
-        <label class="dho-field-label" for="dho-input">DHCP interface options (hex)</label>
+        <div class="ipk-field-header">
+          <label class="dho-field-label" for="dho-input">DHCP interface options (hex)</label>
+          <button type="button" id="dho-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="dho-input"
           class="mono dho-input"
@@ -70,8 +74,6 @@ const tool: ToolDefinition = {
           placeholder="35 00 00 00 00 00 00 00 01 00 00 00 ..."
         ></textarea>
         <div class="dho-actions">
-          <button type="button" class="btn" id="dho-example">Load example</button>
-          <button type="button" class="btn" id="dho-clear">Clear</button>
           <label class="dho-filter-label">
             <input type="checkbox" id="dho-hide-empty" checked />
             Hide empty values
@@ -85,7 +87,6 @@ const tool: ToolDefinition = {
 
     const input = container.querySelector<HTMLTextAreaElement>("#dho-input")!;
     const exampleBtn = container.querySelector<HTMLButtonElement>("#dho-example")!;
-    const clearBtn = container.querySelector<HTMLButtonElement>("#dho-clear")!;
     const hideEmptyCheck = container.querySelector<HTMLInputElement>("#dho-hide-empty")!;
     const countEl = container.querySelector<HTMLSpanElement>("#dho-count")!;
     const results = container.querySelector<HTMLDivElement>("#dho-results")!;
@@ -144,17 +145,7 @@ const tool: ToolDefinition = {
     input.addEventListener("input", render);
     hideEmptyCheck.addEventListener("change", render);
     const unwireGlobalPaste = wireGlobalPaste(input);
-    // Setting .value programmatically doesn't fire a native "input" event, which the generic
-    // sessionStorage persistence (wired in layout.ts) relies on - dispatch one explicitly so this
-    // survives switching tools/apps, not just manually typed input.
-    exampleBtn.addEventListener("click", () => {
-      input.value = EXAMPLE_HEX;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-    clearBtn.addEventListener("click", () => {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_HEX);
 
     render();
 
@@ -163,6 +154,7 @@ const tool: ToolDefinition = {
       hideEmptyCheck.removeEventListener("change", render);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

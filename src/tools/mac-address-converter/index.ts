@@ -2,6 +2,7 @@ import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { codeBlockHtml, setCode } from "@/app/code-block";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import type { ToolDefinition } from "@/types/tool";
 import {
   formatMac,
@@ -67,7 +68,10 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <label class="mac-label" for="mac-input">MAC address(es) <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+        <div class="ipk-field-header">
+          <label class="mac-label" for="mac-input">MAC address(es) <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+          <button type="button" id="mac-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea id="mac-input" class="mono" rows="6" placeholder="Paste one or more MAC addresses, one per line..."></textarea>
         <span class="mac-error" id="mac-error" role="alert"></span>
 
@@ -158,9 +162,17 @@ const tool: ToolDefinition = {
 
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#mac-example")!;
+    const unwireExample = wireExampleButton(
+      exampleBtn,
+      input,
+      () => "00:1A:2B:3C:4D:5E\n00-1A-2B-6F-7A-8B\n001a.2b9c.de01",
+    );
+
     return () => {
       input.removeEventListener("input", render);
       unwireGlobalPaste();
+      unwireExample();
     };
   },
 };

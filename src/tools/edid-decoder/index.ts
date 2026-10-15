@@ -1,6 +1,7 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeEdidHex, parseEdidInput, type DecodedEdid, type EdidInputEntry } from "./parse";
@@ -13,6 +14,11 @@ const PS_VALUE_EXPR = `Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Enum\
 } | ConvertTo-Json`;
 
 const PS_VARIANTS = makePsCommandVariants(PS_VALUE_EXPR, { setup: PS_SETUP });
+
+// A made-up (not a real monitor) 128-byte EDID, hand-built with a valid
+// header/descriptors so "Load example" has something to decode.
+const EXAMPLE_EDID_HEX =
+  "00FFFFFFFFFFFF000AB23412EFBEADDE14220104A5351E780EEE95A3544C99260F5054FF000001010101010101010101010101010101023A801871382D40582C450009252100001E000000FC0049504B204D6F6E69746F720A20000000FF00534E2D44454D4F2D303030310A000000FE0044656D6F20454449440A202020008D";
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -287,7 +293,10 @@ const tool: ToolDefinition = {
         <p class="edd-step-label">1. Get the EDID for connected monitor(s) <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("edd-snippet")}
         <p class="edd-step-label">2. Paste anywhere on the page</p>
-        <label class="edd-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>
+        <div class="ipk-field-header">
+          <label class="edd-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>
+          <button type="button" id="edd-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="edd-input"
           class="mono"
@@ -345,11 +354,15 @@ const tool: ToolDefinition = {
     const unwireGlobalPaste = wireGlobalPaste(input);
     const unwirePsTabs = wirePsCommandTabs(container, "edd-snippet", PS_VARIANTS);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#edd-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_EDID_HEX);
+
     return () => {
       input.removeEventListener("input", render);
       results.removeEventListener("click", onResultsClick);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

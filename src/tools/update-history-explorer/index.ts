@@ -1,5 +1,6 @@
 import "./style.css";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseUpdateHistoryExport, type UpdateHistoryEntry, type UpdateHistoryParseError } from "./parse";
@@ -22,6 +23,30 @@ const PS_VARIANTS = makePsCommandVariants("$History | ConvertTo-Json -Compress",
     "@{Name='UpdateID';Expression={$_.UpdateIdentity.UpdateID}}, " +
     "@{Name='RevisionNumber';Expression={$_.UpdateIdentity.RevisionNumber}}); ",
 });
+
+const EXAMPLE_UHE_JSON = JSON.stringify([
+  {
+    Title: "2026-09 Cumulative Update for Windows 11 Version 24H2 (KB5012345)",
+    Date: "2026-09-10T15:44:16.000Z",
+    Categories: "",
+    UpdateID: "11111111-2222-3333-4444-555555555555",
+    RevisionNumber: 201,
+  },
+  {
+    Title: "Security Intelligence Update for Microsoft Defender Antivirus - KB2267602",
+    Date: "2026-10-12T08:12:03.000Z",
+    Categories: "Microsoft Defender Antivirus",
+    UpdateID: "22222222-3333-4444-5555-666666666666",
+    RevisionNumber: 1234,
+  },
+  {
+    Title: "2026-10 Security Update for Windows 11 Version 24H2 (KB5054321)",
+    Date: "2026-10-14T20:03:41.000Z",
+    Categories: "",
+    UpdateID: "33333333-4444-5555-6666-777777777777",
+    RevisionNumber: 1,
+  },
+]);
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -291,7 +316,10 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("uhe-cmd")}
 
         <p class="uhe-step-label">2. Paste anywhere on the page</p>
-        <label class="uhe-field-label" for="uhe-input">Update history (JSON)</label>
+        <div class="ipk-field-header">
+          <label class="uhe-field-label" for="uhe-input">Update history (JSON)</label>
+          <button type="button" id="uhe-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="uhe-input"
           class="mono"
@@ -418,6 +446,9 @@ const tool: ToolDefinition = {
     );
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#uhe-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_UHE_JSON);
+
     return () => {
       input.removeEventListener("input", parseInput);
       chipButtons.forEach((chip, i) => chip.removeEventListener("click", chipClickHandlers[i]));
@@ -432,6 +463,7 @@ const tool: ToolDefinition = {
       unwireCopyExcel();
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

@@ -1,5 +1,6 @@
 import "./style.css";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import {
@@ -26,6 +27,26 @@ const PS_VARIANTS = makePsCommandVariants(
   '(Select-String -Path \'C:\\ProgramData\\Microsoft\\IntuneManagementExtension\\Logs\\AppWorkload*.log\' -Pattern \'<!\\[LOG\\[Get policies = (.*?)\\]LOG\\]!><time="([^"]+)" date="([^"]+)"\').ForEach({[pscustomobject]@{Date=$_.Matches.Groups[3].Value;Time=$_.Matches.Groups[2].Value;Apps=@($_.Matches.Groups[1].Value | ConvertFrom-Json)}}) | ConvertTo-Json -Depth 12 -Compress',
   { varName: "ime" },
 );
+
+const EXAMPLE_IME_JSON = JSON.stringify([
+  {
+    Date: "10-5-2026",
+    Time: "14:22:10.123+120",
+    Apps: [
+      { Id: "11111111-2222-3333-4444-555555555555", Name: "7-Zip", Version: 24, Intent: 1, TargetType: 2 },
+      { Id: "22222222-3333-4444-5555-666666666666", Name: "Notepad++", Version: 8, Intent: 1, TargetType: 2 },
+    ],
+  },
+  {
+    Date: "10-5-2026",
+    Time: "14:45:02.456+120",
+    Apps: [
+      { Id: "11111111-2222-3333-4444-555555555555", Name: "7-Zip", Version: 24, Intent: 1, TargetType: 2 },
+      { Id: "22222222-3333-4444-5555-666666666666", Name: "Notepad++", Version: 9, Intent: 1, TargetType: 2 },
+      { Id: "33333333-4444-5555-6666-777777777777", Name: "IPK Agent", Version: 2, Intent: 4, TargetType: 2 },
+    ],
+  },
+]);
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -353,7 +374,10 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
 
         <p class="ima-step-label">2. Paste anywhere on the page</p>
-        <label class="ima-field-label" for="ima-input">AppWorkload log contents (JSON)</label>
+        <div class="ipk-field-header">
+          <label class="ima-field-label" for="ima-input">AppWorkload log contents (JSON)</label>
+          <button type="button" id="ima-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="ima-input"
           class="mono"
@@ -464,6 +488,9 @@ const tool: ToolDefinition = {
     hideGapsInput.addEventListener("change", render);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#ima-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_IME_JSON);
+
     const onTimelineClick = async (e: MouseEvent) => {
       const guidEl = (e.target as HTMLElement).closest<HTMLElement>(".ima-app-guid");
       if (!guidEl) return;
@@ -486,6 +513,7 @@ const tool: ToolDefinition = {
       timelineEl.removeEventListener("click", onTimelineClick);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

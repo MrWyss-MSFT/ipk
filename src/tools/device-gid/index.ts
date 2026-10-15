@@ -1,6 +1,7 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
+import { wireExampleButton } from "@/app/example-button";
 import type { ToolDefinition } from "@/types/tool";
 import { gidToLid, lidToGid } from "./convert";
 
@@ -41,7 +42,10 @@ const tool: ToolDefinition = {
         <p class="gid-step-label">2. Enter either value — the other updates automatically</p>
         <div class="gid-fields">
           <div class="gid-field">
-            <label class="gid-field-label" for="gid-lid">LID (hex)</label>
+            <div class="ipk-field-header">
+              <label class="gid-field-label" for="gid-lid">LID (hex)</label>
+              <button type="button" id="gid-example" class="ipk-example-btn">Load example</button>
+            </div>
             <div class="ipk-copy-wrap">
               <input type="text" id="gid-lid" class="mono" placeholder="0a1b2c3d4e5f6071" />
               ${copyButtonHtml("gid-copy-lid")}
@@ -104,10 +108,14 @@ const tool: ToolDefinition = {
     wireCopyButton(copyLidBtn, () => lidInput.value);
     wireCopyButton(copyGidBtn, () => gidInput.value);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#gid-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, lidInput, () => "0a1b2c3d4e5f6071");
+
     return () => {
       lidInput.removeEventListener("input", fromLid);
       gidInput.removeEventListener("input", fromGid);
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

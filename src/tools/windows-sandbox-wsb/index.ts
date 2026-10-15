@@ -2,6 +2,7 @@ import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton, autoGrowTextarea } from "@/app/copy-button";
 import { codeBlockHtml, setCode, setPowerShellCode } from "@/app/code-block";
+import { wireExampleButton } from "@/app/example-button";
 import { buildWsbXml, parseMappedFoldersText, type TriState, type WsbConfig } from "./parse";
 
 const TRI_STATE_OPTIONS: TriState[] = ["Default", "Enable", "Disable"];
@@ -124,15 +125,15 @@ const tool: ToolDefinition = {
           </label>
         </div>
 
-        <div class="wsb-field-header">
+        <div class="ipk-field-header">
           ${forLabelHtml("Logon command", "A single command run automatically after the sandbox signs in - e.g. launching an app or a script from a mapped folder.", "wsb-logon")}
-          <button type="button" id="wsb-logon-example" class="wsb-populate-btn">Use example</button>
+          <button type="button" id="wsb-logon-example" class="ipk-example-btn">Load example</button>
         </div>
         <input id="wsb-logon" class="mono" type="text" placeholder="e.g. explorer.exe C:\\Users\\WDAGUtilityAccount\\Desktop" />
 
-        <div class="wsb-field-header">
+        <div class="ipk-field-header">
           ${forLabelHtml("Mapped folders", "Shares host folders into the sandbox, read-only or read/write. Changes made in a write-enabled folder persist on the host after the sandbox closes.", "wsb-folders")}
-          <button type="button" id="wsb-folders-example" class="wsb-populate-btn">Use example</button>
+          <button type="button" id="wsb-folders-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea id="wsb-folders" class="mono wsb-folders-input" rows="3" placeholder="C:\\Users\\Public\\Downloads&#10;C:\\Tools => C:\\Users\\WDAGUtilityAccount\\Desktop\\Tools&#10;C:\\Secrets => C:\\Secrets (readonly)"></textarea>
         <p class="wsb-hint">
@@ -213,14 +214,8 @@ const tool: ToolDefinition = {
     };
     foldersInput.addEventListener("input", onFoldersInput);
 
-    logonExampleBtn.addEventListener("click", () => {
-      logonInput.value = EXAMPLE_LOGON_COMMAND;
-      logonInput.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-    foldersExampleBtn.addEventListener("click", () => {
-      foldersInput.value = EXAMPLE_MAPPED_FOLDERS;
-      foldersInput.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    const unwireLogonExample = wireExampleButton(logonExampleBtn, logonInput, () => EXAMPLE_LOGON_COMMAND);
+    const unwireFoldersExample = wireExampleButton(foldersExampleBtn, foldersInput, () => EXAMPLE_MAPPED_FOLDERS);
 
     wireCopyButton(copyBtn, () => currentXml);
     downloadBtn.addEventListener("click", () => downloadWsb("Sandbox.wsb", currentXml));
@@ -253,6 +248,8 @@ const tool: ToolDefinition = {
     return () => {
       allInputs.forEach((el) => el.removeEventListener("input", render));
       foldersInput.removeEventListener("input", onFoldersInput);
+      unwireLogonExample();
+      unwireFoldersExample();
     };
   },
 };

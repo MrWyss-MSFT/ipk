@@ -1,6 +1,7 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
@@ -8,6 +9,12 @@ import { decodeAutopilotHashBase64 } from "./decode";
 const PS_VARIANTS = makePsCommandVariants(
   '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData',
 );
+
+// A made-up (not a real device) hardware hash, hand-built as a minimal valid
+// TLV structure so "Load example" has something to decode without needing a
+// real Windows device.
+const EXAMPLE_HASH_BASE64 =
+  "NEuIAAMAEABHZW51aW5lSW50ZWwEAB4ASW50ZWwoUikgQ29yZShUTSkgaTctMTI2NVUOAA4ASVBLMTIzNDU2NxAAFABJUEsgLSBJVCBQcm8gS2l0EQAZAElQSyBJVCBQcm8gS2l0IERldmljZRgAGwAwMDMyOS0wMDAwMC0wMDAwMy1BQTExMQ==";
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -91,7 +98,10 @@ const tool: ToolDefinition = {
         <p class="aph-step-label">1. Get the hardware hash <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
         <p class="aph-step-label">2. Paste anywhere on the page</p>
-        <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
+        <div class="ipk-field-header">
+          <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
+          <button type="button" id="aph-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="aph-input"
           class="mono"
@@ -164,11 +174,15 @@ const tool: ToolDefinition = {
     wireCopyButton(copyBtn, () => rawJson);
     const unwirePsTabs = wirePsCommandTabs(container, "aph-snippet", PS_VARIANTS);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#aph-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_HASH_BASE64);
+
     return () => {
       input.removeEventListener("input", render);
       output.removeEventListener("click", onOutputClick);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

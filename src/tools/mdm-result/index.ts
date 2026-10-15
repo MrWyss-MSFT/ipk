@@ -1,5 +1,6 @@
 import "./style.css";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseMdmDiagReport, type CspPolicyRow } from "./parse";
@@ -39,6 +40,29 @@ const PS_VARIANTS = makePsCommandVariants("$Xml.OuterXml", {
     "$Xml.SelectNodes('//PolicyManagerMeta/AreaMetadata/PolicyMetadata') | Where-Object { -not $Keep.Contains(\"$($_.ParentNode.PolicyAreaName)|$($_.PolicyName)\") } | ForEach-Object { [void]$_.ParentNode.RemoveChild($_) }; ",
   varName: "report",
 });
+
+// A made-up (not a real device) MDMDiagReport.xml fragment with one
+// enrollment and one configured policy, so "Load example" has something
+// to render.
+const EXAMPLE_MDM_XML =
+  "<MDMEnterpriseDiagnosticsReport>" +
+  "<Enrollments><Enrollment><EnrollmentId>11111111-1111-1111-1111-111111111111</EnrollmentId><ProviderID>MS DM Server</ProviderID></Enrollment></Enrollments>" +
+  "<PolicyManager>" +
+  "<ConfigSource><EnrollmentId>11111111-1111-1111-1111-111111111111</EnrollmentId>" +
+  "<PolicyScope><PolicyScope>Device</PolicyScope><Area><PolicyAreaName>System</PolicyAreaName>" +
+  "<AllowTelemetry>1</AllowTelemetry><AllowTelemetry_LastWrite>132123456780000000</AllowTelemetry_LastWrite>" +
+  "</Area></PolicyScope></ConfigSource>" +
+  "<currentPolicies><PolicyScope>device</PolicyScope><CurrentPolicyValues><PolicyAreaName>System</PolicyAreaName>" +
+  "<AllowTelemetry_WinningProvider>11111111-1111-1111-1111-111111111111</AllowTelemetry_WinningProvider>" +
+  "<AllowTelemetry_ProviderSet>11111111-1111-1111-1111-111111111111</AllowTelemetry_ProviderSet>" +
+  "</CurrentPolicyValues></currentPolicies>" +
+  "</PolicyManager>" +
+  "<PolicyManagerMeta><AreaMetadata><PolicyAreaName>System</PolicyAreaName>" +
+  "<PolicyMetadata><PolicyName>AllowTelemetry</PolicyName><value>0</value></PolicyMetadata>" +
+  "</AreaMetadata></PolicyManagerMeta>" +
+  "</MDMEnterpriseDiagnosticsReport>";
+
+
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -147,7 +171,10 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
 
         <p class="mdm-step-label">2. Paste anywhere on the page</p>
-        <label class="mdm-field-label" for="mdm-input">MDM diagnostics report (XML)</label>
+        <div class="ipk-field-header">
+          <label class="mdm-field-label" for="mdm-input">MDM diagnostics report (XML)</label>
+          <button type="button" id="mdm-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="mdm-input"
           class="mono"
@@ -343,11 +370,15 @@ const tool: ToolDefinition = {
     filterInput.addEventListener("input", renderTable);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#mdm-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_MDM_XML);
+
     return () => {
       input.removeEventListener("input", render);
       filterInput.removeEventListener("input", renderTable);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

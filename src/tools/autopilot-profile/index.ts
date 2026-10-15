@@ -1,5 +1,6 @@
 import "./style.css";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
@@ -7,6 +8,22 @@ import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
 const PS_VARIANTS = makePsCommandVariants(
   '(Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotPolicyCache" -Name PolicyJsonCache).PolicyJsonCache',
 );
+
+const EXAMPLE_PROFILE_JSON = JSON.stringify({
+  CloudAssignedTenantDomain: "ipkitprokit.onmicrosoft.com",
+  CloudAssignedTenantId: "11111111-2222-3333-4444-555555555555",
+  DeploymentProfileName: "IPK - IT Pro Kit Autopilot",
+  CloudAssignedDeviceName: "IPK-%SERIAL%",
+  CloudAssignedRegion: "US",
+  CloudAssignedLanguage: "en-US",
+  AutopilotMode: 0,
+  CloudAssignedDomainJoinMethod: 0,
+  CloudAssignedOobeConfig: 28,
+  CloudAssignedForcedEnrollment: 1,
+  IsExplicitProfileAssignment: true,
+  ZtdRegistrationId: "66666666-7777-8888-9999-000000000000",
+  PolicyDownloadDate: "2026-10-05T13:19:26.888Z",
+});
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -123,12 +140,15 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("apc-cmd")}
 
         <p class="apc-step-label">2. Paste anywhere on the page</p>
-        <label class="apc-field-label" for="apc-input">Autopilot profile JSON (PolicyJsonCache)</label>
+        <div class="ipk-field-header">
+          <label class="apc-field-label" for="apc-input">Autopilot profile JSON (PolicyJsonCache)</label>
+          <button type="button" id="apc-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="apc-input"
           class="mono"
           rows="6"
-          placeholder='{"CloudAssignedTenantDomain":"contoso.onmicrosoft.com","DeploymentProfileName":"Contoso Autopilot","CloudAssignedDeviceName":"CNTS-%SERIAL%","AutopilotMode":0,"CloudAssignedOobeConfig":28,...}'
+          placeholder='{"CloudAssignedTenantDomain":"ipkitprokit.onmicrosoft.com","DeploymentProfileName":"IPK - IT Pro Kit Autopilot","CloudAssignedDeviceName":"IPK-%SERIAL%","AutopilotMode":0,"CloudAssignedOobeConfig":28,...}'
         ></textarea>
         <div id="apc-status" class="apc-status" role="alert"></div>
 
@@ -168,10 +188,14 @@ const tool: ToolDefinition = {
     input.addEventListener("input", render);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#apc-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_PROFILE_JSON);
+
     return () => {
       input.removeEventListener("input", render);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

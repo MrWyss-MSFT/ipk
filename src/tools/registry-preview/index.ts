@@ -2,6 +2,7 @@ import "./style.css";
 import { codeBlockHtml, setCode } from "@/app/code-block";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import type { ToolDefinition } from "@/types/tool";
 import { parseRegFile, type RegKeyNode, type RegValue } from "./parser";
 
@@ -97,12 +98,13 @@ const tool: ToolDefinition = {
         <div class="rgp-input-row">
           <label class="btn" for="rgp-file">📂 Load .reg file</label>
           <input type="file" id="rgp-file" accept=".reg,text/plain" hidden />
-          <button type="button" class="btn" id="rgp-example">Load example</button>
-          <button type="button" class="btn" id="rgp-clear">Clear</button>
           <span class="rgp-count" id="rgp-count"></span>
         </div>
 
-        <label class="rgp-field-label" for="rgp-input">.reg file contents</label>
+        <div class="ipk-field-header">
+          <label class="rgp-field-label" for="rgp-input">.reg file contents</label>
+          <button type="button" id="rgp-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="rgp-input"
           class="mono rgp-raw"
@@ -129,7 +131,6 @@ const tool: ToolDefinition = {
 
     const fileInput = container.querySelector<HTMLInputElement>("#rgp-file")!;
     const exampleBtn = container.querySelector<HTMLButtonElement>("#rgp-example")!;
-    const clearBtn = container.querySelector<HTMLButtonElement>("#rgp-clear")!;
     const countEl = container.querySelector<HTMLSpanElement>("#rgp-count")!;
     const exportCmdEl = container.querySelector<HTMLElement>("#rgp-export-cmd")!;
     const exportCopyBtn = container.querySelector<HTMLButtonElement>("#rgp-export-copy")!;
@@ -403,18 +404,7 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", parse);
 
-    // Setting .value programmatically doesn't fire a native "input" event, which the generic
-    // sessionStorage persistence (wired in layout.ts) relies on - dispatch one explicitly so this
-    // survives switching tools/apps, not just manually typed input.
-    exampleBtn.addEventListener("click", () => {
-      input.value = EXAMPLE_REG;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-
-    clearBtn.addEventListener("click", () => {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_REG);
 
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files?.[0];
@@ -431,6 +421,7 @@ const tool: ToolDefinition = {
     return () => {
       input.removeEventListener("input", parse);
       unwireGlobalPaste();
+      unwireExample();
     };
   },
 };

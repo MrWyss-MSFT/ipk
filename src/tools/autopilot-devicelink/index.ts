@@ -3,6 +3,7 @@ import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
 import { wireFileDrop } from "@/app/file-drop";
+import { wireExampleButton } from "@/app/example-button";
 import {
   isDeviceLinkPayload,
   parseDeviceLinkUrl,
@@ -16,6 +17,27 @@ import {
   type DeviceLinkInfo,
   type DeviceLinkCsvRowError,
 } from "@/app/devicelink";
+
+/** A made-up but structurally valid record, rendered to `.devicelink.csv` text for the "Load example" button. */
+const EXAMPLE_DEVICELINK_INFO: DeviceLinkInfo = {
+  version: "1.0",
+  deviceLinkCreationTimeUtc: "2024-01-01T00:00:00Z",
+  serialNumber: "IPK1234567",
+  manufacturer: "IPK - IT Pro Kit",
+  modelName: "IPK IT Pro Kit Device",
+  smbiosUuid: "12345678-1234-1234-1234-123456789012",
+  linkId: "87654321-4321-4321-4321-210987654321",
+  linkIdCreationTimeUtc: "2024-01-01T00:00:00Z",
+  keys: [
+    { keyName: "DeviceKey", keyId: "0123456789abcdef0123456789abcdef", keyType: 1, keyPub: "SGVsbG8gZnJvbSBJUEs=" },
+  ],
+  signingAlgorithm: "RS256",
+  signingKeyName: "DeviceKey",
+  signature: "SGVsbG8gZnJvbSBJUEsgLSBJVCBQcm8gS2l0IQ==",
+  signaturePssHashAlgorithm: "SHA256",
+  signaturePssSaltLength: 32,
+  rawJson: "",
+};
 
 function escapeHtml(value: string): string {
   const div = document.createElement("div");
@@ -147,7 +169,10 @@ const tool: ToolDefinition = {
             or drop the .devicelink.csv file, or paste anywhere on the page
           </span>
         </p>
-        <label class="adl-input-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
+        <div class="ipk-field-header">
+          <label class="adl-input-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
+          <button type="button" class="btn ipk-example-btn" id="adl-example">Load example</button>
+        </div>
         <textarea
           id="adl-input"
           class="adl-raw"
@@ -235,6 +260,9 @@ const tool: ToolDefinition = {
     input.addEventListener("input", () => void decode());
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#adl-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => buildDeviceLinkCsvText(EXAMPLE_DEVICELINK_INFO));
+
     // Setting .value programmatically doesn't fire a native "input" event, which is what both
     // our own listener above and the generic sessionStorage persistence (wired in layout.ts) rely
     // on - dispatch one explicitly so file-loaded content decodes and survives switching tools/apps.
@@ -258,6 +286,7 @@ const tool: ToolDefinition = {
     return () => {
       unwireGlobalPaste();
       unwireFileDrop();
+      unwireExample();
     };
   },
 };

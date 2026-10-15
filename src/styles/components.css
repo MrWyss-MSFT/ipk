@@ -727,6 +727,32 @@ body.ipk-theater-mode .ipk-tool-header {
   color: var(--text-muted);
 }
 
+/* Header row for a field label with a trailing "Load example" button (see
+   .ipk-example-btn) - lets users try a tool without needing real data. */
+.ipk-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.ipk-example-btn {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ipk-example-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
 /* Shared "hint/tip" callout for a tool's short usage note, and its "warning"
    variant for more cautionary notes (e.g. a caveat about time zones). Both
    distinguish themselves from plain card-like boxes (which share the same

@@ -1,11 +1,17 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import type { ToolDefinition } from "@/types/tool";
 import { REDACTION_RULES } from "./patterns";
 import { redactText } from "./redact";
 
 const DEFAULT_REPLACEMENT = "[REDACTED]";
+
+const EXAMPLE_TEXT = `Hi Jane Doe, following up on Project Phoenix for IPK - IT Pro Kit.
+Reach me at jane.doe@ipkitprokit.com or +1 (555) 123-4567.
+The staging server is at 192.168.1.42, see https://staging.ipkitprokit.com/status for details.
+Card on file ends in 4242 4242 4242 4242, IBAN DE89 3704 0044 0532 0130 00.`;
 
 function ruleCheckboxHtml(rule: (typeof REDACTION_RULES)[number]): string {
   return `
@@ -59,7 +65,7 @@ const tool: ToolDefinition = {
               type="text"
               id="rdx-custom"
               class="mono"
-              placeholder="Contoso, Project Phoenix, Jane Doe"
+              placeholder="IPK - IT Pro Kit, Project Phoenix, Jane Doe"
             />
 
             <label class="rdx-field-label" for="rdx-replacement">Replacement text</label>
@@ -67,7 +73,10 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <label class="rdx-field-label" for="rdx-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+        <div class="ipk-field-header">
+          <label class="rdx-field-label" for="rdx-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+          <button type="button" id="rdx-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea id="rdx-input" rows="10" placeholder="Paste text here..."></textarea>
 
         <div class="rdx-summary" id="rdx-summary" role="status"></div>
@@ -126,6 +135,9 @@ const tool: ToolDefinition = {
     wireCopyButton(copyBtn, () => output.value);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#rdx-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_TEXT);
+
     render();
 
     return () => {
@@ -134,6 +146,7 @@ const tool: ToolDefinition = {
       replacementInput.removeEventListener("input", render);
       ruleChecks.forEach((c) => c.removeEventListener("change", render));
       unwireGlobalPaste();
+      unwireExample();
     };
   },
 };

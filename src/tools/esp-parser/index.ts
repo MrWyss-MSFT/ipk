@@ -1,5 +1,6 @@
 import "./style.css";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse";
@@ -7,6 +8,54 @@ import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse
 const PS_VARIANTS = makePsCommandVariants("$Values | ConvertTo-Json -Compress", {
   setup:
     '$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Provisioning\\AutopilotSettings"; $Values = @{}; (Get-Item $RegPath).Property -like "*Category.Status*" | ForEach-Object { $Values[$_] = Get-ItemPropertyValue $RegPath -Name $_ }; ',
+});
+
+// Shaped after a real (anonymized) AutopilotSettings export, which is why the
+// per-phase substep keys look like "AccountSetup.AppsSubcategory" rather than
+// "AccountSetupCategory.Apps" - see stripPhasePrefix()'s doc comment.
+const EXAMPLE_ESP_JSON = JSON.stringify({
+  "DevicePreparationCategory.Status": JSON.stringify({
+    categoryState: "succeeded",
+    categoryStatusText: "Completed",
+    "DevicePreparation.TpmAttestationSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Securing your hardware (Completed)",
+    },
+    "DevicePreparation.AadjSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Joining your organization's network (Completed)",
+    },
+    "DevicePreparation.MdmEnrollmentSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Registering your device for mobile management (Completed)",
+    },
+  }),
+  "DeviceSetupCategory.Status": JSON.stringify({
+    categoryState: "succeeded",
+    categoryStatusText: "Completed",
+    "DeviceSetup.SecurityPoliciesSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Security policies (1 of 1 applied)",
+    },
+    "DeviceSetup.AppsSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Apps (3 of 3 installed)",
+    },
+    "DeviceSetup.SendResultsToMdmServer": { subcategoryState: "succeeded", subcategoryStatusText: "succeeded" },
+  }),
+  "AccountSetupCategory.Status.2026-10-05T13:19:26.888Z": JSON.stringify({
+    categoryState: "succeeded",
+    categoryStatusText: "Completed",
+    "AccountSetup.WaitingForAadRegistrationSubcategory": {
+      subcategoryState: "succeeded",
+      subcategoryStatusText: "Joining your organization's network (Completed)",
+    },
+    "AccountSetup.AppsSubcategory": {
+      subcategoryState: "inProgress",
+      subcategoryStatusText: "Apps (No setup needed)",
+    },
+    "AccountSetup.SendResultsToMdmServer": { subcategoryState: "succeeded", subcategoryStatusText: "succeeded" },
+  }),
 });
 
 /** Best-effort bucket for coloring a status badge; falls back to "unknown" for anything unrecognized. */
@@ -86,7 +135,10 @@ const tool: ToolDefinition = {
         ${psCommandTabsHtml("esp-cmd")}
 
         <p class="esp-step-label">2. Paste anywhere on the page</p>
-        <label class="esp-field-label" for="esp-input">ESP registry values (JSON)</label>
+        <div class="ipk-field-header">
+          <label class="esp-field-label" for="esp-input">ESP registry values (JSON)</label>
+          <button type="button" id="esp-example" class="ipk-example-btn">Load example</button>
+        </div>
         <textarea
           id="esp-input"
           class="mono"
@@ -131,10 +183,14 @@ const tool: ToolDefinition = {
     input.addEventListener("input", render);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#esp-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_ESP_JSON);
+
     return () => {
       input.removeEventListener("input", render);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

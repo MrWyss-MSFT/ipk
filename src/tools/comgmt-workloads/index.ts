@@ -1,6 +1,7 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import {
@@ -37,7 +38,10 @@ const tool: ToolDefinition = {
         <p class="cmw-step-label">1. Get the ComgmtWorkloads value on a co-managed device <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("cmw-snippet", { requiresAdmin: true })}
         <p class="cmw-step-label">2. Paste anywhere on the page</p>
-        <label class="cmw-field-label" for="cmw-input">ComgmtWorkloads value</label>
+        <div class="ipk-field-header">
+          <label class="cmw-field-label" for="cmw-input">ComgmtWorkloads value</label>
+          <button type="button" id="cmw-example" class="ipk-example-btn">Load example</button>
+        </div>
         <input id="cmw-input" class="mono" type="text" placeholder="e.g. 8193" value="8193" />
         <span class="cmw-error" id="cmw-error" role="alert"></span>
         <p class="cmw-note">Tick or untick workloads below to build the value the other way around.</p>
@@ -169,12 +173,16 @@ const tool: ToolDefinition = {
     const unwirePsTabs = wirePsCommandTabs(container, "cmw-snippet", PS_VARIANTS);
     wireCopyButton(intuneCopyBtn, () => intuneCopyText);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#cmw-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () => "8259");
+
     renderFromValue();
 
     return () => {
       input.removeEventListener("input", renderFromValue);
       unwireGlobalPaste();
       unwirePsTabs();
+      unwireExample();
     };
   },
 };

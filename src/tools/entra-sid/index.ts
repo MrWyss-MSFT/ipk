@@ -1,6 +1,7 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
+import { wireExampleButton } from "@/app/example-button";
 import type { ToolDefinition } from "@/types/tool";
 import { detectSidCloud, objectIdToSid, sidToObjectId, type SidCloud } from "./convert";
 
@@ -28,7 +29,10 @@ const tool: ToolDefinition = {
           <label><input type="radio" name="sid-cloud" value="gcc-high" /> GCC-High</label>
         </div>
 
-        <label class="sid-field-label" id="sid-input-label" for="sid-input">Entra ID ObjectID (GUID)</label>
+        <div class="ipk-field-header">
+          <label class="sid-field-label" id="sid-input-label" for="sid-input">Entra ID ObjectID (GUID)</label>
+          <button type="button" id="sid-example" class="ipk-example-btn">Load example</button>
+        </div>
         <input type="text" id="sid-input" class="mono" placeholder="4f29d7a1-8b3e-4c6a-9f12-3d7e5a8b61c0" />
 
         <span class="sid-error" id="sid-error" role="alert"></span>
@@ -117,11 +121,19 @@ const tool: ToolDefinition = {
     wireCopyButton(copyBtn, () => output.value);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
+    const exampleBtn = container.querySelector<HTMLButtonElement>("#sid-example")!;
+    const unwireExample = wireExampleButton(exampleBtn, input, () =>
+      mode === "objectid-to-sid"
+        ? "4f29d7a1-8b3e-4c6a-9f12-3d7e5a8b61c0"
+        : "S-1-12-1-1328142241-1282050878-2117931679-3227618138",
+    );
+
     setMode(mode);
 
     return () => {
       input.removeEventListener("input", render);
       unwireGlobalPaste();
+      unwireExample();
     };
   },
 };
