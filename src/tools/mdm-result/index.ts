@@ -1,4 +1,5 @@
 import "./style.css";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseMdmDiagReport, type CspPolicyRow } from "./parse";
@@ -145,7 +146,8 @@ const tool: ToolDefinition = {
         <p class="mdm-step-label">1. Run this on the device — copies to clipboard</p>
         ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
 
-        <label class="mdm-step-label" for="mdm-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="mdm-step-label">2. Paste anywhere on the page</p>
+        <label class="mdm-field-label" for="mdm-input">MDM diagnostics report (XML)</label>
         <textarea
           id="mdm-input"
           class="mono"
@@ -339,10 +341,12 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     filterInput.addEventListener("input", renderTable);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     return () => {
       input.removeEventListener("input", render);
       filterInput.removeEventListener("input", renderTable);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

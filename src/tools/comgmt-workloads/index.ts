@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import {
@@ -35,7 +36,8 @@ const tool: ToolDefinition = {
       <div class="cmw-tool">
         <p class="cmw-step-label">1. Get the value on a co-managed device (copies to clipboard)</p>
         ${psCommandTabsHtml("cmw-snippet", { requiresAdmin: true })}
-        <label class="cmw-step-label" for="cmw-input">2. ComgmtWorkloads value</label>
+        <p class="cmw-step-label">2. Paste anywhere on the page</p>
+        <label class="cmw-field-label" for="cmw-input">ComgmtWorkloads value</label>
         <input id="cmw-input" class="mono" type="text" placeholder="e.g. 8193" value="8193" />
         <span class="cmw-error" id="cmw-error" role="alert"></span>
         <p class="cmw-note">Tick or untick workloads below to build the value the other way around.</p>
@@ -163,6 +165,7 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", renderFromValue);
+    const unwireGlobalPaste = wireGlobalPaste(input);
     const unwirePsTabs = wirePsCommandTabs(container, "cmw-snippet", PS_VARIANTS);
     wireCopyButton(intuneCopyBtn, () => intuneCopyText);
 
@@ -170,6 +173,7 @@ const tool: ToolDefinition = {
 
     return () => {
       input.removeEventListener("input", renderFromValue);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

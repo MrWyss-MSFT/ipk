@@ -58,6 +58,12 @@
   color: var(--text-muted);
 }
 
+.adl-input-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: calc(var(--space-1) - var(--space-4));
+}
+
 .adl-field-value {
   width: 100%;
 }

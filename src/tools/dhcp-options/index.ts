@@ -1,5 +1,6 @@
 import "./style.css";
 import { autoGrowTextarea } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { hexToBytes, parseDhcpInterfaceOptions, type ParsedDhcpOption } from "./parser";
@@ -60,7 +61,8 @@ const tool: ToolDefinition = {
         <p class="dho-step-label">1. Run this on the client — copies the DHCP options as hex to clipboard (pick the NIC you care about from the output)</p>
         ${psCommandTabsHtml("dho-ps")}
 
-        <label class="dho-step-label" for="dho-input">2. Paste the hex here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="dho-step-label">2. Paste anywhere on the page</p>
+        <label class="dho-field-label" for="dho-input">DHCP interface options (hex)</label>
         <textarea
           id="dho-input"
           class="mono dho-input"
@@ -141,6 +143,7 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     hideEmptyCheck.addEventListener("change", render);
+    const unwireGlobalPaste = wireGlobalPaste(input);
     // Setting .value programmatically doesn't fire a native "input" event, which the generic
     // sessionStorage persistence (wired in layout.ts) relies on - dispatch one explicitly so this
     // survives switching tools/apps, not just manually typed input.
@@ -158,6 +161,7 @@ const tool: ToolDefinition = {
     return () => {
       input.removeEventListener("input", render);
       hideEmptyCheck.removeEventListener("change", render);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

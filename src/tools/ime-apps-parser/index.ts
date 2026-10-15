@@ -1,4 +1,5 @@
 import "./style.css";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import {
@@ -351,7 +352,8 @@ const tool: ToolDefinition = {
         <p class="ima-step-label">1. Run this on the device — copies to clipboard</p>
         ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
 
-        <label class="ima-step-label" for="ima-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="ima-step-label">2. Paste anywhere on the page</p>
+        <label class="ima-field-label" for="ima-input">AppWorkload log contents (JSON)</label>
         <textarea
           id="ima-input"
           class="mono"
@@ -460,6 +462,7 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     hideGapsInput.addEventListener("change", render);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     const onTimelineClick = async (e: MouseEvent) => {
       const guidEl = (e.target as HTMLElement).closest<HTMLElement>(".ima-app-guid");
@@ -481,6 +484,7 @@ const tool: ToolDefinition = {
       input.removeEventListener("input", render);
       hideGapsInput.removeEventListener("change", render);
       timelineEl.removeEventListener("click", onTimelineClick);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

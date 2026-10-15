@@ -1,6 +1,7 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { codeBlockHtml, setCode } from "@/app/code-block";
+import { wireGlobalPaste } from "@/app/global-paste";
 import type { ToolDefinition } from "@/types/tool";
 import {
   formatMac,
@@ -66,7 +67,7 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <label class="mac-label" for="mac-input">MAC address(es)</label>
+        <label class="mac-label" for="mac-input">MAC address(es) <span class="ipk-paste-note">— paste anywhere on the page</span></label>
         <textarea id="mac-input" class="mono" rows="6" placeholder="Paste one or more MAC addresses, one per line..."></textarea>
         <span class="mac-error" id="mac-error" role="alert"></span>
 
@@ -155,8 +156,11 @@ const tool: ToolDefinition = {
 
     render();
 
+    const unwireGlobalPaste = wireGlobalPaste(input);
+
     return () => {
       input.removeEventListener("input", render);
+      unwireGlobalPaste();
     };
   },
 };

@@ -1,5 +1,6 @@
 import "./style.css";
 import { autoGrowTextarea, copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import type { ToolDefinition } from "@/types/tool";
 
 /** UTF-8 safe Base64 encode. */
@@ -31,7 +32,7 @@ const tool: ToolDefinition = {
           <button type="button" class="btn btn-primary" data-mode="encode">Encode</button>
           <button type="button" class="btn" data-mode="decode">Decode</button>
         </div>
-        <label class="b64-label" for="b64-input">Input</label>
+        <label class="b64-label" for="b64-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
         <textarea id="b64-input" class="mono" rows="8" placeholder="Type or paste text here..."></textarea>
         <span class="b64-error" id="b64-error" role="alert"></span>
         <label class="b64-label" for="b64-output">Output</label>
@@ -81,6 +82,7 @@ const tool: ToolDefinition = {
     });
 
     input.addEventListener("input", render);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     wireCopyButton(copyBtn, () => output.value);
 
@@ -88,6 +90,7 @@ const tool: ToolDefinition = {
     // reset, which is harmless if the view is torn down mid-flight.
     return () => {
       input.removeEventListener("input", render);
+      unwireGlobalPaste();
     };
   },
 };

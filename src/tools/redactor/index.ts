@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import type { ToolDefinition } from "@/types/tool";
 import { REDACTION_RULES } from "./patterns";
 import { redactText } from "./redact";
@@ -66,7 +67,7 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <label class="rdx-field-label" for="rdx-input">Input</label>
+        <label class="rdx-field-label" for="rdx-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
         <textarea id="rdx-input" rows="10" placeholder="Paste text here..."></textarea>
 
         <div class="rdx-summary" id="rdx-summary" role="status"></div>
@@ -123,6 +124,7 @@ const tool: ToolDefinition = {
     ruleChecks.forEach((c) => c.addEventListener("change", render));
 
     wireCopyButton(copyBtn, () => output.value);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     render();
 
@@ -131,6 +133,7 @@ const tool: ToolDefinition = {
       customInput.removeEventListener("input", render);
       replacementInput.removeEventListener("input", render);
       ruleChecks.forEach((c) => c.removeEventListener("change", render));
+      unwireGlobalPaste();
     };
   },
 };

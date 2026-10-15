@@ -12,7 +12,7 @@
 .aph-label {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-top: var(--space-2);
+  margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
 .aph-step-label {

@@ -1,4 +1,5 @@
 import "./style.css";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseUpdateHistoryExport, type UpdateHistoryEntry, type UpdateHistoryParseError } from "./parse";
@@ -289,7 +290,8 @@ const tool: ToolDefinition = {
         <p class="uhe-step-label">1. Run this on the device — copies the full history to clipboard as JSON</p>
         ${psCommandTabsHtml("uhe-cmd")}
 
-        <label class="uhe-step-label" for="uhe-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="uhe-step-label">2. Paste anywhere on the page</p>
+        <label class="uhe-field-label" for="uhe-input">Update history (JSON)</label>
         <textarea
           id="uhe-input"
           class="mono"
@@ -414,6 +416,7 @@ const tool: ToolDefinition = {
     const unwireCopyExcel = wireLabeledCopyButton(copyExcelBtn, () =>
       filtered.length > 0 ? entriesToTable(filtered, "\t") : "",
     );
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     return () => {
       input.removeEventListener("input", parseInput);
@@ -427,6 +430,7 @@ const tool: ToolDefinition = {
       }
       unwireCopyCsv();
       unwireCopyExcel();
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

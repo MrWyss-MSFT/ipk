@@ -10,6 +10,12 @@
   color: var(--text);
 }
 
+.edd-field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 calc(var(--space-1) - var(--space-2));
+}
+
 .edd-tool textarea {
   font-size: 0.85rem;
   width: 100%;

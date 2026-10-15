@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeEdidHex, parseEdidInput, type DecodedEdid, type EdidInputEntry } from "./parse";
@@ -285,7 +286,8 @@ const tool: ToolDefinition = {
       <div class="edd-tool">
         <p class="edd-step-label">1. Get the EDID for connected monitor(s) on a Windows device (copies to clipboard)</p>
         ${psCommandTabsHtml("edd-snippet")}
-        <label class="edd-step-label" for="edd-input">2. EDID hex, or the JSON from the command above</label>
+        <p class="edd-step-label">2. Paste anywhere on the page</p>
+        <label class="edd-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>
         <textarea
           id="edd-input"
           class="mono"
@@ -340,11 +342,13 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     results.addEventListener("click", onResultsClick);
+    const unwireGlobalPaste = wireGlobalPaste(input);
     const unwirePsTabs = wirePsCommandTabs(container, "edd-snippet", PS_VARIANTS);
 
     return () => {
       input.removeEventListener("input", render);
       results.removeEventListener("click", onResultsClick);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

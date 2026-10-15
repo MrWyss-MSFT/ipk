@@ -1,6 +1,7 @@
 import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import {
   isDeviceLinkPayload,
   parseDeviceLinkUrl,
@@ -142,7 +143,8 @@ const tool: ToolDefinition = {
           or scan a DeviceLink QR code with the <a href="#/tool/qr-scanner">QR Code Scanner</a> tool
         </p>
 
-        <label class="adl-step-label" for="adl-input">2. Paste it here</label>
+        <p class="adl-step-label">2. Paste anywhere on the page</p>
+        <label class="adl-input-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
         <textarea
           id="adl-input"
           class="adl-raw"
@@ -228,6 +230,7 @@ const tool: ToolDefinition = {
     }
 
     input.addEventListener("input", () => void decode());
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     // Setting .value programmatically doesn't fire a native "input" event, which is what both
     // our own listener above and the generic sessionStorage persistence (wired in layout.ts) rely
@@ -243,7 +246,7 @@ const tool: ToolDefinition = {
     void decode();
 
     return () => {
-      // No listeners outlive the container; nothing to clean up.
+      unwireGlobalPaste();
     };
   },
 };

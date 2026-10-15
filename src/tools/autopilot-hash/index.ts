@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
@@ -89,7 +90,8 @@ const tool: ToolDefinition = {
       <div class="aph-tool">
         <p class="aph-step-label">1. Get the hardware hash on a Windows device (copies to clipboard)</p>
         ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
-        <label class="aph-step-label" for="aph-input">2. Base64 hardware hash (DeviceHardwareData)</label>
+        <p class="aph-step-label">2. Paste anywhere on the page</p>
+        <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
         <textarea
           id="aph-input"
           class="mono"
@@ -154,14 +156,18 @@ const tool: ToolDefinition = {
       leaf.classList.add("is-copied");
     };
 
+    // Let Ctrl+V paste the hash here no matter what has focus, unless the user is
+    // actively typing into some other editable field (e.g. header search).
     input.addEventListener("input", render);
     output.addEventListener("click", onOutputClick);
+    const unwireGlobalPaste = wireGlobalPaste(input);
     wireCopyButton(copyBtn, () => rawJson);
     const unwirePsTabs = wirePsCommandTabs(container, "aph-snippet", PS_VARIANTS);
 
     return () => {
       input.removeEventListener("input", render);
       output.removeEventListener("click", onOutputClick);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

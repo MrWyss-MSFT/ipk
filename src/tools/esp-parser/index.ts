@@ -1,4 +1,5 @@
 import "./style.css";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseEspExport, type EspPhaseResult, type EspParseError } from "./parse";
@@ -84,7 +85,8 @@ const tool: ToolDefinition = {
         <p class="esp-step-label">1. Run this on the device — copies to clipboard</p>
         ${psCommandTabsHtml("esp-cmd")}
 
-        <label class="esp-step-label" for="esp-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="esp-step-label">2. Paste anywhere on the page</p>
+        <label class="esp-field-label" for="esp-input">ESP registry values (JSON)</label>
         <textarea
           id="esp-input"
           class="mono"
@@ -127,9 +129,11 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", render);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     return () => {
       input.removeEventListener("input", render);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

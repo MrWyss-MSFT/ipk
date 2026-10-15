@@ -708,6 +708,15 @@ body.ipk-theater-mode .ipk-tool-header {
   overflow-x: auto;
 }
 
+/* Subtle trailing note on a step label / field label, for tools that wire up
+   global paste (see src/app/global-paste.ts) - lets the user know Ctrl+V
+   works anywhere on the page, not just when that field has focus. */
+.ipk-paste-note {
+  font-weight: 400;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
 /* Shared "hint/tip" callout for a tool's short usage note, and its "warning"
    variant for more cautionary notes (e.g. a caveat about time zones). Both
    distinguish themselves from plain card-like boxes (which share the same

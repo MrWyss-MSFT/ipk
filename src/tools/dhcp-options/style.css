@@ -23,6 +23,12 @@
   color: var(--text);
 }
 
+.dho-field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 calc(var(--space-1) - var(--space-3));
+}
+
 .dho-tool textarea {
   width: 100%;
   font-size: 0.8rem;

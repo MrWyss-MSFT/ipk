@@ -1,4 +1,5 @@
 import "./style.css";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { parseAutopilotProfile, type AutopilotProfileResult } from "./parse";
@@ -121,7 +122,8 @@ const tool: ToolDefinition = {
         <p class="apc-step-label">1. Run this on the device — copies to clipboard</p>
         ${psCommandTabsHtml("apc-cmd")}
 
-        <label class="apc-step-label" for="apc-input">2. Paste it here (<kbd>Ctrl</kbd>+<kbd>V</kbd>)</label>
+        <p class="apc-step-label">2. Paste anywhere on the page</p>
+        <label class="apc-field-label" for="apc-input">Autopilot profile JSON (PolicyJsonCache)</label>
         <textarea
           id="apc-input"
           class="mono"
@@ -164,9 +166,11 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", render);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     return () => {
       input.removeEventListener("input", render);
+      unwireGlobalPaste();
       unwirePsTabs();
     };
   },

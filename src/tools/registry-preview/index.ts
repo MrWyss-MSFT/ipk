@@ -1,6 +1,7 @@
 import "./style.css";
 import { codeBlockHtml, setCode } from "@/app/code-block";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import type { ToolDefinition } from "@/types/tool";
 import { parseRegFile, type RegKeyNode, type RegValue } from "./parser";
 
@@ -92,7 +93,7 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <label class="rgp-step-label" for="rgp-input">2. Load or paste the .reg file here</label>
+        <p class="rgp-step-label">2. Load the file, or paste anywhere on the page</p>
         <div class="rgp-input-row">
           <label class="btn" for="rgp-file">📂 Load .reg file</label>
           <input type="file" id="rgp-file" accept=".reg,text/plain" hidden />
@@ -101,6 +102,7 @@ const tool: ToolDefinition = {
           <span class="rgp-count" id="rgp-count"></span>
         </div>
 
+        <label class="rgp-field-label" for="rgp-input">.reg file contents</label>
         <textarea
           id="rgp-input"
           class="mono rgp-raw"
@@ -424,8 +426,11 @@ const tool: ToolDefinition = {
 
     parse();
 
+    const unwireGlobalPaste = wireGlobalPaste(input);
+
     return () => {
       input.removeEventListener("input", parse);
+      unwireGlobalPaste();
     };
   },
 };

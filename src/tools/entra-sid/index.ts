@@ -1,5 +1,6 @@
 import "./style.css";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { wireGlobalPaste } from "@/app/global-paste";
 import type { ToolDefinition } from "@/types/tool";
 import { detectSidCloud, objectIdToSid, sidToObjectId, type SidCloud } from "./convert";
 
@@ -85,12 +86,13 @@ const tool: ToolDefinition = {
         btn.classList.toggle("btn-primary", btn.dataset.mode === next);
       });
       cloudRow.style.visibility = next === "objectid-to-sid" ? "visible" : "hidden";
+      const pasteNote = `<span class="ipk-paste-note">— paste anywhere on the page</span>`;
       if (next === "objectid-to-sid") {
-        inputLabel.textContent = "Entra ID ObjectID (GUID)";
+        inputLabel.innerHTML = `Entra ID ObjectID (GUID) ${pasteNote}`;
         outputLabel.textContent = "SID";
         input.placeholder = "4f29d7a1-8b3e-4c6a-9f12-3d7e5a8b61c0";
       } else {
-        inputLabel.textContent = "SID";
+        inputLabel.innerHTML = `SID ${pasteNote}`;
         outputLabel.textContent = "Entra ID ObjectID (GUID)";
         input.placeholder = "S-1-12-1-1328142241-1282050878-2117931679-3227618138";
         const detected = detectSidCloud(input.value);
@@ -113,11 +115,13 @@ const tool: ToolDefinition = {
     });
 
     wireCopyButton(copyBtn, () => output.value);
+    const unwireGlobalPaste = wireGlobalPaste(input);
 
     setMode(mode);
 
     return () => {
       input.removeEventListener("input", render);
+      unwireGlobalPaste();
     };
   },
 };
