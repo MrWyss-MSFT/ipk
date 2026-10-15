@@ -4,7 +4,7 @@ import { autoGrowTextarea } from "@/app/copy-button";
 import { escapeHtml, renderMarkdown, substituteVariables } from "./markdown";
 
 const MESSAGE_PLACEHOLDER =
-  "# Test running\nStarted {{startedAt}} - {{timer}} elapsed. Please do not disturb.\nPress Esc to leave full screen or theater mode.";
+  "# 🚫🖐️🖥️\n\n# I am a server, serving important stuff\n\nRunning non-stop since {{startedAt}} - {{timer}} and crunching numbers.\n🐌......10110101010101010101\n\nPress Esc to leave full screen or theater mode.";
 const EXAMPLE_MESSAGE = MESSAGE_PLACEHOLDER;
 const DEFAULT_BG_COLOR = "#121212";
 const DEFAULT_FG_COLOR = "#f5f5f5";
