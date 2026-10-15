@@ -66,7 +66,15 @@
 .adl-input-label {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-bottom: calc(var(--space-1) - var(--space-4));
+}
+
+/* .adl-tool's own flex gap (space-4) is too wide between the field header
+   row and the field below it - pull it back down to the standard space-2
+   gap used elsewhere (the label's own margin above no longer has any
+   effect here since it sits inside .ipk-field-header, not as a direct
+   flex item of .adl-tool). */
+.adl-tool .ipk-field-header {
+  margin-bottom: calc(var(--space-2) - var(--space-4));
 }
 
 .adl-field-value {

@@ -4,6 +4,13 @@
   gap: var(--space-3);
 }
 
+/* .wsb-tool's own flex gap (space-3) is too wide between the field header
+   row and the field below it - pull it back down to the standard space-2
+   gap used elsewhere. */
+.wsb-tool .ipk-field-header {
+  margin-bottom: calc(var(--space-2) - var(--space-3));
+}
+
 .wsb-note {
   display: flex;
   flex-direction: column;

@@ -25,7 +25,15 @@
 .rgp-field-label {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin: 0 0 calc(var(--space-1) - var(--space-3));
+}
+
+/* .rgp-tool's own flex gap (space-3) is too wide between the field header
+   row and the field below it - pull it back down to the standard space-2
+   gap used elsewhere (the label's own margin above no longer has any
+   effect here since it sits inside .ipk-field-header, not as a direct
+   flex item of .rgp-tool). */
+.rgp-tool .ipk-field-header {
+  margin-bottom: calc(var(--space-2) - var(--space-3));
 }
 
 .rgp-raw {

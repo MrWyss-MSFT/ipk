@@ -26,6 +26,13 @@
   margin: 0;
 }
 
+/* .gid-field's own flex gap (space-1) is too narrow between the field
+   header row and the field below it - bump it up to the standard space-2
+   gap used elsewhere. */
+.gid-field .ipk-field-header {
+  margin-bottom: calc(var(--space-2) - var(--space-1));
+}
+
 .gid-step-label {
   font-weight: 600;
   margin: var(--space-2) 0 0;
