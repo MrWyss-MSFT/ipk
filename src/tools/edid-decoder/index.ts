@@ -284,7 +284,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="edd-tool">
-        <p class="edd-step-label">1. Get the EDID for connected monitor(s) on a Windows device (copies to clipboard)</p>
+        <p class="edd-step-label">1. Get the EDID for connected monitor(s) <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("edd-snippet")}
         <p class="edd-step-label">2. Paste anywhere on the page</p>
         <label class="edd-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>

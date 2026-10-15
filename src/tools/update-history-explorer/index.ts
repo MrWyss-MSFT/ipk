@@ -287,7 +287,7 @@ const tool: ToolDefinition = {
           authoritative Microsoft classification.
         </p>
 
-        <p class="uhe-step-label">1. Run this on the device — copies the full history to clipboard as JSON</p>
+        <p class="uhe-step-label">1. Get the update history <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("uhe-cmd")}
 
         <p class="uhe-step-label">2. Paste anywhere on the page</p>

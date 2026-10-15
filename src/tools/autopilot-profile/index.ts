@@ -119,7 +119,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="apc-tool">
-        <p class="apc-step-label">1. Run this on the device — copies to clipboard</p>
+        <p class="apc-step-label">1. Get the Autopilot profile <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("apc-cmd")}
 
         <p class="apc-step-label">2. Paste anywhere on the page</p>

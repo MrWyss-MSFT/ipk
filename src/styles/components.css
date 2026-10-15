@@ -717,6 +717,15 @@ body.ipk-theater-mode .ipk-tool-header {
   color: var(--text-muted);
 }
 
+/* Subtle trailing note on a step-1 label, e.g. "(copies to clipboard)" -
+   de-emphasized the same way as .ipk-paste-note so the bold step
+   instruction stays the focal point. */
+.ipk-step-note {
+  font-weight: 400;
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
 /* Shared "hint/tip" callout for a tool's short usage note, and its "warning"
    variant for more cautionary notes (e.g. a caveat about time zones). Both
    distinguish themselves from plain card-like boxes (which share the same

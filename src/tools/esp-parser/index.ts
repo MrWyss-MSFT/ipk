@@ -82,7 +82,7 @@ const tool: ToolDefinition = {
           phases are both handled automatically.
         </p>
 
-        <p class="esp-step-label">1. Run this on the device — copies to clipboard</p>
+        <p class="esp-step-label">1. Get the ESP registry values <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("esp-cmd")}
 
         <p class="esp-step-label">2. Paste anywhere on the page</p>

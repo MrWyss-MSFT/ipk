@@ -143,7 +143,7 @@ const tool: ToolDefinition = {
           the "winning provider" column telling you who actually won.
         </p>
 
-        <p class="mdm-step-label">1. Run this on the device — copies to clipboard</p>
+        <p class="mdm-step-label">1. Get the MDM diagnostics report <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
 
         <p class="mdm-step-label">2. Paste anywhere on the page</p>

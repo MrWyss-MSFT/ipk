@@ -35,7 +35,7 @@ const tool: ToolDefinition = {
           reasons that have nothing to do with Intune reporting 🫠.
         </p>
 
-        <p class="gid-step-label">1. Get the local LID value on the device (copies to clipboard)</p>
+        <p class="gid-step-label">1. Get the local LID value <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("gid-ps-lid")}
 
         <p class="gid-step-label">2. Enter either value — the other updates automatically</p>

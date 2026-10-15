@@ -349,7 +349,7 @@ const tool: ToolDefinition = {
           <a href="https://github.com/jonasatgit/IntuneDebug" target="_blank" rel="noopener">Jonas's IntuneDebug</a>.
         </p>
 
-        <p class="ima-step-label">1. Run this on the device — copies to clipboard</p>
+        <p class="ima-step-label">1. Get the AppWorkload log contents <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
 
         <p class="ima-step-label">2. Paste anywhere on the page</p>

@@ -58,7 +58,7 @@ const tool: ToolDefinition = {
             Ingmar Verheij's ReadDhcpOptions.ps1</a>.
         </p>
 
-        <p class="dho-step-label">1. Run this on the client — copies the DHCP options as hex to clipboard (pick the NIC you care about from the output)</p>
+        <p class="dho-step-label">1. Get the DHCP interface options <span class="ipk-step-note">(copies to clipboard; pick the NIC you care about from the output)</span></p>
         ${psCommandTabsHtml("dho-ps")}
 
         <p class="dho-step-label">2. Paste anywhere on the page</p>

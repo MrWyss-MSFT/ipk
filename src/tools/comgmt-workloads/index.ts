@@ -34,7 +34,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="cmw-tool">
-        <p class="cmw-step-label">1. Get the value on a co-managed device (copies to clipboard)</p>
+        <p class="cmw-step-label">1. Get the ComgmtWorkloads value on a co-managed device <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("cmw-snippet", { requiresAdmin: true })}
         <p class="cmw-step-label">2. Paste anywhere on the page</p>
         <label class="cmw-field-label" for="cmw-input">ComgmtWorkloads value</label>

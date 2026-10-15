@@ -88,7 +88,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="aph-tool">
-        <p class="aph-step-label">1. Get the hardware hash on a Windows device (copies to clipboard)</p>
+        <p class="aph-step-label">1. Get the hardware hash <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
         <p class="aph-step-label">2. Paste anywhere on the page</p>
         <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
