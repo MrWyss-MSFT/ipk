@@ -249,8 +249,10 @@ export function buildLayout(root: HTMLElement): { main: HTMLElement } {
             aria-haspopup="dialog"
             aria-expanded="false"
             aria-controls="ipk-tagline-popover"
+            aria-label="Why everything stays in your browser"
           >
-            Everything in your browser, nothing leaves
+            <span class="ipk-tagline-icon" aria-hidden="true">i</span>
+            <span class="ipk-tagline-text">Everything in your browser, nothing leaves</span>
           </button>
           <div class="ipk-tagline-popover" id="ipk-tagline-popover" role="dialog" aria-label="Why everything stays in your browser" hidden>
             <p>
