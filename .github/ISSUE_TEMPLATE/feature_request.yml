@@ -1,0 +1,43 @@
+name: ✨ Feature request
+description: Suggest a new tool or an improvement to an existing one
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool? (leave as "New tool" if this isn't about an existing one)
+      options:
+        - New tool
+        - Autopilot DeviceLink Decoder
+        - Autopilot Hardware Hash Decoder
+        - Autopilot Profile Parser
+        - Base64 Encode / Decode
+        - Co-Management Workloads Decoder
+        - DHCP Options Decoder
+        - EDID Decoder
+        - Entra ID ObjectID ↔ SID
+        - ESP Progress Parser
+        - Find Text in Files
+        - GDID ↔ LID
+        - IME Apps Parser
+        - MAC Address Converter
+        - MDM Result
+        - Playbooks
+        - QR Code Scanner
+        - Redactor
+        - References
+        - Registry Preview
+        - Stay Awake
+        - Update History Explorer
+        - Windows Sandbox Config Generator
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+      description: What's the problem or task, and what would the ideal tool/feature do?
+    validations:
+      required: true

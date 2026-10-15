@@ -1,0 +1,49 @@
+name: 🐛 Bug report
+description: Something in a tool isn't working right
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool?
+      options:
+        - Autopilot DeviceLink Decoder
+        - Autopilot Hardware Hash Decoder
+        - Autopilot Profile Parser
+        - Base64 Encode / Decode
+        - Co-Management Workloads Decoder
+        - DHCP Options Decoder
+        - EDID Decoder
+        - Entra ID ObjectID ↔ SID
+        - ESP Progress Parser
+        - Find Text in Files
+        - GDID ↔ LID
+        - IME Apps Parser
+        - MAC Address Converter
+        - MDM Result
+        - Playbooks
+        - QR Code Scanner
+        - Redactor
+        - References
+        - Registry Preview
+        - Stay Awake
+        - Update History Explorer
+        - Windows Sandbox Config Generator
+        - Other / not tool-specific
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Sample input, browser/OS, screenshots - whatever helps reproduce it.
+    validations:
+      required: false

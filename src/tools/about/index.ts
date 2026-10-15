@@ -81,12 +81,17 @@ const tool: ToolDefinition = {
         <section class="abt-card">
           <h2 class="abt-contrib-title">Contributing</h2>
           <p>
-            Contributions are welcome! Feel free to open a pull request, or file an
-            issue for bugs and feature requests on
+            Contributions are welcome! Feel free to open a pull request, or
             ${
               repoUrl
-                ? `<a href="${repoUrl}/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>`
-                : `GitHub Issues`
+                ? `<a href="${repoUrl}/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer">report a bug</a>`
+                : `report a bug`
+            }
+            or
+            ${
+              repoUrl
+                ? `<a href="${repoUrl}/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer">request a feature</a>`
+                : `request a feature`
             }.
           </p>
         </section>
