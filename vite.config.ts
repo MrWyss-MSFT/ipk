@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
-import pkg from "./package.json";
+import pkg from "./package.json" with { type: "json" };
 
 // Strip the "git+" prefix and ".git" suffix npm sometimes adds to repository
 // URLs so the About page can link straight to the GitHub repo.

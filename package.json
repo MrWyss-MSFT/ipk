@@ -18,15 +18,18 @@
     "release:dry": "release-it --dry-run"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^11.0.1",
+    "@release-it/conventional-changelog": "^12.0.2",
     "@types/node": "^20.19.43",
     "@types/prismjs": "^1.26.6",
-    "release-it": "^20.2.1",
+    "release-it": "^21.1.1",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^8.3.4"
   },
   "dependencies": {
     "jsqr": "^1.4.0",
     "prismjs": "^1.30.0"
+  },
+  "overrides": {
+    "basic-ftp": "^6.2.3"
   }
 }
