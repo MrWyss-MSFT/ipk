@@ -1,0 +1,250 @@
+.edd-tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.edd-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
+}
+
+.edd-tool textarea {
+  font-size: 0.85rem;
+  width: 100%;
+  resize: vertical;
+}
+
+.edd-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.edd-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.edd-entry {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.edd-entry-heading {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.edd-badges {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.edd-entry-meta {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.edd-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.edd-badge-connected {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 50%, var(--border));
+  background-color: color-mix(in srgb, var(--success) 12%, transparent);
+}
+
+.edd-badge-internal {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.edd-badge-hdr {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+  background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.edd-entry-subtitle {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin: -4px 0 var(--space-2);
+  word-break: break-all;
+}
+
+.edd-warning {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0 0 var(--space-2);
+}
+
+.edd-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.edd-overview-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.edd-overview-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.edd-overview-label::after {
+  content: ":";
+}
+
+.edd-overview-value {
+  font-weight: 600;
+  min-width: 0;
+  word-break: break-word;
+  font-size: 0.85rem;
+}
+
+.edd-details,
+.edd-raw {
+  margin-top: var(--space-2);
+}
+
+.edd-timings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.edd-timings-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-right: var(--space-1);
+}
+
+.edd-timing-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  white-space: nowrap;
+}
+
+.edd-details > summary,
+.edd-raw > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.edd-tree {
+  margin-top: var(--space-2);
+  font-size: 0.8rem;
+}
+
+.edd-node {
+  margin: 1px 0;
+}
+
+.edd-node-label {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: revert;
+  padding: 1px 0;
+}
+
+.edd-node-label::marker {
+  color: var(--text-muted);
+}
+
+.edd-children {
+  margin-left: 0.55rem;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--border);
+}
+
+.edd-leaf-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 1px 0;
+}
+
+.edd-leaf-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.edd-leaf-label::after {
+  content: ":";
+}
+
+.edd-leaf-value {
+  min-width: 0;
+  word-break: break-word;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.edd-leaf-value:hover {
+  color: var(--text);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.edd-leaf-value.is-copied {
+  color: var(--success);
+  animation: edd-leaf-copied 0.5s ease;
+}
+
+@keyframes edd-leaf-copied {
+  0% {
+    background-color: color-mix(in srgb, var(--success) 25%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.edd-empty {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.edd-raw .ipk-code {
+  margin-top: var(--space-2);
+  max-height: 420px;
+  overflow: auto;
+}
