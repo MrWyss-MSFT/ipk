@@ -126,7 +126,7 @@ the "Playbooks" tool as a whole) shows up as its own result when you search
   `learn.microsoft.com`) will get CORS-blocked in real browser usage and was
   removed for exactly that reason. Assume **no backend, no proxy** — tools
   must work from static data bundled in the repo or from user-pasted input.
-  **One deliberate, narrow exception**: Stay Awake's `{{ws}}` variable lets
+  **One deliberate, narrow exception**: Stay Awake's `{{websocketdata}}` variable lets
   the browser open a WebSocket directly to a URL the *user types in*, purely
   client-side (no IPK backend/proxy involved) — the user opts in explicitly
   per connection, so this isn't IPK silently phoning home. Don't use this as

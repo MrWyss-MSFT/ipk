@@ -5,7 +5,7 @@ import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import { escapeHtml, renderMarkdown, substituteVariables } from "./markdown";
 
 const MESSAGE_PLACEHOLDER =
-  "# 🚫🖐️🖥️\n\n# I am a server, serving important stuff\n\nRunning non-stop since {{startedAt}} - {{timer}} and crunching numbers.\n🐌......10110101010101010101\n\nPress Esc to leave full screen or theater mode.";
+  "# 🚫🖐️🖥️\n\n# I am a server, serving important stuff\n\nRunning non-stop since {{startedAt}} - {{timer}} and crunching numbers.\n🐌......10110101010101010101\n\n{{websocketdata}}\n\nPress Esc to leave full screen or theater mode.";
 const EXAMPLE_MESSAGE = MESSAGE_PLACEHOLDER;
 const DEFAULT_BG_COLOR = "#121212";
 const DEFAULT_FG_COLOR = "#f5f5f5";
@@ -14,6 +14,7 @@ const ANTI_BURN_INTERVAL_MS = 45_000;
 const ANTI_BURN_MAX_OFFSET_PX = 18;
 const WS_RECONNECT_BASE_MS = 1_000;
 const WS_RECONNECT_MAX_MS = 30_000;
+const WS_EXAMPLE_URL = "ws://localhost:8080/";
 const WS_EXAMPLE_SERVER_SCRIPT = `function New-ToStayAwake {
     <#
     .SYNOPSIS
@@ -214,19 +215,22 @@ const tool: ToolDefinition = {
             placeholder="${escapeHtml(MESSAGE_PLACEHOLDER)}"
           ></textarea>
           <p class="awk-hint">
-            Supports basic Markdown, and <code>{{startedAt}}</code> / <code>{{timer}}</code> / <code>{{ws}}</code>
-            variables.
+            Supports basic Markdown, and <code>{{startedAt}}</code> / <code>{{timer}}</code> /
+            <code>{{websocketdata}}</code> variables.
           </p>
         </div>
 
         <div class="awk-ws-field">
           <div class="awk-ws-title">
-            <label class="awk-ws-label" for="awk-ws-url">Live data via WebSocket (optional)</label>
-            <span
-              class="ipk-stage-badge ipk-stage-alpha"
-              title="This feature is alpha - still under active work, rough edges and missing features are expected."
-              >alpha</span
-            >
+            <span class="awk-ws-title-text">
+              <label class="awk-ws-label" for="awk-ws-url">Live data via WebSocket (optional)</label>
+              <span
+                class="ipk-stage-badge ipk-stage-alpha"
+                title="This feature is alpha - still under active work, rough edges and missing features are expected."
+                >alpha</span
+              >
+            </span>
+            <button type="button" id="awk-ws-example" class="awk-populate-btn">Use example</button>
           </div>
           <div class="awk-ws-row">
             <input
@@ -240,7 +244,7 @@ const tool: ToolDefinition = {
           <span
             class="awk-ws-status"
             id="awk-ws-status"
-            title="Your browser connects directly to the URL you enter - IPK's own code doesn't see or relay this traffic. Use {{ws}} in the message above to show whatever text the server sends."
+            title="Your browser connects directly to the URL you enter - IPK's own code doesn't see or relay this traffic. Use {{websocketdata}} in the message above to show whatever text the server sends."
             ><span class="awk-indicator"></span>Not connected.</span
           >
           <details class="awk-ws-example">
@@ -302,6 +306,7 @@ const tool: ToolDefinition = {
     const colorsResetBtn = container.querySelector<HTMLButtonElement>("#awk-colors-reset")!;
     const antiBurnToggle = container.querySelector<HTMLInputElement>("#awk-antiburn")!;
     const wsUrlInput = container.querySelector<HTMLInputElement>("#awk-ws-url")!;
+    const wsExampleBtn = container.querySelector<HTMLButtonElement>("#awk-ws-example")!;
     const wsToggleBtn = container.querySelector<HTMLButtonElement>("#awk-ws-toggle")!;
     const wsStatusEl = container.querySelector<HTMLSpanElement>("#awk-ws-status")!;
     const wsExampleCodeEl = container.querySelector<HTMLElement>("#awk-ws-example-code")!;
@@ -326,7 +331,7 @@ const tool: ToolDefinition = {
       const vars = {
         timer: formatElapsed(active ? Date.now() - startedAt : 0),
         startedat: active && startedAt ? new Date(startedAt).toLocaleTimeString() : "-",
-        ws: wsValue,
+        websocketdata: wsValue,
       };
       if (!raw.trim()) {
         previewContentEl.innerHTML = `<div class="awk-preview-placeholder">${renderMarkdown(substituteVariables(MESSAGE_PLACEHOLDER, vars))}</div>`;
@@ -438,6 +443,11 @@ const tool: ToolDefinition = {
     messageExampleBtn.addEventListener("click", () => {
       messageInput.value = EXAMPLE_MESSAGE;
       messageInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    wsExampleBtn.addEventListener("click", () => {
+      wsUrlInput.value = WS_EXAMPLE_URL;
+      wsUrlInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     const applyColors = () => {
