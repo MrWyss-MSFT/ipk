@@ -54,7 +54,10 @@ const tool: ToolDefinition = {
           </div>
 
           <div class="gid-field">
-            <label class="gid-field-label" for="gid-gid">Device physical ID (g:)</label>
+            <div class="ipk-field-header">
+              <label class="gid-field-label" for="gid-gid">Device physical ID (g:)</label>
+              <button type="button" id="gid-gid-example" class="ipk-example-btn">Load example</button>
+            </div>
             <div class="ipk-copy-wrap">
               <input type="text" id="gid-gid" class="mono" placeholder="g:1234567891234567" />
               ${copyButtonHtml("gid-copy-gid")}
@@ -111,11 +114,15 @@ const tool: ToolDefinition = {
     const exampleBtn = container.querySelector<HTMLButtonElement>("#gid-example")!;
     const unwireExample = wireExampleButton(exampleBtn, lidInput, () => "0a1b2c3d4e5f6071");
 
+    const gidExampleBtn = container.querySelector<HTMLButtonElement>("#gid-gid-example")!;
+    const unwireGidExample = wireExampleButton(gidExampleBtn, gidInput, () => lidToGid("0a1b2c3d4e5f6071"));
+
     return () => {
       lidInput.removeEventListener("input", fromLid);
       gidInput.removeEventListener("input", fromGid);
       unwirePsTabs();
       unwireExample();
+      unwireGidExample();
     };
   },
 };
