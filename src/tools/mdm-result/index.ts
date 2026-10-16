@@ -49,16 +49,16 @@ const EXAMPLE_MDM_XML =
   "<Enrollments><Enrollment><EnrollmentId>11111111-1111-1111-1111-111111111111</EnrollmentId><ProviderID>MS DM Server</ProviderID></Enrollment></Enrollments>" +
   "<PolicyManager>" +
   "<ConfigSource><EnrollmentId>11111111-1111-1111-1111-111111111111</EnrollmentId>" +
-  "<PolicyScope><PolicyScope>Device</PolicyScope><Area><PolicyAreaName>System</PolicyAreaName>" +
-  "<AllowTelemetry>1</AllowTelemetry><AllowTelemetry_LastWrite>132123456780000000</AllowTelemetry_LastWrite>" +
+  "<PolicyScope><PolicyScope>Device</PolicyScope><Area><PolicyAreaName>LocalPoliciesSecurityOptions</PolicyAreaName>" +
+  "<UserAccountControl_TypeOfAdminApprovalMode>1</UserAccountControl_TypeOfAdminApprovalMode><UserAccountControl_TypeOfAdminApprovalMode_LastWrite>132123456780000000</UserAccountControl_TypeOfAdminApprovalMode_LastWrite>" +
   "</Area></PolicyScope></ConfigSource>" +
-  "<currentPolicies><PolicyScope>device</PolicyScope><CurrentPolicyValues><PolicyAreaName>System</PolicyAreaName>" +
-  "<AllowTelemetry_WinningProvider>11111111-1111-1111-1111-111111111111</AllowTelemetry_WinningProvider>" +
-  "<AllowTelemetry_ProviderSet>11111111-1111-1111-1111-111111111111</AllowTelemetry_ProviderSet>" +
+  "<currentPolicies><PolicyScope>device</PolicyScope><CurrentPolicyValues><PolicyAreaName>LocalPoliciesSecurityOptions</PolicyAreaName>" +
+  "<UserAccountControl_TypeOfAdminApprovalMode_WinningProvider>11111111-1111-1111-1111-111111111111</UserAccountControl_TypeOfAdminApprovalMode_WinningProvider>" +
+  "<UserAccountControl_TypeOfAdminApprovalMode_ProviderSet>11111111-1111-1111-1111-111111111111</UserAccountControl_TypeOfAdminApprovalMode_ProviderSet>" +
   "</CurrentPolicyValues></currentPolicies>" +
   "</PolicyManager>" +
-  "<PolicyManagerMeta><AreaMetadata><PolicyAreaName>System</PolicyAreaName>" +
-  "<PolicyMetadata><PolicyName>AllowTelemetry</PolicyName><value>0</value></PolicyMetadata>" +
+  "<PolicyManagerMeta><AreaMetadata><PolicyAreaName>LocalPoliciesSecurityOptions</PolicyAreaName>" +
+  "<PolicyMetadata><PolicyName>UserAccountControl_TypeOfAdminApprovalMode</PolicyName><value>0</value></PolicyMetadata>" +
   "</AreaMetadata></PolicyManagerMeta>" +
   "</MDMEnterpriseDiagnosticsReport>";
 
