@@ -3,9 +3,11 @@ import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { decodeFrame } from "./decode";
 import { parseQrPayload } from "./parse";
+import { QR_EXAMPLES } from "./examples";
 import {
   decodeDeviceLinkData,
   buildDeviceLinkCsvText,
+  buildDeviceLinkCsvTextMulti,
   encodeUtf16LeWithBom,
   deviceLinkCsvFilename,
   type DeviceLinkInfo,
@@ -33,8 +35,7 @@ interface ResultField {
   monospace?: boolean;
 }
 
-function buildFieldHtml(field: ResultField, index: number): string {
-  const id = `qrs-copy-${index}`;
+function buildFieldHtml(field: ResultField, id: string): string {
   return `
     <div class="qrs-field">
       <span class="qrs-field-label">${escapeHtml(field.label)}</span>
@@ -49,6 +50,21 @@ function buildFieldHtml(field: ResultField, index: number): string {
       </div>
     </div>
   `;
+}
+
+/** Shortens a long string for a one-line summary-row preview. */
+function truncate(value: string, max = 70): string {
+  const flat = value.replace(/\s+/g, " ").trim();
+  return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat;
+}
+
+/** A single row in the (potentially multi-result) result list - a collapsible `<details>` with a live-updatable summary/body. */
+interface ResultRow {
+  el: HTMLDetailsElement;
+  /** Updates the one-line summary shown when collapsed. */
+  setSummary(kindLabel: string, preview: string): void;
+  /** Replaces the row's expanded body content, rewiring any copy buttons inside it. */
+  setBody(extraHtml: string, fields: ResultField[]): void;
 }
 
 const tool: ToolDefinition = {
@@ -72,17 +88,6 @@ const tool: ToolDefinition = {
           When scanning your screen, the browser will show its own sharing indicator; that's normal.
         </p>
 
-        <div class="qrs-formats">
-          <p class="qrs-formats-title">What it can decode</p>
-          <ul class="qrs-formats-list">
-            <li><strong>Links</strong> - any <code>http(s)://</code> URL, shown as a clickable link.</li>
-            <li><strong>Wi-Fi networks</strong> - the standard <code>WIFI:T:...;S:...;P:...;;</code> QR format, parsed into SSID, password and security type.</li>
-            <li><strong>TOTP / authenticator setup codes</strong> - <code>otpauth://totp/...</code> codes, parsed into issuer, account and secret.</li>
-            <li><strong>Autopilot Device Preparation DeviceLink</strong> - <code>deviceLink:/1/?sn=...&amp;data=...</code> codes, decoded into device/key details with a <code>.devicelink.csv</code> export.</li>
-            <li><strong>Plain text</strong> - anything else is shown as-is.</li>
-          </ul>
-        </div>
-
         <div class="qrs-mode-toggle" role="group" aria-label="Capture source">
           <button type="button" class="btn qrs-mode-btn" data-mode="screen" ${screenSupported ? "" : "disabled"}>
             🖥️ Screen
@@ -93,6 +98,35 @@ const tool: ToolDefinition = {
           <button type="button" class="btn btn-primary" id="qrs-start">Start scanning</button>
           <button type="button" class="btn" id="qrs-stop" hidden>Stop</button>
           <span class="qrs-status" id="qrs-status"></span>
+        </div>
+
+        <div class="qrs-options" role="group" aria-label="Scanning options">
+          <label class="qrs-checkbox-label">
+            <input type="checkbox" id="qrs-continuous" />
+            Continuous scanning <span class="ipk-step-note">(keep scanning, add every code found to a list)</span>
+          </label>
+          <label class="qrs-checkbox-label">
+            <input type="checkbox" id="qrs-beep" checked />
+            🔊 Beep on scan
+          </label>
+        </div>
+
+        <div class="qrs-formats">
+          <p class="qrs-formats-title">
+            Decodes: <strong>Autopilot DeviceLink</strong>, Links, Wi-Fi networks, TOTP / authenticator codes, Plain text.
+          </p>
+
+          <details class="qrs-examples">
+            <summary class="qrs-examples-summary">Try example QR codes</summary>
+            <div class="qrs-examples-body">
+              <div class="qrs-example-qr" id="qrs-example-qr"></div>
+              <div class="qrs-example-nav">
+                <button type="button" class="btn" id="qrs-example-prev">◀ Previous</button>
+                <span class="qrs-example-label" id="qrs-example-label"></span>
+                <button type="button" class="btn" id="qrs-example-next">Next ▶</button>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div class="qrs-camera-picker" id="qrs-camera-picker" hidden>
@@ -110,7 +144,16 @@ const tool: ToolDefinition = {
 
         <p class="qrs-warning" id="qrs-error" role="alert" hidden></p>
 
-        <div class="qrs-result" id="qrs-result" hidden></div>
+        <div class="qrs-result-panel" id="qrs-result-panel" hidden>
+          <div class="qrs-result-panel-header">
+            <span class="qrs-result-count" id="qrs-result-count"></span>
+            <div class="qrs-result-panel-actions">
+              <button type="button" class="btn" id="qrs-export-devicelinks" hidden>⬇️ Export all DeviceLinks as .csv</button>
+              <button type="button" class="btn" id="qrs-clear-list" hidden>Clear list</button>
+            </div>
+          </div>
+          <div class="qrs-result-list" id="qrs-result-list"></div>
+        </div>
       </div>
     `;
 
@@ -121,10 +164,20 @@ const tool: ToolDefinition = {
     const stopBtn = container.querySelector<HTMLButtonElement>("#qrs-stop")!;
     const statusEl = container.querySelector<HTMLSpanElement>("#qrs-status")!;
     const errorEl = container.querySelector<HTMLParagraphElement>("#qrs-error")!;
-    const resultEl = container.querySelector<HTMLDivElement>("#qrs-result")!;
     const modeButtons = Array.from(container.querySelectorAll<HTMLButtonElement>(".qrs-mode-btn"));
     const cameraPickerEl = container.querySelector<HTMLDivElement>("#qrs-camera-picker")!;
     const cameraSelectEl = container.querySelector<HTMLSelectElement>("#qrs-camera-select")!;
+    const continuousCheckbox = container.querySelector<HTMLInputElement>("#qrs-continuous")!;
+    const beepCheckbox = container.querySelector<HTMLInputElement>("#qrs-beep")!;
+    const resultPanelEl = container.querySelector<HTMLDivElement>("#qrs-result-panel")!;
+    const resultListEl = container.querySelector<HTMLDivElement>("#qrs-result-list")!;
+    const resultCountEl = container.querySelector<HTMLSpanElement>("#qrs-result-count")!;
+    const clearListBtn = container.querySelector<HTMLButtonElement>("#qrs-clear-list")!;
+    const exportDeviceLinksBtn = container.querySelector<HTMLButtonElement>("#qrs-export-devicelinks")!;
+    const exampleQrEl = container.querySelector<HTMLDivElement>("#qrs-example-qr")!;
+    const exampleLabelEl = container.querySelector<HTMLSpanElement>("#qrs-example-label")!;
+    const examplePrevBtn = container.querySelector<HTMLButtonElement>("#qrs-example-prev")!;
+    const exampleNextBtn = container.querySelector<HTMLButtonElement>("#qrs-example-next")!;
 
     const ctx = canvasEl.getContext("2d", { willReadFrequently: true });
 
@@ -134,6 +187,19 @@ const tool: ToolDefinition = {
     let decoding = false;
     let active = false;
     let preferredCameraId = "";
+    let lastDecodedText: string | null = null;
+    let rowCounter = 0;
+    let audioCtx: AudioContext | null = null;
+    let exampleIndex = 0;
+    const scannedDeviceLinks: DeviceLinkInfo[] = [];
+
+    function showExample(index: number) {
+      exampleIndex = ((index % QR_EXAMPLES.length) + QR_EXAMPLES.length) % QR_EXAMPLES.length;
+      const example = QR_EXAMPLES[exampleIndex];
+      exampleQrEl.innerHTML = example.svg;
+      exampleLabelEl.textContent = `${exampleIndex + 1} of ${QR_EXAMPLES.length} — ${example.label}`;
+    }
+
 
     function showError(message: string) {
       errorEl.textContent = message;
@@ -154,6 +220,85 @@ const tool: ToolDefinition = {
       modeButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.mode === next));
       cameraPickerEl.hidden = next !== "camera" || !cameraSupported;
       if (!active) placeholderEl.textContent = PLACEHOLDER_TEXT[next];
+    }
+
+    /** Short synthesized tone on every successful decode - no audio file, no network, gated on the "Beep on scan" checkbox. */
+    function playBeep() {
+      if (!beepCheckbox.checked) return;
+      try {
+        const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtor) return;
+        if (!audioCtx) audioCtx = new AudioCtor();
+        if (audioCtx.state === "suspended") void audioCtx.resume();
+        // Mimic a classic handheld barcode scanner: a short, sharp, high-pitched square-wave blip.
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.value = 2800;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.005);
+        gain.gain.setValueAtTime(0.2, now + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } catch {
+        // Beep is a nice-to-have - never let an audio error interrupt scanning.
+      }
+    }
+
+    function updateResultCount() {
+      const count = resultListEl.children.length;
+      resultCountEl.textContent = count === 1 ? "1 result" : `${count} results`;
+      clearListBtn.hidden = count === 0;
+      exportDeviceLinksBtn.hidden = scannedDeviceLinks.length === 0;
+    }
+
+    function clearResultList() {
+      resultListEl.innerHTML = "";
+      resultPanelEl.hidden = true;
+      lastDecodedText = null;
+      scannedDeviceLinks.length = 0;
+      updateResultCount();
+    }
+
+    /** Appends a new collapsible row to the result list and returns handles to update its summary/body live. */
+    function createResultRow(autoOpen: boolean): ResultRow {
+      rowCounter += 1;
+      const rowId = rowCounter;
+      const details = document.createElement("details");
+      details.className = "qrs-result-item";
+      details.open = autoOpen;
+      details.innerHTML = `
+        <summary class="qrs-result-summary">
+          <span class="qrs-result-kind" data-role="kind">Result</span>
+          <span class="qrs-result-preview" data-role="preview"></span>
+          <span class="qrs-result-time">${new Date().toLocaleTimeString()}</span>
+        </summary>
+        <div class="qrs-result-body" data-role="body"></div>
+      `;
+      resultListEl.appendChild(details);
+      resultPanelEl.hidden = false;
+      updateResultCount();
+
+      const kindEl = details.querySelector<HTMLElement>('[data-role="kind"]')!;
+      const previewEl = details.querySelector<HTMLElement>('[data-role="preview"]')!;
+      const bodyEl = details.querySelector<HTMLElement>('[data-role="body"]')!;
+
+      return {
+        el: details,
+        setSummary(kindLabel, preview) {
+          kindEl.textContent = kindLabel;
+          previewEl.textContent = preview;
+        },
+        setBody(extraHtml, fields) {
+          bodyEl.innerHTML = `${extraHtml}${fields.map((f, i) => buildFieldHtml(f, `qrs-copy-${rowId}-${i}`)).join("")}`;
+          bodyEl.querySelectorAll<HTMLButtonElement>(".ipk-copy-btn").forEach((btn, i) => {
+            wireCopyButton(btn, () => fields[i].value);
+          });
+        },
+      };
     }
 
     async function refreshCameraDevices(selectDeviceId?: string) {
@@ -215,6 +360,7 @@ const tool: ToolDefinition = {
       modeButtons.forEach((btn) => {
         btn.disabled = btn.dataset.mode === "screen" ? !screenSupported : !cameraSupported;
       });
+      continuousCheckbox.disabled = false;
     }
 
     async function scanTick() {
@@ -228,12 +374,30 @@ const tool: ToolDefinition = {
         canvasEl.height = h;
         ctx.drawImage(videoEl, 0, 0, w, h);
         const text = await decodeFrame(canvasEl, ctx);
-        if (text) {
-          setStatus("QR code found!");
-          void renderResult(text);
-          stopStream();
-          placeholderEl.textContent = "✅ QR code found — see the result below.";
+        const continuous = continuousCheckbox.checked;
+
+        if (!text) {
+          // The code (if any) left the frame - clear the dedupe guard so it can be re-added if it reappears.
+          lastDecodedText = null;
+          return;
         }
+
+        if (continuous) {
+          if (text === lastDecodedText) return; // Same code still in view - already recorded this sighting.
+          lastDecodedText = text;
+          playBeep();
+          const row = createResultRow(false);
+          void renderResult(text, row);
+          setStatus("Scanning… (continuous mode - new code added to the list below)");
+          return;
+        }
+
+        setStatus("QR code found!");
+        playBeep();
+        const row = createResultRow(true);
+        void renderResult(text, row);
+        stopStream();
+        placeholderEl.textContent = "✅ QR code found — see the result below.";
       } catch {
         // Ignore a transient decode error for this frame - keep scanning.
       } finally {
@@ -243,8 +407,6 @@ const tool: ToolDefinition = {
 
     async function startScan() {
       clearError();
-      resultEl.hidden = true;
-      resultEl.innerHTML = "";
       placeholderEl.textContent = PLACEHOLDER_TEXT[mode];
 
       if (!secureContext) {
@@ -284,6 +446,7 @@ const tool: ToolDefinition = {
       startBtn.hidden = true;
       stopBtn.hidden = false;
       modeButtons.forEach((btn) => (btn.disabled = true));
+      continuousCheckbox.disabled = true;
       setStatus("Scanning…");
 
       // If the user stops sharing via the browser's own UI, reflect that here too.
@@ -297,19 +460,6 @@ const tool: ToolDefinition = {
       scanTimer = window.setInterval(() => void scanTick(), 250);
     }
 
-    function renderFields(kindLabel: string, extraHtml: string, fields: ResultField[]) {
-      resultEl.innerHTML = `
-        <p class="qrs-result-kind">${escapeHtml(kindLabel)}</p>
-        ${extraHtml}
-        ${fields.map(buildFieldHtml).join("")}
-      `;
-      resultEl.hidden = false;
-
-      resultEl.querySelectorAll<HTMLButtonElement>(".ipk-copy-btn").forEach((btn, i) => {
-        wireCopyButton(btn, () => fields[i].value);
-      });
-    }
-
     function downloadDeviceLinkCsv(info: DeviceLinkInfo) {
       const bytes = encodeUtf16LeWithBom(buildDeviceLinkCsvText(info));
       const blob = new Blob([bytes], { type: "text/csv;charset=utf-16le" });
@@ -317,6 +467,19 @@ const tool: ToolDefinition = {
       const link = document.createElement("a");
       link.href = url;
       link.download = deviceLinkCsvFilename(info);
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /** Combines every DeviceLink scanned so far (across continuous-mode results) into one `.devicelink.csv`. */
+    function downloadDeviceLinksCsvMulti() {
+      if (scannedDeviceLinks.length === 0) return;
+      const bytes = encodeUtf16LeWithBom(buildDeviceLinkCsvTextMulti(scannedDeviceLinks));
+      const blob = new Blob([bytes], { type: "text/csv;charset=utf-16le" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "scanned.devicelink.csv";
       link.click();
       URL.revokeObjectURL(url);
     }
@@ -347,18 +510,18 @@ const tool: ToolDefinition = {
           <tbody>${keyRows}</tbody>
         </table>
         ${missingPubKeyNote}
-        <button type="button" class="btn btn-primary qrs-devicelink-export" id="qrs-devicelink-export">
+        <button type="button" class="btn btn-primary qrs-devicelink-export">
           ⬇️ Export as .devicelink.csv
         </button>
       `;
     }
 
-    async function renderResult(raw: string) {
+    async function renderResult(raw: string, row: ResultRow) {
       const parsed = parseQrPayload(raw);
 
       if (parsed.kind === "url") {
-        renderFields(
-          "Link",
+        row.setSummary("Link", truncate(parsed.url));
+        row.setBody(
           `<p class="qrs-link"><a href="${escapeHtml(parsed.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(
             parsed.url,
           )}</a></p>`,
@@ -368,31 +531,34 @@ const tool: ToolDefinition = {
       }
 
       if (parsed.kind === "wifi") {
+        row.setSummary("Wi-Fi network", `SSID: ${parsed.ssid || "(empty)"}`);
         const fields: ResultField[] = [{ label: "SSID", value: parsed.ssid || "(empty)" }];
         if (parsed.password) fields.push({ label: "Password", value: parsed.password });
         if (parsed.authType) fields.push({ label: "Security", value: parsed.authType });
         fields.push({ label: "Raw decoded text", value: raw, monospace: true });
-        renderFields("Wi-Fi network", "", fields);
+        row.setBody("", fields);
         return;
       }
 
       if (parsed.kind === "totp") {
+        row.setSummary("TOTP / authenticator", [parsed.issuer, parsed.account].filter(Boolean).join(" · ") || truncate(raw));
         const fields: ResultField[] = [];
         if (parsed.issuer) fields.push({ label: "Issuer", value: parsed.issuer });
         if (parsed.account) fields.push({ label: "Account", value: parsed.account });
         if (parsed.secret) fields.push({ label: "Secret", value: parsed.secret, monospace: true });
         fields.push({ label: "Raw decoded text", value: raw, monospace: true });
-        renderFields("TOTP / authenticator", "", fields);
+        row.setBody("", fields);
         return;
       }
 
       if (parsed.kind === "deviceLink") {
-        renderFields("Autopilot DeviceLink", "<p>Decoding device link…</p>", [
-          { label: "Raw decoded text", value: raw, monospace: true },
-        ]);
+        row.setSummary("Autopilot DeviceLink", `Serial: ${parsed.serialNumber}`);
+        row.setBody("<p>Decoding device link…</p>", [{ label: "Raw decoded text", value: raw, monospace: true }]);
         try {
           const info = await decodeDeviceLinkData(parsed.data);
-          renderFields("Autopilot DeviceLink", deviceLinkExtraHtml(info), [
+          scannedDeviceLinks.push(info);
+          updateResultCount();
+          row.setBody(deviceLinkExtraHtml(info), [
             { label: "Serial Number", value: info.serialNumber },
             { label: "Manufacturer", value: info.manufacturer },
             { label: "Model", value: info.modelName },
@@ -405,11 +571,11 @@ const tool: ToolDefinition = {
             { label: "Decoded JSON", value: info.rawJson, monospace: true },
             { label: "Raw decoded text", value: raw, monospace: true },
           ]);
-          container.querySelector<HTMLButtonElement>("#qrs-devicelink-export")?.addEventListener("click", () => {
+          row.el.querySelector<HTMLButtonElement>(".qrs-devicelink-export")?.addEventListener("click", () => {
             downloadDeviceLinkCsv(info);
           });
         } catch (err) {
-          renderFields("Autopilot DeviceLink", "", [
+          row.setBody("", [
             { label: "Error", value: `Could not decode this device link: ${err instanceof Error ? err.message : String(err)}` },
             { label: "Raw decoded text", value: raw, monospace: true },
           ]);
@@ -417,7 +583,8 @@ const tool: ToolDefinition = {
         return;
       }
 
-      renderFields("Text", "", [{ label: "Raw decoded text", value: raw, monospace: true }]);
+      row.setSummary("Text", truncate(raw));
+      row.setBody("", [{ label: "Raw decoded text", value: raw, monospace: true }]);
     }
 
     setMode(mode);
@@ -452,9 +619,20 @@ const tool: ToolDefinition = {
       setStatus("Stopped.");
       stopStream();
     });
+    clearListBtn.addEventListener("click", () => clearResultList());
+    exportDeviceLinksBtn.addEventListener("click", () => downloadDeviceLinksCsvMulti());
+    continuousCheckbox.addEventListener("change", () => updateResultCount());
+
+    showExample(0);
+    examplePrevBtn.addEventListener("click", () => showExample(exampleIndex - 1));
+    exampleNextBtn.addEventListener("click", () => showExample(exampleIndex + 1));
 
     return () => {
       stopStream();
+      if (audioCtx) {
+        void audioCtx.close().catch(() => undefined);
+        audioCtx = null;
+      }
     };
   },
 };
