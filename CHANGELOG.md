@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.15.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.14.0...v0.15.0) (2026-10-16)
+
+### ✨ Features
+
+* 🎉 New Tool: 🖥️ EDID Decoder ([e3fa666](https://github.com/MrWyss-MSFT/ipk/commit/e3fa666a0051ce03840ef07e8c736dad1bec533d))
+* add global paste-anywhere support to input tools ([fea946a](https://github.com/MrWyss-MSFT/ipk/commit/fea946a65e9ec5f7dd6fcc8bd9a59cd75774520c))
+* add live WebSocket data variable to Stay Awake ([4884409](https://github.com/MrWyss-MSFT/ipk/commit/4884409a85ca12da75e9a184cf942e2ee33182aa))
+* add Load example / Clear buttons to all input-driven tools ([77f058a](https://github.com/MrWyss-MSFT/ipk/commit/77f058aab3f4f6c7862157535c4b29928fdeb8a1))
+* make Entra ID ObjectID/SID converter two-way like GDID/LID ([c7ae089](https://github.com/MrWyss-MSFT/ipk/commit/c7ae0890cf73aaf91f2761b09cd5459ca4e46234))
+* rename Stay Awake {{ws}} variable to {{websocketdata}} ([9a246cb](https://github.com/MrWyss-MSFT/ipk/commit/9a246cbf92c524b7c7c4f13c1a9cb64218674297))
+* support dropping a .devicelink.csv file anywhere on the page ([f552d2d](https://github.com/MrWyss-MSFT/ipk/commit/f552d2d61acd0d7cf4e01f431f6031dd76f277b6))
+
+### 🐛 Bug Fixes
+
+* keep header logo visible and fix popover rendering on narrow screens ([3f062cb](https://github.com/MrWyss-MSFT/ipk/commit/3f062cb24f027dbfdcaaeb67ec2ad8ffc05bcecd))
+* normalize field-header-to-field gap across tools ([43599e5](https://github.com/MrWyss-MSFT/ipk/commit/43599e58e3fc1e5be443506dda2de0f00d66421e))
+* polish Stay Awake control panel layout and copy ([07b2287](https://github.com/MrWyss-MSFT/ipk/commit/07b2287fef31f3aa23fe8d2655c5406a3abf41ab))
+* standardize error message styling across tools ([b92754d](https://github.com/MrWyss-MSFT/ipk/commit/b92754d609542f889887dd0f9cd34d305cb53a57))
+* use consistent step-1 instruction wording across tools ([df02b9e](https://github.com/MrWyss-MSFT/ipk/commit/df02b9e2121f5263e86c6f72856bb99d744fd171))
+
+### 📝 Documentation
+
+* document stepped-tool UI conventions for new tools ([e9f8274](https://github.com/MrWyss-MSFT/ipk/commit/e9f82743e5d3c670a880a427db23db3f34d6783e))
+
 ## [0.14.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.13.0...v0.14.0) (2026-10-15)
 
 ### ✨ Features
