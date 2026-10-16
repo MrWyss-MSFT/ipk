@@ -16,11 +16,21 @@
   text-align: center;
 }
 
+.awk-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.awk-toggle-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
 .awk-toggle {
   font-size: 1.05rem;
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-lg);
-  min-width: 260px;
 }
 
 .awk-toggle.is-active {
@@ -34,21 +44,13 @@
 }
 
 .awk-status {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
 }
 
 .awk-status.is-active {
   color: var(--success);
   font-weight: 600;
-}
-
-.awk-timer {
-  margin: 0;
-  font-size: 1.4rem;
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
-  color: var(--text);
 }
 
 .awk-warning {
@@ -150,6 +152,8 @@
 .awk-preview-wrap {
   display: flex;
   flex-direction: column;
+  align-self: stretch;
+  width: 100%;
   gap: var(--space-2);
 }
 
@@ -215,7 +219,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5) var(--space-4);
+  aspect-ratio: var(--awk-preview-aspect, 16 / 9);
   min-height: 7em;
+  max-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -280,7 +286,9 @@
 .awk-preview.is-fullscreen,
 .awk-preview.is-theater {
   border-radius: 0;
+  aspect-ratio: auto;
   min-height: 100vh;
+  max-height: none;
   padding: var(--space-6);
 }
 
@@ -385,9 +393,22 @@ body.ipk-theater-mode .awk-tool {
 }
 
 body.ipk-theater-mode .awk-note,
-body.ipk-theater-mode .awk-panel,
 body.ipk-theater-mode .awk-message-field,
 body.ipk-theater-mode .awk-ws-field,
 body.ipk-theater-mode .awk-preview-header {
+  display: none;
+}
+
+/* .awk-preview-wrap now lives inside .awk-panel - collapse the panel's own
+   box (background/border/padding) instead of hiding it, so the preview
+   keeps flowing as a full-width child of .awk-tool, and hide its other
+   (non-preview) children individually. */
+body.ipk-theater-mode .awk-panel {
+  display: contents;
+}
+
+body.ipk-theater-mode .awk-toggle-row,
+body.ipk-theater-mode .awk-status,
+body.ipk-theater-mode .awk-mode-options {
   display: none;
 }

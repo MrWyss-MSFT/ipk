@@ -5,7 +5,7 @@ import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import { escapeHtml, renderMarkdown, substituteVariables } from "./markdown";
 
 const MESSAGE_PLACEHOLDER =
-  "# 🚫🖐️🖥️\n\n# I am a server, serving important stuff\n\nRunning non-stop since {{startedAt}} - {{timer}} and crunching numbers.\n🐌......10110101010101010101\n\n{{websocketdata}}\n\nPress Esc to leave full screen or theater mode.";
+  "# 🚫🖐️🖥️\n\n# I am a server, serving important stuff\n\nRunning non-stop since {{startedAt}} - {{timer}} and crunching numbers.\n🐌......10110101010101010101\n\n{{websocketdata}}\n\nPress Esc to leave full screen or windows mode.";
 const EXAMPLE_MESSAGE = MESSAGE_PLACEHOLDER;
 const DEFAULT_BG_COLOR = "#121212";
 const DEFAULT_FG_COLOR = "#f5f5f5";
@@ -188,9 +188,11 @@ const tool: ToolDefinition = {
         </p>
 
         <div class="awk-panel">
-          <button type="button" class="btn btn-primary awk-toggle" id="awk-toggle">☕ Keep screen awake</button>
+          <div class="awk-toggle-row">
+            <button type="button" class="btn btn-primary awk-toggle" id="awk-toggle">☕ Start</button>
+            <span class="awk-toggle-label">Stay awake</span>
+          </div>
           <span class="awk-status" id="awk-status"><span class="awk-indicator"></span>Screen may turn off as usual.</span>
-          <p class="awk-timer" id="awk-timer" hidden></p>
           <div class="awk-mode-options">
             <label class="awk-mode-field">
               <input type="checkbox" id="awk-fullscreen" readonly ${fullscreenSupported ? "" : "disabled"} />
@@ -198,8 +200,32 @@ const tool: ToolDefinition = {
             </label>
             <label class="awk-mode-field">
               <input type="checkbox" id="awk-theater" readonly />
-              🗖 Theater mode
+              🗖 Windows mode
             </label>
+          </div>
+
+          <div class="awk-preview-wrap">
+            <div class="awk-preview-header">
+              <span class="awk-label">Preview</span>
+              <div class="awk-preview-controls">
+                <label class="awk-antiburn-field" title="Periodically nudges the message so it doesn't burn a static image into the screen">
+                  <input type="checkbox" id="awk-antiburn" checked />
+                  🔥 Prevent burn-in
+                </label>
+                <label class="awk-color-field" id="awk-bg-field" title="Locked to black while Prevent burn-in is on - a static colored background would burn in regardless of text movement">
+                  Background
+                  <input type="color" id="awk-bg-color" value="${DEFAULT_BG_COLOR}" />
+                </label>
+                <label class="awk-color-field">
+                  Text
+                  <input type="color" id="awk-fg-color" value="${DEFAULT_FG_COLOR}" />
+                </label>
+                <button type="button" id="awk-colors-reset" class="awk-populate-btn">Reset colors</button>
+              </div>
+            </div>
+            <div class="awk-preview" id="awk-preview">
+              <div class="awk-preview-content" id="awk-preview-content"></div>
+            </div>
           </div>
         </div>
 
@@ -262,37 +288,12 @@ const tool: ToolDefinition = {
           </details>
         </div>
 
-        <div class="awk-preview-wrap">
-          <div class="awk-preview-header">
-            <span class="awk-label">Preview</span>
-            <div class="awk-preview-controls">
-              <label class="awk-antiburn-field" title="Periodically nudges the message so it doesn't burn a static image into the screen">
-                <input type="checkbox" id="awk-antiburn" checked />
-                🔥 Prevent burn-in
-              </label>
-              <label class="awk-color-field" id="awk-bg-field" title="Locked to black while Prevent burn-in is on - a static colored background would burn in regardless of text movement">
-                Background
-                <input type="color" id="awk-bg-color" value="${DEFAULT_BG_COLOR}" />
-              </label>
-              <label class="awk-color-field">
-                Text
-                <input type="color" id="awk-fg-color" value="${DEFAULT_FG_COLOR}" />
-              </label>
-              <button type="button" id="awk-colors-reset" class="awk-populate-btn">Reset colors</button>
-            </div>
-          </div>
-          <div class="awk-preview" id="awk-preview">
-            <div class="awk-preview-content" id="awk-preview-content"></div>
-          </div>
-        </div>
-
         <p class="awk-warning" id="awk-warning" role="alert"></p>
       </div>
     `;
 
     const toggleBtn = container.querySelector<HTMLButtonElement>("#awk-toggle")!;
     const statusEl = container.querySelector<HTMLSpanElement>("#awk-status")!;
-    const timerEl = container.querySelector<HTMLParagraphElement>("#awk-timer")!;
     const warningEl = container.querySelector<HTMLParagraphElement>("#awk-warning")!;
     const messageInput = container.querySelector<HTMLTextAreaElement>("#awk-message")!;
     const previewEl = container.querySelector<HTMLDivElement>("#awk-preview")!;
@@ -340,14 +341,20 @@ const tool: ToolDefinition = {
       previewContentEl.innerHTML = renderMarkdown(substituteVariables(raw, vars));
     };
 
+    const renderStatusText = () => {
+      statusEl.classList.toggle("is-active", active);
+      const base = active ? "Staying on while this tab is visible." : "Screen may turn off as usual.";
+      const timerSuffix = active && startedAt ? ` ${new Date(startedAt).toLocaleTimeString()} - ${formatElapsed(Date.now() - startedAt)}` : "";
+      statusEl.innerHTML = `<span class="awk-indicator"></span>${base}${timerSuffix}`;
+    };
+
     const updateTimer = () => {
-      timerEl.textContent = `Awake for ${formatElapsed(Date.now() - startedAt)}`;
+      renderStatusText();
       renderPreview();
     };
 
     const startTimer = () => {
       startedAt = Date.now();
-      timerEl.hidden = false;
       updateTimer();
       timerInterval = window.setInterval(updateTimer, 1000);
     };
@@ -357,18 +364,14 @@ const tool: ToolDefinition = {
         window.clearInterval(timerInterval);
         timerInterval = undefined;
       }
-      timerEl.hidden = true;
     };
 
     const setActive = (next: boolean) => {
       active = next;
-      toggleBtn.textContent = active ? "🛑 Stop keeping screen awake" : "☕ Keep screen awake";
+      toggleBtn.textContent = active ? "🛑 Stop" : "☕ Start";
       toggleBtn.classList.toggle("is-active", active);
       toggleBtn.classList.toggle("btn-primary", !active);
-      statusEl.classList.toggle("is-active", active);
-      statusEl.innerHTML = `<span class="awk-indicator"></span>${
-        active ? "Screen will stay on while this tab is open and visible." : "Screen may turn off as usual."
-      }`;
+      renderStatusText();
       if (active) startTimer();
       else stopTimer();
       renderPreview();
@@ -449,6 +452,17 @@ const tool: ToolDefinition = {
       wsUrlInput.value = WS_EXAMPLE_URL;
       wsUrlInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
+
+    const applyPreviewAspectRatio = () => {
+      const { width, height } = window.screen;
+      if (width > 0 && height > 0) {
+        previewEl.style.setProperty("--awk-preview-aspect", `${width} / ${height}`);
+      }
+    };
+    applyPreviewAspectRatio();
+    // Screen resolution can change if the window is dragged to another monitor, or the
+    // OS display settings change - there's no dedicated event for that, so piggyback on resize.
+    window.addEventListener("resize", applyPreviewAspectRatio);
 
     const applyColors = () => {
       const bg = antiBurnToggle.checked ? BURN_IN_SAFE_BG_COLOR : bgColorInput.value;
@@ -659,6 +673,7 @@ const tool: ToolDefinition = {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       document.removeEventListener("keydown", onKeydown);
+      window.removeEventListener("resize", applyPreviewAspectRatio);
       if (document.fullscreenElement === previewEl) void document.exitFullscreen().catch(() => undefined);
       if (theaterActive) document.body.classList.remove("ipk-theater-mode");
       stopAntiBurn();
