@@ -309,6 +309,68 @@
   font-size: 1.6rem;
 }
 
+.awk-ws-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.awk-ws-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.awk-ws-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.awk-ws-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.awk-ws-input {
+  flex: 1;
+  font-size: 0.85rem;
+}
+
+.awk-ws-toggle {
+  white-space: nowrap;
+}
+
+.awk-ws-status {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.awk-ws-status.is-connected {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.awk-ws-status .awk-indicator {
+  background: var(--border);
+}
+
+.awk-ws-status.is-connected .awk-indicator {
+  background: var(--success);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+.awk-ws-example summary {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.awk-ws-example[open] summary {
+  margin-bottom: var(--space-2);
+}
+
 /* Theater mode: strip the tool down to just the full-width preview. */
 body.ipk-theater-mode .awk-tool {
   max-width: none;
@@ -318,6 +380,7 @@ body.ipk-theater-mode .awk-tool {
 body.ipk-theater-mode .awk-note,
 body.ipk-theater-mode .awk-panel,
 body.ipk-theater-mode .awk-message-field,
+body.ipk-theater-mode .awk-ws-field,
 body.ipk-theater-mode .awk-preview-header {
   display: none;
 }
