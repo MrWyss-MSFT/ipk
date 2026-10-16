@@ -4,19 +4,12 @@
   gap: var(--space-2);
 }
 
-.sid-mode {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
 .sid-cloud {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   font-size: 0.875rem;
   color: var(--text-muted);
-  margin-bottom: var(--space-2);
 }
 
 .sid-cloud label {
@@ -31,10 +24,35 @@
   color: var(--text);
 }
 
+.sid-step-label {
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.sid-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.sid-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* .sid-field's own flex gap (space-1) is too narrow between the field
+   header row and the field below it - bump it up to the standard space-2
+   gap used elsewhere. */
+.sid-field .ipk-field-header {
+  margin-bottom: calc(var(--space-2) - var(--space-1));
+}
+
 .sid-field-label {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin: 0 0 calc(var(--space-1) - var(--space-2));
+  margin: 0;
 }
 
 .sid-tool input[type="text"] {
