@@ -131,7 +131,7 @@
 }
 
 .adl-script-attribution {
-  margin: var(--space-2) 0 var(--space-4);
+  margin: var(--space-2) 0 var(--space-2);
   font-size: 0.8rem;
   color: var(--text-muted);
 }
@@ -140,6 +140,6 @@
   margin-bottom: var(--space-2);
 }
 
-.adl-script-note {
-  margin: 0 0 var(--space-4);
+.adl-script-example + .adl-script-example {
+  margin-top: calc(var(--space-1) - var(--space-4));
 }

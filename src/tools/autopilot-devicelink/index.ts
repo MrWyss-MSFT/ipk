@@ -5,6 +5,7 @@ import { wireGlobalPaste } from "@/app/global-paste";
 import { wireFileDrop } from "@/app/file-drop";
 import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
+import { codeBlockHtml, setPowerShellCode } from "@/app/code-block";
 import {
   isDeviceLinkPayload,
   parseDeviceLinkUrl,
@@ -117,6 +118,96 @@ $csvPath = [DeviceLink.Native]::ExportCsv($folder)
 Write-Host "Exported: $csvPath"
 `;
 const EXPORT_SCRIPT_VARIANTS = makePsCommandVariants("Get-Content -Raw $csvPath", { setup: EXPORT_SCRIPT_SETUP });
+
+/**
+ * Reports presence/size/hash (never raw bytes) of the Device Link UEFI variables that store the local
+ * Autopilot device association, per https://learn.microsoft.com/en-us/autopilot/device-preparation/
+ * device-association/remove-association. Uses only built-in kernel32/advapi32 P/Invoke (no external
+ * tool): enables SeSystemEnvironmentPrivilege (required even on an elevated token) via
+ * AdjustTokenPrivileges, then calls GetFirmwareEnvironmentVariableExW for each variable.
+ */
+const READ_SCRIPT = `# Run elevated. Reads the local Autopilot device association (Device Link UEFI variables)
+# and reports presence/size/hash only - never the raw bytes.
+$ns = '{B3DE75DA-819C-4FD5-9F01-C3D49E8CBBD7}'
+$names = 'DeviceLinkId', 'DeviceLinkJwtCompressed', 'DeviceLinkJwtLastWrite', 'DeviceLinkCreationTimeUtc'
+
+Add-Type -Namespace DL -Name Fw -MemberDefinition @'
+[DllImport("kernel32.dll", EntryPoint="GetFirmwareEnvironmentVariableExW", CharSet=CharSet.Unicode, SetLastError=true)]
+public static extern uint Read(string name, string vendor, byte[] value, uint size, out uint attributes);
+'@
+
+Add-Type -Namespace DL -Name Priv -MemberDefinition @'
+[DllImport("kernel32.dll")] public static extern IntPtr GetCurrentProcess();
+[DllImport("advapi32.dll", SetLastError=true)] public static extern bool OpenProcessToken(IntPtr h, uint access, out IntPtr token);
+[DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)] public static extern bool LookupPrivilegeValue(string sys, string name, out long luid);
+[StructLayout(LayoutKind.Sequential)] public struct TP { public uint Count; public long Luid; public uint Attr; }
+[DllImport("advapi32.dll", SetLastError=true)] public static extern bool AdjustTokenPrivileges(IntPtr token, bool disableAll, ref TP tp, uint size, IntPtr prev, IntPtr ret);
+'@
+$tokenHandle = [IntPtr]::Zero
+[void][DL.Priv]::OpenProcessToken([DL.Priv]::GetCurrentProcess(), 0x28, [ref]$tokenHandle)
+$luid = 0L
+[void][DL.Priv]::LookupPrivilegeValue($null, 'SeSystemEnvironmentPrivilege', [ref]$luid)
+$tp = New-Object DL.Priv+TP
+$tp.Count = 1; $tp.Luid = $luid; $tp.Attr = 2
+if (-not [DL.Priv]::AdjustTokenPrivileges($tokenHandle, $false, [ref]$tp, 0, [IntPtr]::Zero, [IntPtr]::Zero)) {
+    throw "Could not enable SeSystemEnvironmentPrivilege - run PowerShell as administrator."
+}
+
+$results = foreach ($name in $names) {
+    $buf = New-Object byte[] 65536
+    $count = [DL.Fw]::Read($name, $ns, $buf, $buf.Length, [ref]0)
+    $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+    if ($count -gt 0) {
+        $hash = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($buf, 0, $count)).Replace('-', '')
+        [pscustomobject]@{ Variable = $name; Status = 'Present'; Bytes = $count; SHA256 = $hash }
+    } else {
+        [pscustomobject]@{ Variable = $name; Status = if ($err -eq 203) { 'NotFound' } else { "ReadFailed ($err)" }; Bytes = $null; SHA256 = $null }
+    }
+}
+$results | Format-Table -AutoSize
+`;
+
+/**
+ * Clears the Device Link UEFI variables that store the local Autopilot device association, per
+ * https://learn.microsoft.com/en-us/autopilot/device-preparation/device-association/remove-association.
+ * Uses only built-in kernel32/advapi32 P/Invoke (no external tool): enables SeSystemEnvironmentPrivilege
+ * (required even on an elevated token) via AdjustTokenPrivileges, then calls
+ * SetFirmwareEnvironmentVariableExW with a zero-length value to delete each variable. Doesn't reset the
+ * TPM, unenroll the device, or delete its Entra ID/Intune records - only removes the local association.
+ */
+const REMOVE_SCRIPT = `# Run elevated. Clears the local Autopilot device association (Device Link UEFI variables).
+# Does not reset the TPM, unenroll the device, or delete its Entra ID/Intune records.
+$ns = '{B3DE75DA-819C-4FD5-9F01-C3D49E8CBBD7}'
+$names = 'DeviceLinkId', 'DeviceLinkJwtCompressed', 'DeviceLinkJwtLastWrite', 'DeviceLinkCreationTimeUtc'
+
+Add-Type -Namespace DL -Name Fw -MemberDefinition @'
+[DllImport("kernel32.dll", EntryPoint="SetFirmwareEnvironmentVariableExW", CharSet=CharSet.Unicode, SetLastError=true)]
+public static extern bool Clear(string name, string vendor, byte[] value, uint size, uint attributes);
+'@
+
+Add-Type -Namespace DL -Name Priv -MemberDefinition @'
+[DllImport("kernel32.dll")] public static extern IntPtr GetCurrentProcess();
+[DllImport("advapi32.dll", SetLastError=true)] public static extern bool OpenProcessToken(IntPtr h, uint access, out IntPtr token);
+[DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)] public static extern bool LookupPrivilegeValue(string sys, string name, out long luid);
+[StructLayout(LayoutKind.Sequential)] public struct TP { public uint Count; public long Luid; public uint Attr; }
+[DllImport("advapi32.dll", SetLastError=true)] public static extern bool AdjustTokenPrivileges(IntPtr token, bool disableAll, ref TP tp, uint size, IntPtr prev, IntPtr ret);
+'@
+$tokenHandle = [IntPtr]::Zero
+[void][DL.Priv]::OpenProcessToken([DL.Priv]::GetCurrentProcess(), 0x28, [ref]$tokenHandle)
+$luid = 0L
+[void][DL.Priv]::LookupPrivilegeValue($null, 'SeSystemEnvironmentPrivilege', [ref]$luid)
+$tp = New-Object DL.Priv+TP
+$tp.Count = 1; $tp.Luid = $luid; $tp.Attr = 2
+if (-not [DL.Priv]::AdjustTokenPrivileges($tokenHandle, $false, [ref]$tp, 0, [IntPtr]::Zero, [IntPtr]::Zero)) {
+    throw "Could not enable SeSystemEnvironmentPrivilege - run PowerShell as administrator."
+}
+
+foreach ($name in $names) {
+    [void][DL.Fw]::Clear($name, $ns, $null, 0, 0)
+    $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+    "{0}: {1}" -f $name, (if ($err -eq 0 -or $err -eq 203) { 'Cleared' } else { "Failed ($err)" })
+}
+`;
 
 /** A made-up but structurally valid record, rendered to `.devicelink.csv` text for the "Load example" button. */
 const EXAMPLE_DEVICELINK_INFO: DeviceLinkInfo = {
@@ -285,7 +376,9 @@ const tool: ToolDefinition = {
         <div class="adl-results" id="adl-results"></div>
 
         <details class="adl-script-example">
-          <summary>
+          <summary
+            title="Calls the undocumented ModernDeployment.Autopilot.Core.DeviceLinkUtilities WinRT class directly (no external tool) to export a real .devicelink.csv without running the full MdmDiagnosticsTool.exe -area Autopilot -cab collection. Needs an elevated session on a Device Preparation-capable edition (Pro/Enterprise/Education) with KB5120998+."
+          >
             <span class="adl-script-summary-text">
               Example: export a .devicelink.csv in PowerShell
               <span
@@ -300,13 +393,67 @@ const tool: ToolDefinition = {
             <a href="https://www.powershellgallery.com/packages/Get-AutopilotDeviceAssociation" target="_blank" rel="noopener">Get-AutopilotDeviceAssociation</a>
             module.
           </p>
-          <p class="adl-script-note ipk-hint">
-            Calls the undocumented <code>ModernDeployment.Autopilot.Core.DeviceLinkUtilities</code> WinRT
-            class directly (no external tool) to export a real <code>.devicelink.csv</code> without running
-            the full <code>MdmDiagnosticsTool.exe -area Autopilot -cab</code> collection. Needs an elevated
-            session on a Device Preparation-capable edition (Pro/Enterprise/Education) with KB5120998+.
-          </p>
           ${psCommandTabsHtml("adl-script", { requiresAdmin: true })}
+        </details>
+
+        <details class="adl-script-example">
+          <summary
+            title="Reports presence/size/SHA-256 (never the raw bytes) of the four Device Link UEFI variables - no export, just a quick local check for whether this device already has an association (no external tool, just built-in kernel32/advapi32 P/Invoke). Needs an elevated session."
+          >
+            <span class="adl-script-summary-text">
+              Example: read the local device association in PowerShell
+              <span
+                class="ipk-stage-badge ipk-stage-alpha"
+                title="This script is alpha - still under active work, rough edges and missing features are expected."
+                >alpha</span
+              >
+            </span>
+          </summary>
+          <p class="adl-script-attribution">
+            Variable names per Microsoft Learn's
+            <a href="https://learn.microsoft.com/en-us/autopilot/device-preparation/device-association/remove-association" target="_blank" rel="noopener">Remove a Windows Autopilot device association</a>
+            guidance.
+          </p>
+          <div class="ipk-ps-command">
+            <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
+              <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">PowerShell</button>
+              <span class="ipk-ps-admin-badge" title="Needs an elevated PowerShell/terminal (Run as Administrator)">🛡️ Admin</span>
+            </div>
+            <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
+              ${codeBlockHtml("adl-read-script-code")}
+              ${copyButtonHtml("adl-read-script-copy")}
+            </div>
+          </div>
+        </details>
+
+        <details class="adl-script-example">
+          <summary
+            title="Clears the four Device Link UEFI variables that store the local tenant affinity (no external tool, just built-in kernel32/advapi32 P/Invoke). This only removes the on-device association - it doesn't reset the TPM, unenroll the device, or delete its Entra ID/Intune records, and you still need to delete the device from Intune's Device association list separately. Needs an elevated session."
+          >
+            <span class="adl-script-summary-text">
+              Example: remove the local device association in PowerShell
+              <span
+                class="ipk-stage-badge ipk-stage-alpha"
+                title="This script is alpha - still under active work, rough edges and missing features are expected."
+                >alpha</span
+              >
+            </span>
+          </summary>
+          <p class="adl-script-attribution">
+            Variable names per Microsoft Learn's
+            <a href="https://learn.microsoft.com/en-us/autopilot/device-preparation/device-association/remove-association" target="_blank" rel="noopener">Remove a Windows Autopilot device association</a>
+            guidance.
+          </p>
+          <div class="ipk-ps-command">
+            <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
+              <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">PowerShell</button>
+              <span class="ipk-ps-admin-badge" title="Needs an elevated PowerShell/terminal (Run as Administrator)">🛡️ Admin</span>
+            </div>
+            <div class="ipk-copy-wrap ipk-copy-wrap-tabbed">
+              ${codeBlockHtml("adl-remove-script-code")}
+              ${copyButtonHtml("adl-remove-script-copy")}
+            </div>
+          </div>
         </details>
       </div>
     `;
@@ -317,6 +464,14 @@ const tool: ToolDefinition = {
     const resultsEl = container.querySelector<HTMLDivElement>("#adl-results")!;
 
     const unwireScriptTabs = wirePsCommandTabs(container, "adl-script", EXPORT_SCRIPT_VARIANTS);
+
+    const removeScriptCode = container.querySelector<HTMLElement>("#adl-remove-script-code")!;
+    setPowerShellCode(removeScriptCode, REMOVE_SCRIPT);
+    wireCopyButton(container.querySelector<HTMLButtonElement>("#adl-remove-script-copy")!, () => REMOVE_SCRIPT);
+
+    const readScriptCode = container.querySelector<HTMLElement>("#adl-read-script-code")!;
+    setPowerShellCode(readScriptCode, READ_SCRIPT);
+    wireCopyButton(container.querySelector<HTMLButtonElement>("#adl-read-script-copy")!, () => READ_SCRIPT);
 
     function showError(message: string) {
       errorEl.textContent = message;
