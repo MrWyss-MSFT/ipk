@@ -44,8 +44,9 @@ export interface ToolDefinition {
   stage?: "alpha" | "beta";
   /**
    * Set true to exclude this tool from the home grid, sidebar nav groups,
-   * category list, and search - for app-level pages (e.g. About) that are
-   * linked from elsewhere in the chrome instead of listed as a regular tool.
+   * category list, and search - for unpublished tools or app-level pages
+   * (e.g. About) linked from elsewhere instead of listed as a regular tool.
+   * Set false or omit to make the tool discoverable again.
    * The tool is still reachable at #/tool/<id> and resolved by getToolById().
    */
   hidden?: boolean;

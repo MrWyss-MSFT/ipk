@@ -28,6 +28,7 @@
 
 :root,
 [data-theme="light"] {
+  color-scheme: light;
   --bg: #faf3e8;
   --bg-elevated: #fffdfa;
   --bg-hover: #f1e6d3;
@@ -48,6 +49,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #141312;
   --bg-elevated: #1f1c19;
   --bg-hover: #2a2520;
