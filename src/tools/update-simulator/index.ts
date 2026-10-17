@@ -470,6 +470,17 @@ const tool: ToolDefinition = {
       }
       run();
     };
+    const onNumberWheel = (e: WheelEvent) => {
+      const input = e.target;
+      if (!(input instanceof HTMLInputElement) || input.type !== "number" ||
+          input.disabled || input.readOnly || input.step === "any" ||
+          e.ctrlKey || e.metaKey || e.deltaY === 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      const previous = input.value;
+      if (e.deltaY < 0) input.stepUp();
+      else input.stepDown();
+      if (input.value !== previous) input.dispatchEvent(new Event("input", { bubbles: true }));
+    };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
       const mark = t.closest<HTMLElement>("[data-n]");
@@ -506,6 +517,7 @@ const tool: ToolDefinition = {
     container.addEventListener("input", onInput);
     container.addEventListener("change", onInput);
     container.addEventListener("click", onClick);
+    container.addEventListener("wheel", onNumberWheel, { passive: false });
     run();
     const cleanupTimeline = wireTimelineInteractions(container);
 
@@ -514,6 +526,7 @@ const tool: ToolDefinition = {
       container.removeEventListener("input", onInput);
       container.removeEventListener("change", onInput);
       container.removeEventListener("click", onClick);
+      container.removeEventListener("wheel", onNumberWheel);
     };
   },
 };
