@@ -4,6 +4,7 @@ import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { wireGlobalPaste } from "@/app/global-paste";
 import { wireFileDrop } from "@/app/file-drop";
 import { wireExampleButton } from "@/app/example-button";
+import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import {
   isDeviceLinkPayload,
   parseDeviceLinkUrl,
@@ -17,6 +18,105 @@ import {
   type DeviceLinkInfo,
   type DeviceLinkCsvRowError,
 } from "@/app/devicelink";
+
+/**
+ * Undocumented WinRT call behind Autopilot Device Preparation's own DeviceLink export (reverse-engineered
+ * from the community `Get-AutopilotDeviceAssociation` script). Calls `ModernDeployment.Autopilot.Core.
+ * DeviceLinkUtilities.ExportDeviceLinkInfoCsvAsync` directly via raw COM/WinRT interop - no external tool,
+ * just `Add-Type` + `combase.dll` P/Invoke - to produce a real `.devicelink.csv` without running the full
+ * `MdmDiagnosticsTool.exe -area Autopilot -cab` collection. Requires an elevated session on a Device
+ * Preparation-capable edition (Pro/Enterprise/Education) with a recent-enough build (KB5120998+).
+ */
+const EXPORT_SCRIPT_SETUP = `# Run elevated, on a Device-Prep-capable edition (Pro/Enterprise/Education).
+if (-not ('DeviceLink.Native' -as [type])) {
+    Add-Type @'
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+
+namespace DeviceLink
+{
+    [ComImport, Guid("6410BEE7-60A9-5627-9EB2-FEDA7518A4EB"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IDeviceLinkUtilities
+    {
+        [PreserveSig] int GetIids(out int c, out IntPtr p);
+        [PreserveSig] int GetRuntimeClassName(out IntPtr n);
+        [PreserveSig] int GetTrustLevel(out int l);
+        [PreserveSig] int ExportDeviceLinkInfoCsvAsync(IntPtr folder, int format, out IntPtr op); // slot 6
+    }
+    [ComImport, Guid("00000036-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    interface IAsyncInfo
+    {
+        [PreserveSig] int GetIids(out int c, out IntPtr p);
+        [PreserveSig] int GetRuntimeClassName(out IntPtr n);
+        [PreserveSig] int GetTrustLevel(out int l);
+        [PreserveSig] int get_Id(out uint id);
+        [PreserveSig] int get_Status(out int status);
+        [PreserveSig] int get_ErrorCode(out int hr);
+    }
+
+    public static class Native
+    {
+        [DllImport("combase.dll")] static extern int RoInitialize(int type);
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)] static extern int WindowsCreateString(string s, int len, out IntPtr h);
+        [DllImport("combase.dll")] static extern int WindowsDeleteString(IntPtr h);
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)] static extern int RoActivateInstance(IntPtr id, out IntPtr inst);
+
+        static void ThrowIfFailed(string op, int hr) { if (hr < 0) throw new Exception(op + " failed (0x" + hr.ToString("X8") + ")"); }
+
+        public static string ExportCsv(string folder, int timeoutSec = 30)
+        {
+            RoInitialize(1);
+            const string className = "ModernDeployment.Autopilot.Core.DeviceLinkUtilities";
+            IntPtr hClass; ThrowIfFailed("WindowsCreateString(class)",
+                WindowsCreateString(className, className.Length, out hClass));
+            IntPtr inst; int hr = RoActivateInstance(hClass, out inst); WindowsDeleteString(hClass);
+            ThrowIfFailed("RoActivateInstance", hr);
+            var dlu = (IDeviceLinkUtilities)Marshal.GetObjectForIUnknown(inst);
+
+            IntPtr hFolder; ThrowIfFailed("WindowsCreateString(folder)",
+                WindowsCreateString(folder, folder.Length, out hFolder));
+            IntPtr op; ThrowIfFailed("ExportDeviceLinkInfoCsvAsync",
+                dlu.ExportDeviceLinkInfoCsvAsync(hFolder, 33 /* Json|Base64 */, out op)); // format 33 matches the OOBE export
+            WindowsDeleteString(hFolder);
+
+            var asyncInfo = (IAsyncInfo)Marshal.GetObjectForIUnknown(op);
+            var deadline = DateTime.UtcNow.AddSeconds(timeoutSec);
+            int status;
+            do
+            {
+                System.Threading.Thread.Sleep(250);
+                ThrowIfFailed("get_Status", asyncInfo.get_Status(out status));
+                if (DateTime.UtcNow > deadline) throw new Exception("Export timed out.");
+            } while (status == 0); // 0 = Started
+
+            if (status != 1) // 1 = Completed
+            {
+                int errorCode; asyncInfo.get_ErrorCode(out errorCode);
+                throw new Exception("Export failed, status " + status + " (0x" + errorCode.ToString("X8") + ")");
+            }
+
+            string newest = null; DateTime newestTime = DateTime.MinValue;
+            foreach (var f in Directory.GetFiles(folder, "*.devicelink.csv"))
+            {
+                var t = File.GetLastWriteTimeUtc(f);
+                if (t >= newestTime) { newestTime = t; newest = f; }
+            }
+            if (newest == null) throw new Exception("Export completed but no *.devicelink.csv found in " + folder);
+            return newest;
+        }
+    }
+}
+'@
+}
+
+$folder = "$env:ProgramData\\DeviceLink"
+New-Item -ItemType Directory -Path $folder -Force | Out-Null
+
+$csvPath = [DeviceLink.Native]::ExportCsv($folder)
+Write-Host "Exported: $csvPath"
+`;
+const EXPORT_SCRIPT_VARIANTS = makePsCommandVariants("Get-Content -Raw $csvPath", { setup: EXPORT_SCRIPT_SETUP });
 
 /** A made-up but structurally valid record, rendered to `.devicelink.csv` text for the "Load example" button. */
 const EXAMPLE_DEVICELINK_INFO: DeviceLinkInfo = {
@@ -183,6 +283,31 @@ const tool: ToolDefinition = {
         <p class="adl-error" id="adl-error" role="alert" hidden></p>
 
         <div class="adl-results" id="adl-results"></div>
+
+        <details class="adl-script-example">
+          <summary>
+            <span class="adl-script-summary-text">
+              Example: export a .devicelink.csv in PowerShell
+              <span
+                class="ipk-stage-badge ipk-stage-alpha"
+                title="This script is alpha - still under active work, rough edges and missing features are expected."
+                >alpha</span
+              >
+            </span>
+          </summary>
+          <p class="adl-script-attribution">
+            Approach derived from Rudy Ooms' (call4cloud)
+            <a href="https://www.powershellgallery.com/packages/Get-AutopilotDeviceAssociation" target="_blank" rel="noopener">Get-AutopilotDeviceAssociation</a>
+            module.
+          </p>
+          <p class="adl-script-note ipk-hint">
+            Calls the undocumented <code>ModernDeployment.Autopilot.Core.DeviceLinkUtilities</code> WinRT
+            class directly (no external tool) to export a real <code>.devicelink.csv</code> without running
+            the full <code>MdmDiagnosticsTool.exe -area Autopilot -cab</code> collection. Needs an elevated
+            session on a Device Preparation-capable edition (Pro/Enterprise/Education) with KB5120998+.
+          </p>
+          ${psCommandTabsHtml("adl-script", { requiresAdmin: true })}
+        </details>
       </div>
     `;
 
@@ -190,6 +315,8 @@ const tool: ToolDefinition = {
     const input = container.querySelector<HTMLTextAreaElement>("#adl-input")!;
     const errorEl = container.querySelector<HTMLParagraphElement>("#adl-error")!;
     const resultsEl = container.querySelector<HTMLDivElement>("#adl-results")!;
+
+    const unwireScriptTabs = wirePsCommandTabs(container, "adl-script", EXPORT_SCRIPT_VARIANTS);
 
     function showError(message: string) {
       errorEl.textContent = message;
@@ -287,6 +414,7 @@ const tool: ToolDefinition = {
       unwireGlobalPaste();
       unwireFileDrop();
       unwireExample();
+      unwireScriptTabs();
     };
   },
 };

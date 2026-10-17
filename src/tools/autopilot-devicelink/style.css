@@ -117,3 +117,29 @@
   font-size: 0.85rem;
   color: var(--danger);
 }
+
+.adl-script-example summary {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.adl-script-summary-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.adl-script-attribution {
+  margin: var(--space-2) 0 var(--space-4);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.adl-script-example[open] summary {
+  margin-bottom: var(--space-2);
+}
+
+.adl-script-note {
+  margin: 0 0 var(--space-4);
+}
