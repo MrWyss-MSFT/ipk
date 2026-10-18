@@ -446,7 +446,7 @@ const tool: ToolDefinition = {
           : undefined;
         const restart = restartInput instanceof HTMLSelectElement
           ? kind === "oob" || kind === "oobns"
-          : kind !== "driver" && !!restartInput?.checked;
+          : !!restartInput?.checked;
         const title = kind === "software"
           ? container.querySelector<HTMLInputElement>("#wus-release-software-title")!.value.trim() || KIND_LABEL.software
           : KIND_LABEL[kind];
