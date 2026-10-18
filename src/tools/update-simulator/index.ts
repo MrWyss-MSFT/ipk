@@ -289,7 +289,7 @@ const tool: ToolDefinition = {
 
     container.innerHTML = `
       <div class="wus-tool">
-        <p class="ipk-hint">Hypothetical timeline for an idle Windows 11 25H2+ device using the configured online schedule. Models quality updates and optional Microsoft product releases; legacy policies and feature updates are not simulated. Hover a numbered marker, or use the Notes column, to see assumptions where Microsoft docs are silent or conflict.</p>
+        <p class="ipk-hint">Hypothetical timeline for an idle Windows 11 25H2+ device using the configured online schedule. Models quality updates and optional Microsoft product releases; legacy policies and feature updates are not simulated. Each release's restarts and notifications are modeled independently; shared restarts and notifications across updates are not simulated, so duplicates can appear. Hover a numbered marker, or use the Notes column, to see assumptions where Microsoft docs are silent or conflict.</p>
         <div class="wus-result" id="wus-result"></div>
         ${DEPLOYMENT_RING_HTML}
         <details class="wus-group" id="wus-releases"><summary class="wus-summary" id="wus-releases-summary">Simulate releases</summary>

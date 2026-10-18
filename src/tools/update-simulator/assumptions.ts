@@ -17,6 +17,10 @@ const HOTPATCH = "https://learn.microsoft.com/windows/deployment/windows-autopat
 const RELEASE = "https://learn.microsoft.com/windows/deployment/update/release-cycle";
 
 export const ASSUMPTIONS = {
+  independentRestarts: {
+    text: "Simulator limitation: each release's restart and notifications are calculated independently. A single device restart completing multiple installed updates, shared notification sequences, and interactions between different updates' deadlines and grace periods are not modeled. Multiple releases can therefore show separate or duplicate restart and notification events; these do not predict the number of actual device restarts or prompts.",
+    url: DEADLINES,
+  },
   cloudOverridesClient: {
     text: "Documented policy precedence: when a device and update are covered by a cloud-based Windows quality update policy (Intune / Autopatch), that policy controls approval and deferral instead of the client-side deferral ({{DeferQualityUpdatesPeriodInDays}}). The deferrals are not added together. Client deadlines and grace periods still apply.",
     url: OVERVIEW + "#:~:text=Deferrals%20set%20in%20cloud-based%20quality%20update%20policies%20override%20any%20client-side%20deferral%20settings",
@@ -185,7 +189,7 @@ export const ASSUMPTION_GROUPS = {
   "Releases and discovery": ["releaseTime", "previewDate", "userEvents", "discoveryImmediate", "driverDeferral", "excludeDriversName", "softwareUpdates"],
   "Cloud policies and hotpatch": ["cloudOverridesClient", "cloudOptionalContent", "cloudClientPause", "manualApproval", "hotpatchEligible", "hotpatchCalendar", "hotpatchNonSecurity", "restartOverride"],
   "Installation and device availability": ["maintenanceAt3", "installDuration", "onlineHours", "mode4", "pauseModel"],
-  "Active hours and restarts": ["activeHours", "mode3Countdown", "restartPending"],
+  "Active hours and restarts": ["activeHours", "mode3Countdown", "restartPending", "independentRestarts"],
   "Deadlines and grace periods": ["deadlineClock", "autoUpdateVsDeadline", "deadlineImmediate", "deadlineZero", "noAutoReboot", "deadlineForcedRestart"],
   "Notifications": ["notifyDefaultOff", "noReminders", "notifLevelMeaning", "noNotifActiveHours"],
   "Maintenance windows": ["mwWindow", "mwLast"],
