@@ -1,4 +1,7 @@
 import { BROWSER_TZ } from "./calendar";
+
+export const LOCAL_ACTIVE_HOURS_HELP = "Active hours set locally in Windows Settings. With Automatically, Windows learns these hours from device usage, called Intelligent Active Hours. With Manually, the user chooses them. Policy-defined active hours take precedence.";
+
 export type CloudKind = "cu" | "preview" | "oob" | "oobns";
 export interface CloudApproval {
   auto: boolean;

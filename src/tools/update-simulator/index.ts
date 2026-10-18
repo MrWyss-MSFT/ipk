@@ -1,13 +1,18 @@
 import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
-import { configuredPolicies, DEFAULTS, DEVICE_APPLIED_DEFAULTS, GROUPS, WEEKDAYS, type CloudKind, type Field, type Settings } from "./settings";
+import { configuredPolicies, DEFAULTS, DEVICE_APPLIED_DEFAULTS, GROUPS, LOCAL_ACTIVE_HOURS_HELP, WEEKDAYS, type CloudKind, type Field, type Settings } from "./settings";
 import { autoReleases, KIND_LABEL, simulate, type Release, type UpdateKind } from "./simulate";
 import { BROWSER_TZ, fmtDate, lastDayOfMonth, parseDate, patchTuesday } from "./calendar";
 import { setTimelineZoom, renderTimeline, wireTimelineInteractions, type EventGroup } from "./timeline";
-import { ASSUMPTIONS, assumptionHtml, cspLink } from "./assumptions";
+import { ASSUMPTIONS, ASSUMPTION_GROUPS, assumptionHtml, cspLink } from "./assumptions";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const timeValue = (hour: number) => `${String(Math.floor(hour)).padStart(2, "0")}:${String(Math.round(hour % 1 * 60)).padStart(2, "0")}`;
+const timeHour = (value: string) => {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours + minutes / 60;
+};
 
 function fieldHtml(f: Field): string {
   const id = `wus-${f.key}`;
@@ -79,12 +84,12 @@ function readSettings(root: HTMLElement): Settings {
   s.noNotifActiveEnabled = root.querySelector<HTMLInputElement>("#wus-noNotifActiveEnabled")!.checked;
   s.autoUpdate = s.installMode === "auto" && s.resetToDefault ? 6
     : s.installMode === "scheduled" && s.schedSub === "scheduled" ? 3 : 2;
-  s.activeStart = Number(num("smartStart") || DEFAULTS.activeStart);
-  s.activeEnd = Number(num("smartEnd") || DEFAULTS.activeEnd);
+  s.activeStart = timeHour(num("localStart") || timeValue(DEFAULTS.activeStart));
+  s.activeEnd = timeHour(num("localEnd") || timeValue(DEFAULTS.activeEnd));
   s.onlineAlways = root.querySelector<HTMLInputElement>("#wus-onlineAlways")?.checked ?? DEFAULTS.onlineAlways;
   s.onlineDays = WEEKDAYS.map((_, i) => root.querySelector<HTMLInputElement>(`#wus-online-day-${i}`)?.checked ?? DEFAULTS.onlineDays[i]);
-  s.onlineStart = Number(num("onlineStart") || DEFAULTS.onlineStart);
-  s.onlineEnd = Number(num("onlineEnd") || DEFAULTS.onlineEnd);
+  s.onlineStart = timeHour(num("onlineStartTime") || timeValue(DEFAULTS.onlineStart));
+  s.onlineEnd = timeHour(num("onlineEndTime") || timeValue(DEFAULTS.onlineEnd));
   if (s.installMode === "scheduled" && s.schedSub === "active") {
     s.activeStart = Number(num("activeStart"));
     s.activeEnd = Number(num("activeEnd"));
@@ -223,23 +228,24 @@ const DEVICE_USER_HTML = `
   <details class="wus-group" id="wus-device-simulation">
     <summary class="wus-summary" id="wus-device-simulation-summary">Simulate Device / User</summary>
     <section class="wus-section wus-panel">
-    <h3>Device availability</h3>
+    <h3 id="wus-device-availability" tabindex="-1">Device availability</h3>
     <label class="wus-check" title="Before the effective deadline, automatic restarts need an online period outside active hours. If none exists, restart stays pending; at or after the effective deadline, active hours no longer block it."><input type="checkbox" id="wus-onlineAlways" ${DEFAULTS.onlineAlways ? "checked" : ""}> Device is always online (powered on and connected)</label>
     <div class="wus-fields" id="wus-online-box" ${DEFAULTS.onlineAlways ? "hidden" : ""}>
       <fieldset class="wus-online-days"><legend title="Select the days when the device is online. Overnight hours belong to the selected start day and continue into the following day.">Online days</legend><div class="wus-weekly">${WEEKDAYS.map((day, i) => `<label class="wus-check"><input type="checkbox" id="wus-online-day-${i}" ${DEFAULTS.onlineDays[i] ? "checked" : ""}> ${day}</label>`).join("")}</div></fieldset>
-      <div class="wus-field"><label for="wus-onlineStart" title="Hours use the selected device time zone. Matching start and end hours mean all day on selected days.">Online hours start</label>${hourSelect("wus-onlineStart", DEFAULTS.onlineStart)}</div>
-      <div class="wus-field"><label for="wus-onlineEnd" title="Hours use the selected device time zone. An end time earlier than the start continues into the following day; matching start and end hours mean all day on selected days.">Online hours end</label>${hourSelect("wus-onlineEnd", DEFAULTS.onlineEnd)}</div>
+      <div class="wus-field"><label for="wus-onlineStartTime" title="Hours use the selected device time zone. Matching start and end hours mean all day on selected days.">Online hours start</label><input type="time" id="wus-onlineStartTime" step="60" value="${timeValue(DEFAULTS.onlineStart)}" required aria-describedby="wus-availability-error"></div>
+      <div class="wus-field"><label for="wus-onlineEndTime" title="Hours use the selected device time zone. An end time earlier than the start continues into the following day; matching start and end hours mean all day on selected days.">Online hours end</label><input type="time" id="wus-onlineEndTime" step="60" value="${timeValue(DEFAULTS.onlineEnd)}" required aria-describedby="wus-availability-error"></div>
     </div>
     <p class="wus-error" id="wus-availability-error" role="alert" hidden></p>
     </section>
     <section class="wus-section wus-panel">
-      <h3>User behavior</h3>
+      <h3 id="wus-user-behavior" tabindex="-1">User behavior</h3>
       <div class="wus-fields">${GROUPS.filter((g) => g.id === "user-behavior").flatMap((g) => g.fields).map(fieldHtml).join("")}</div>
-      <h4 class="wus-subheading">Intelligent active hours</h4>
-      <div class="wus-fields">
-        <div class="wus-field"><label for="wus-smartStart">Start</label>${hourSelect("wus-smartStart", DEFAULTS.activeStart)}</div>
-        <div class="wus-field"><label for="wus-smartEnd">End</label>${hourSelect("wus-smartEnd", DEFAULTS.activeEnd)}</div>
+      <h4 class="wus-subheading"><span id="wus-local-active-hours-title" title="${esc(LOCAL_ACTIVE_HOURS_HELP)}" tabindex="0">Local active hours</span></h4>
+      <div class="wus-fields" id="wus-local-active-hours">
+        <div class="wus-field"><label for="wus-localStart">Start</label><input type="time" id="wus-localStart" step="60" value="${timeValue(DEFAULTS.activeStart)}" required aria-describedby="wus-local-hours-error"></div>
+        <div class="wus-field"><label for="wus-localEnd">End (max 18 hours)</label><input type="time" id="wus-localEnd" step="60" value="${timeValue(DEFAULTS.activeEnd)}" required aria-describedby="wus-local-hours-error"></div>
       </div>
+      <p class="wus-error" id="wus-local-hours-error" role="alert" hidden></p>
       <a class="wus-csp" href="ms-settings:windowsupdate-activehours" title="Open Windows Update active hours">ms-settings:windowsupdate-activehours</a>
     </section>
     <section class="wus-section wus-panel">
@@ -311,9 +317,10 @@ const tool: ToolDefinition = {
         ${QUALITY_POLICY_HTML}
         ${groups}
         <details class="wus-group"><summary class="wus-summary" id="wus-assumptions-summary">All assumptions used by this tool</summary>
-          <ul class="wus-assumptions">${Object.values(ASSUMPTIONS)
-            .map((a) => `<li>${assumptionHtml(a.text)} <a href="${a.url}" target="_blank" rel="noopener">Docs</a></li>`)
-            .join("")}</ul>
+          ${Object.entries(ASSUMPTION_GROUPS).map(([title, ids]) => `<details class="wus-assumption-group"><summary>${esc(title)} (${ids.length})</summary><ul class="wus-assumptions">${ids.map((id) => {
+            const a = ASSUMPTIONS[id];
+            return `<li>${assumptionHtml(a.text)} <a href="${a.url}" target="_blank" rel="noopener">Docs</a></li>`;
+          }).join("")}</ul></details>`).join("")}
         </details>
         <section class="wus-section" id="wus-configured-policies">
           <h3>Configured policies</h3>
@@ -344,6 +351,16 @@ const tool: ToolDefinition = {
       container.querySelector<HTMLElement>("#wus-scheduled-install-options")!.hidden = !sched;
       container.querySelector<HTMLElement>("#wus-active-box")!.hidden = m.schedSub !== "active";
       container.querySelector<HTMLElement>("#wus-slot-box")!.hidden = m.schedSub !== "scheduled";
+      const localHoursOverridden = sched;
+      const localHours = container.querySelector<HTMLElement>("#wus-local-active-hours")!;
+      container.querySelector<HTMLElement>("#wus-local-active-hours-title")!.title = sched
+        ? m.schedSub === "active"
+          ? "Local active hours have no effect while policy-defined active hours (ActiveHoursStart / ActiveHoursEnd) are configured. Change those hours under Deployment Ring > Set active hours."
+          : "The simulator assumes AllowAutoUpdate = 3 ignores local active hours (manual or intelligent). There is no strong evidence confirming this; it is an unverified simulator assumption, not established Windows behavior."
+        : LOCAL_ACTIVE_HOURS_HELP;
+      for (const input of localHours.querySelectorAll<HTMLInputElement>("input")) {
+        input.disabled = localHoursOverridden;
+      }
       container.querySelector<HTMLElement>("#wus-online-box")!.hidden = m.onlineAlways;
       container.querySelector<HTMLInputElement>("#wus-deferDays")!.disabled = m.cloudEnabled;
       for (const [k] of CLOUD_ROWS) {
@@ -423,6 +440,7 @@ const tool: ToolDefinition = {
       policyValues.set("NoUpdateNotificationsDuringActiveHours", String(Number(settings.noNotifActive)));
       const syncCspValues = () => {
         for (const link of container.querySelectorAll<HTMLAnchorElement>("a[data-csp]")) {
+          if (link.closest(".wus-assumptions")) continue;
           const name = link.dataset.csp!;
           let value = policyValues.get(name);
           const option = link.dataset.radioCsp;
@@ -439,12 +457,24 @@ const tool: ToolDefinition = {
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))
         .map(([name, value]) => `<div class="wus-policy-value-row"><span class="wus-policy-value-name${DEVICE_APPLIED_DEFAULTS.has(name) ? " wus-csp-device-default" : ""}"${DEVICE_APPLIED_DEFAULTS.has(name) ? ` title="Device-applied default: ${DEVICE_APPLIED_DEFAULTS.get(name)} on the device even when not configured"` : ""}>${esc(name)} =</span><span class="wus-policy-value mono">${esc(value)}</span>${/^MaintenanceWindow(Daily|Weekly|Monthly)Interval$/.test(name) ? '<span class="wus-help">Windows Insider Preview · non-default intervals not simulated</span>' : ""}</div>`)
         .join("");
-      const invalidAvailability = !settings.onlineAlways && !settings.onlineDays.some(Boolean);
+      const onlineInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-online-box input[type=time]")];
+      const invalidOnlineTimes = !settings.onlineAlways && onlineInputs.some((input) => !input.validity.valid);
+      const invalidAvailability = !settings.onlineAlways && (!settings.onlineDays.some(Boolean) || invalidOnlineTimes);
+      for (const input of onlineInputs) input.setAttribute("aria-invalid", String(invalidOnlineTimes));
+      const localInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-local-active-hours input")];
+      const invalidLocalHours = settings.installMode === "auto" && (
+        localInputs.some((input) => !input.validity.valid) ||
+        (Math.round((settings.activeEnd - settings.activeStart) * 60) + 1440) % 1440 > 1080
+      );
+      const localHoursError = container.querySelector<HTMLElement>("#wus-local-hours-error")!;
+      localHoursError.hidden = !invalidLocalHours;
+      localHoursError.textContent = invalidLocalHours ? "Enter start and end times no more than 18 hours apart." : "";
+      for (const input of localInputs) input.setAttribute("aria-invalid", String(invalidLocalHours));
       const availabilityError = container.querySelector<HTMLElement>("#wus-availability-error")!;
       availabilityError.hidden = !invalidAvailability;
-      availabilityError.textContent = invalidAvailability ? "Select at least one online day, or enable always online." : "";
-      resultEl.hidden = invalidAvailability;
-      if (invalidAvailability) {
+      availabilityError.textContent = invalidOnlineTimes ? "Enter valid online start and end times." : invalidAvailability ? "Select at least one online day, or enable always online." : "";
+      resultEl.hidden = invalidAvailability || invalidLocalHours;
+      if (invalidAvailability || invalidLocalHours) {
         container.querySelector<HTMLDetailsElement>("#wus-device-simulation")!.open = true;
         return;
       }
@@ -483,6 +513,23 @@ const tool: ToolDefinition = {
     };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      const configLink = t.closest<HTMLAnchorElement>(".wus-config-link");
+      if (configLink) {
+        e.preventDefault();
+        const heading = container.querySelector<HTMLElement>(configLink.hash)!;
+        heading.closest<HTMLDetailsElement>("details")!.open = true;
+        heading.focus({ preventScroll: true });
+        const section = heading.closest<HTMLElement>("section")!;
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        section.scrollIntoView({ block: "center", behavior: reducedMotion ? "instant" : "smooth" });
+        section.getAnimations().filter((animation) => animation.id === "wus-config-highlight").forEach((animation) => animation.cancel());
+        section.animate([
+          { boxShadow: "inset 0 0 0 2px var(--accent)", offset: 0 },
+          { boxShadow: "inset 0 0 0 2px var(--accent)", offset: 0.65 },
+          { boxShadow: "inset 0 0 0 2px transparent", offset: 1 },
+        ], { duration: 2800, easing: "ease-out", id: "wus-config-highlight" });
+        return;
+      }
       const mark = t.closest<HTMLElement>("[data-n]");
       const monthStep = t.closest<HTMLButtonElement>("[data-month-step]");
       if (monthStep) {

@@ -124,7 +124,7 @@ export function maintenanceWindows(s: Settings, from: number, to: number): TimeW
 }
 
 /** Scheduled install slot; schedFreq 0 = every week, 1-4 = only in that week of the month. */
-function schedSlot(s: Settings, t: number, wd: number | null): number {
+export function schedSlot(s: Settings, t: number, wd: number | null): number {
   let cur = nextSlot(t, s.schedTime, wd);
   for (let i = 0; i < 70 && s.schedFreq > 0; i++) {
     if (Math.floor((new Date(cur).getUTCDate() - 1) / 7) + 1 === s.schedFreq) break;
@@ -147,7 +147,8 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
   const monthEnd = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
   const windows = maintenanceWindows(s, startMs, monthEnd + 90 * DAY);
   const all: SimEvent[] = [];
-  const activeHours = s.activeStart === s.activeEnd ? "none" : `${s.activeStart}:00-${s.activeEnd}:00`;
+  const formatHour = (hour: number) => `${String(Math.floor(hour)).padStart(2, "0")}:${String(Math.round(hour % 1 * 60)).padStart(2, "0")}`;
+  const activeHours = s.activeStart === s.activeEnd ? "none" : `${formatHour(s.activeStart)}-${formatHour(s.activeEnd)}`;
 
   for (const r of releases.filter((r) => r.date < monthEnd).sort((a, b) => a.date - b.date)) {
     const add = (lane: Lane, at: number, text: string, tone: Tone, assumptions: AssumptionId[] = [], from?: number, until?: number) =>
@@ -290,7 +291,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     const pending = instDone;
     const grace = s.deadlineEnabled ? s.graceDays * DAY : 0;
     const effDeadline = deadlineAt !== null ? Math.max(deadlineAt, pending + grace) : null;
-    const rAss: AssumptionId[] = ["activeHours"];
+    const rAss: AssumptionId[] = s.autoUpdate === 3 && !mwOn ? ["mode3Countdown"] : ["activeHours"];
     if (hasRestartOverride) rAss.push("restartOverride");
     if (!s.onlineAlways) rAss.push("onlineHours");
     let earliest = pending + 15 * MIN;
@@ -309,8 +310,8 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
       if (!blockEarlyRestart)
         cand = nextRestartOpportunity(s, earliest, effDeadline, windows.map((w) => ({ start: w.start, end: w.end - 30 * MIN })));
     } else if (s.autoUpdate === 3 && !blockEarlyRestart) {
-      rAss.push("mode3Countdown");
-      cand = nextRestartOpportunity(s, earliest, effDeadline);
+      const online = toOnline(s, earliest);
+      cand = effDeadline === null || online < effDeadline ? online : null;
     } else if (autoRestartMode && !blockEarlyRestart) {
       if (userOptIn) earliest = Math.max(earliest, pending + 24 * HOUR);
       cand = nextRestartOpportunity(s, earliest, effDeadline);
@@ -372,6 +373,8 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
             ? `Restart pending: no eligible online automatic restart opportunity before the effective deadline (${fmtDateTime(effDeadline)}); user can restart manually`
             : windowRestart
               ? "Restart pending: user can schedule it; otherwise it happens in the maintenance window"
+              : s.autoUpdate === 3
+                ? "Restart pending: scheduled-install countdown; local active hours are ignored (unverified simulator assumption)"
               : `Restart pending: user can schedule it; Windows can restart outside active hours (${activeHours})${effDeadline !== null ? `, until the effective deadline (${fmtDateTime(effDeadline)})` : ""}`,
       tone: "info",
       assumptions: ["restartPending", ...rAss],

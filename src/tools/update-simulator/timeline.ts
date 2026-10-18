@@ -1,8 +1,8 @@
 import { DAY, HOUR, fmtDate, fmtDateTime, patchTuesday, releaseAt, timeZones } from "./calendar";
-import { type Release, type SimResult, type SimEvent } from "./simulate";
+import { schedSlot, type Release, type SimResult, type SimEvent } from "./simulate";
 import { ASSUMPTIONS, assumptionPlain } from "./assumptions";
 import { onlineWindows } from "./availability";
-import type { Settings } from "./settings";
+import { LOCAL_ACTIVE_HOURS_HELP, type Settings } from "./settings";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -241,13 +241,21 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   const shown = numbered.filter(({ e }) => approved.has(e.releaseId) && !hiddenGroups.has(eventGroup(e)));
   const onlineTotal = result.availability.reduce((total, w) => total + w.end - w.start, 0);
   const alwaysOnline = onlineTotal === end - start;
-  let labels = `<div class="wus-timeline-group">Device availability</div><div class="wus-timeline-label"><strong>Online<em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
+  let labels = `<div class="wus-timeline-group"><a class="wus-config-link" href="#wus-device-availability">Device availability</a></div><div class="wus-timeline-label"><strong>Online<em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
   const availabilityBars = result.availability.map((w) => {
     const title = esc(`Device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)}`);
     return `<span class="wus-timeline-availability" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
   }).join("");
   let tracks = `<div class="wus-timeline-group-track"></div><div class="wus-timeline-track">${availabilityBars}</div>`;
-  const activePeriods = settings.activeStart === settings.activeEnd ? [] : onlineWindows({
+  const scheduledInstall = settings.installMode === "scheduled" && settings.schedSub === "scheduled";
+  const policyActiveHours = settings.installMode === "scheduled" && settings.schedSub === "active";
+  const mode = scheduledInstall ? "si" : policyActiveHours ? "ah" : "lah";
+  const modeName = scheduledInstall ? "Scheduled Install" : policyActiveHours ? "Active Hours" : "Local Active Hours";
+  const modeHelp = scheduledInstall
+    ? "Configured install schedule, not guaranteed install events. Device availability and deadlines can affect execution."
+    : policyActiveHours ? "Policy-defined active hours. ActiveHoursStart and ActiveHoursEnd take precedence over locally configured active hours."
+    : LOCAL_ACTIVE_HOURS_HELP;
+  const activePeriods = scheduledInstall || settings.activeStart === settings.activeEnd ? [] : onlineWindows({
     ...settings,
     onlineAlways: false,
     onlineDays: [true, true, true, true, true, true, true],
@@ -259,11 +267,22 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   }));
   const activeTotal = activePeriods.reduce((total, w) => total + w.end - w.start, 0);
   const activeBars = activePeriods.map((w) => {
-    const title = esc(`Active hours while device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)} (${tz}). Automatic restarts are blocked during active hours before the effective deadline.`);
+    const title = esc(`${modeName} while device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)} (${tz}). Automatic restarts are blocked during active hours before the effective deadline.`);
     return `<span class="wus-timeline-availability wus-timeline-active-hours" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
   }).join("");
-  labels += `<div class="wus-timeline-group">User behavior</div><div class="wus-timeline-label"><strong><span>Active Hours <small class="wus-inline-note">(calculated)</small></span><em>${durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
-  tracks += `<div class="wus-timeline-group-track"></div><div class="wus-timeline-track">${activeBars}</div>`;
+  const installTimes: number[] = [];
+  if (scheduledInstall) {
+    const weekday = settings.schedDay === 0 ? null : settings.schedDay - 1;
+    for (let at = schedSlot(settings, start, weekday); at < end; at = schedSlot(settings, at + HOUR, weekday)) {
+      installTimes.push(at);
+    }
+  }
+  const scheduleBars = installTimes.map((at) => {
+    const title = esc(`Configured scheduled install: ${fmtDateTime(at)} (${tz}). This is a schedule, not an actual install event; device availability and deadlines can affect execution.`);
+    return `<span class="wus-timeline-install-slot" role="img" aria-label="${title}" title="${title}" style="left:${pct(at)}%"></span>`;
+  }).join("");
+  labels += `<div class="wus-timeline-group"><a class="wus-config-link" href="#wus-user-behavior">User behavior</a></div><div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}" tabindex="0"><strong><span class="wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></span><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
+  tracks += `<div class="wus-timeline-group-track"></div><div class="wus-timeline-track">${scheduledInstall ? scheduleBars : activeBars}</div>`;
   const dateLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
   const shortDate = (at: number) => `${dateLabel.format(at)} · ${fmtDateTime(at).slice(11)}`;
   for (const release of releases) {

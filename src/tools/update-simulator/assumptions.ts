@@ -145,11 +145,11 @@ export const ASSUMPTIONS = {
     url: CSPA + "maintenancewindowmonthlyweekbasedoccurrenceinmonth",
   },
   activeHours: {
-    text: "Active hours ({{ActiveHoursStart}} / {{ActiveHoursEnd}}) are used exactly as configured. When no active hours policy is set, the 'Intelligent active hours' values from Device usage are used, which stand in for the hours Windows learns from user activity.",
+    text: "Policy-defined active hours ({{ActiveHoursStart}} / {{ActiveHoursEnd}}) take precedence over Local active hours under Simulate Device / User. Local hours represent either user-selected manual hours or automatically learned Intelligent Active Hours. Scheduled Install mode ignores local hours as described in the separate, unverified mode 3 assumption.",
     url: CSPA + "activehoursstart",
   },
   mode3Countdown: {
-    text: "{{AllowAutoUpdate}} 3 has a 15-minute countdown following installation. The simulation also requires the device to be online and outside active hours before the effective deadline; that deadline overrides these scheduling restrictions.",
+    text: "{{AllowAutoUpdate}} 3 documents a 15-minute countdown following installation. The simulator assumes local active hours (manual or intelligent) do not block this restart. There is no strong evidence confirming this precedence; this is an unverified modeling choice, not established Windows behavior. Device availability and deadline/no-auto-reboot restrictions still apply.",
     url: CSPA + "allowautoupdate",
   },
   pauseModel: {
@@ -180,3 +180,13 @@ export function assumptionHtml(text: string): string {
 }
 
 export type AssumptionId  = keyof typeof ASSUMPTIONS;
+
+export const ASSUMPTION_GROUPS = {
+  "Releases and discovery": ["releaseTime", "previewDate", "userEvents", "discoveryImmediate", "driverDeferral", "excludeDriversName", "softwareUpdates"],
+  "Cloud policies and hotpatch": ["cloudOverridesClient", "cloudOptionalContent", "cloudClientPause", "manualApproval", "hotpatchEligible", "hotpatchCalendar", "hotpatchNonSecurity", "restartOverride"],
+  "Installation and device availability": ["maintenanceAt3", "installDuration", "onlineHours", "mode4", "pauseModel"],
+  "Active hours and restarts": ["activeHours", "mode3Countdown", "restartPending"],
+  "Deadlines and grace periods": ["deadlineClock", "autoUpdateVsDeadline", "deadlineImmediate", "deadlineZero", "noAutoReboot", "deadlineForcedRestart"],
+  "Notifications": ["notifyDefaultOff", "noReminders", "notifLevelMeaning", "noNotifActiveHours"],
+  "Maintenance windows": ["mwWindow", "mwLast"],
+} satisfies Record<string, AssumptionId[]>;

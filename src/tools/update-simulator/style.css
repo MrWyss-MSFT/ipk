@@ -47,6 +47,38 @@
   font-size: 0.85rem;
 }
 
+.wus-field select:disabled,
+.wus-field input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wus-tool input[type="time"] {
+  accent-color: var(--accent);
+}
+
+.wus-tool input[type="time"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.wus-tool input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+.wus-tool input[type="time"]::-webkit-datetime-edit-minute-field:focus,
+.wus-tool input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-radius: var(--radius-sm);
+}
+
+.wus-tool input[type="time"]::-webkit-calendar-picker-indicator {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.wus-tool input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  background-color: var(--bg-hover);
+}
+
 .wus-field input[type="number"] + .wus-csp,
 .wus-field select + .wus-csp,
 .wus-field select + span:has(.wus-csp) {
@@ -221,6 +253,16 @@ a.wus-csp:focus-visible {
   flex-direction: column;
   gap: var(--space-2);
   font-size: 0.85rem;
+}
+
+.wus-assumption-group {
+  border-top: 1px solid var(--border);
+}
+
+.wus-assumption-group > summary {
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .wus-timeline-controls,
@@ -622,10 +664,53 @@ button.wus-timeline-label:hover {
   text-overflow: ellipsis;
 }
 
-.wus-timeline-label .wus-inline-note {
-  display: inline;
-  margin: 0;
-  font-weight: 400;
+.wus-behavior-label {
+  container: wus-behavior / inline-size;
+}
+
+.wus-config-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.wus-config-link:hover,
+.wus-config-link:focus-visible {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.wus-behavior-full {
+  display: none;
+}
+
+@container wus-behavior (min-width: 190px) {
+  .wus-behavior-lah .wus-behavior-full {
+    display: inline;
+  }
+  .wus-behavior-lah .wus-behavior-short {
+    display: none;
+  }
+}
+
+@container wus-behavior (min-width: 135px) {
+  .wus-behavior-ah .wus-behavior-full,
+  .wus-behavior-si .wus-behavior-full {
+    display: inline;
+  }
+  .wus-behavior-ah .wus-behavior-short,
+  .wus-behavior-si .wus-behavior-short {
+    display: none;
+  }
+}
+
+.wus-timeline-install-slot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 16px;
+  width: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
 }
 
 .wus-timeline-axis {
