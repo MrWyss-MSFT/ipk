@@ -81,8 +81,9 @@ export function autoReleases(startMs: number): Release[] {
     const y = d.getUTCFullYear();
     const mo = d.getUTCMonth() + m;
     const pt = patchTuesday(y, mo);
-    const name = new Date(pt).toLocaleString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
-    out.push({ id: `cu-${pt}`, kind: "cu", date: pt, label: `${name} CU`, restart: true, auto: true });
+    const date = new Date(pt);
+    const name = `${date.getUTCFullYear()}.${String(date.getUTCMonth() + 1).padStart(2, "0")} B`;
+    out.push({ id: `cu-${pt}`, kind: "cu", date: pt, label: name, restart: true, auto: true });
   }
   return out;
 }
