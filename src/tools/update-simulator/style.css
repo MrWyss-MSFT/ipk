@@ -265,22 +265,49 @@ a.wus-csp:focus-visible {
   font-weight: 600;
 }
 
-.wus-timeline-controls,
-.wus-timeline-toolbar {
+.wus-timeline-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
 }
 
-.wus-timeline-filters {
+.wus-layers {
+  position: relative;
   margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.wus-layers > summary {
+  padding: 6px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.wus-layers > summary:hover,
+.wus-layers[open] > summary {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.wus-timeline-filters {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 10;
+  width: max-content;
+  max-width: calc(100vw - var(--space-5));
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--space-1) var(--space-3);
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .wus-filter-option {
@@ -288,7 +315,7 @@ a.wus-csp:focus-visible {
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .wus-tone-ok { border-color: var(--success); --wus-c: var(--success); }
@@ -446,6 +473,13 @@ a.wus-csp:focus-visible {
 .wus-tz option {
   background: var(--bg-elevated);
   color: var(--text);
+}
+
+.wus-layers > summary,
+.wus-calendar-controls,
+.wus-zoom {
+  box-sizing: border-box;
+  height: calc(1lh + 2 * var(--space-1) + 6px);
 }
 
 .wus-calendar-controls,
@@ -666,6 +700,33 @@ button.wus-timeline-label:hover {
 
 .wus-behavior-label {
   container: wus-behavior / inline-size;
+}
+
+.wus-processing-label {
+  container: wus-processing / inline-size;
+}
+
+.wus-processing-full,
+.wus-processing-equation {
+  display: none;
+}
+
+@container wus-processing (min-width: 200px) {
+  .wus-processing-equation {
+    display: inline;
+  }
+  .wus-processing-total {
+    display: none;
+  }
+}
+
+@container wus-processing (min-width: 290px) {
+  .wus-processing-full {
+    display: inline;
+  }
+  .wus-processing-short {
+    display: none;
+  }
 }
 
 .wus-config-link {

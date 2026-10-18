@@ -12,7 +12,8 @@ export const daysInMonth = (start: number) => {
 };
 export type EventGroup = "offer" | "deploy" | "notify";
 export const eventGroup = (e: SimEvent): EventGroup =>
-  e.lane === "notify" ? "notify" : e.from !== undefined || e.until !== undefined || /^(Downloaded|Installed|Restart|Forced restart)/.test(e.text) ? "deploy" : "offer";
+  e.lane === "notify" ? "notify" : /^(Update released|Deferral period|Discovered \/ offered)/.test(e.text) ? "offer"
+    : e.from !== undefined || e.until !== undefined || /^(Downloaded|Installed|Restart|Forced restart|Deadline period)/.test(e.text) ? "deploy" : "offer";
 
 function activityName(e: SimEvent): string {
   if (e.lane === "notify") {
@@ -20,8 +21,10 @@ function activityName(e: SimEvent): string {
     if (e.text.startsWith("Notification: updates")) return "Updates available";
     return "Restart notification";
   }
-  if (e.text.startsWith("Update discovered")) return "Scan discovery";
-  if (e.text.startsWith("Offered")) return "Update offered";
+  if (e.text.startsWith("Update released")) return "Update released";
+  if (e.text.startsWith("Deferral period")) return "Deferral period";
+  if (e.text.startsWith("Discovered / offered")) return "Discovery / Offering";
+  if (e.text.startsWith("Deadline period")) return "Deadline period";
   if (e.text.startsWith("Downloaded")) return "Downloading";
   if (e.text.startsWith("Installed")) return "Installing";
   if (e.text.startsWith("Restart pending")) return "Restart pending";
@@ -237,8 +240,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   const end = result.end, days = (end - start) / DAY;
   const pct = (at: number) => (at - start) / (end - start) * 100;
   const numbered = result.events.map((e, i) => ({ e, n: i + 1 }));
-  const approved = new Set(result.events.filter((e) => e.text.startsWith("Offered") || e.from !== undefined || e.until !== undefined).map((e) => e.releaseId));
-  const shown = numbered.filter(({ e }) => approved.has(e.releaseId) && !hiddenGroups.has(eventGroup(e)));
+  const shown = numbered.filter(({ e }) => !hiddenGroups.has(eventGroup(e)));
   const onlineTotal = result.availability.reduce((total, w) => total + w.end - w.start, 0);
   const alwaysOnline = onlineTotal === end - start;
   let labels = `<div class="wus-timeline-group"><a class="wus-config-link" href="#wus-device-availability">Device availability</a></div><div class="wus-timeline-label"><strong>Online<em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
@@ -288,9 +290,29 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   for (const release of releases) {
     const activities = shown.filter(({ e }) => e.releaseId === release.id);
     if (!activities.length) continue;
+    const download = activities.find(({ e }) => e.text.startsWith("Downloaded"));
+    const installation = activities.find(({ e }) => e.text.startsWith("Installed"));
     labels += `<div class="wus-timeline-group" title="${esc(release.label)}">${esc(release.label)}</div>`;
     tracks += '<div class="wus-timeline-group-track"></div>';
     for (const { e, n } of activities) {
+      if (installation && e === download?.e) continue;
+      if (download && e === installation?.e && download.e.from !== undefined && e.from !== undefined) {
+        const downloadMinutes = Math.round((download.e.at - download.e.from) / 60_000);
+        const installMinutes = Math.round((e.at - e.from) / 60_000);
+        const total = `${downloadMinutes + installMinutes}m`;
+        const equation = `${downloadMinutes}m + ${installMinutes}m = ${total}`;
+        const name = "Downloading + Installing";
+        const title = esc(`${release.label}: ${name}\n${equation} (processing time; excludes waiting)\nDownload: ${fmtDateTime(download.e.from)} to ${fmtDateTime(download.e.at)}\nInstallation: ${fmtDateTime(e.from)} to ${fmtDateTime(e.at)}\n${e.text}`);
+        labels += `<button type="button" class="wus-timeline-label wus-processing-label" data-n="${n}" title="${title}"><strong><span aria-label="${name}"><span class="wus-processing-full">Downloading + Installing</span><span class="wus-processing-short" aria-hidden="true">DL + Install</span></span><em aria-label="${equation}"><span class="wus-processing-equation">${equation}</span><span class="wus-processing-total" aria-hidden="true">${total}</span></em></strong><small>${shortDate(download.e.from)} → ${shortDate(e.at)}</small></button>`;
+        const bars = [download, { e, n }].map(({ e: phase, n: phaseNumber }) => {
+          const a = phase.from!, b = phase.at;
+          const left = pct(Math.max(start, a)), width = Math.max(0, pct(Math.min(end, b)) - left);
+          const phaseTitle = esc(`${release.label}: ${phase.text}\n${fmtDateTime(a)} to ${fmtDateTime(b)} (${durationText(b - a)})`);
+          return `<button type="button" class="wus-timeline-mark wus-tone-${phase.tone} is-duration" data-n="${phaseNumber}" style="left:${left}%;width:${width}%;" data-tooltip="${phaseTitle}" aria-label="${phaseTitle}"><span>${durationText(b - a)}</span></button>`;
+        }).join("");
+        tracks += `<div class="wus-timeline-track">${bars}</div>`;
+        continue;
+      }
       const a = e.from ?? e.at, b = e.until ?? e.at;
       const duration = b > a;
       const ongoing = e.ongoing;
@@ -342,9 +364,10 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
         <button type="button" class="wus-btn" data-zoom-step="1" aria-label="Zoom in" title="Zoom in">+</button>
         <button type="button" class="wus-btn wus-zoom-reset" id="wus-fit" title="Reset zoom to fit month" aria-label="Reset zoom to fit month"><output id="wus-zoom-value" for="wus-zoom">Full month</output></button>
       </div>
-    </div>
-    <div class="wus-timeline-toolbar">
-      <span class="wus-timeline-filters">${([["offer", "Discovery & offer"], ["deploy", "Download, install & restart"], ["notify", "Notifications"]] as const).map(([g, label]) => `<label class="wus-filter-option"><input type="checkbox" data-grp="${g}"${hiddenGroups.has(g) ? "" : " checked"}> ${label}</label>`).join("")}</span>
+      <details class="wus-layers">
+        <summary>Activities · ${3 - hiddenGroups.size}</summary>
+        <div class="wus-timeline-filters" role="group" aria-label="Visible timeline activity groups">${([["offer", "Discovery & offer"], ["deploy", "Download, install & restart"], ["notify", "Notifications"]] as const).map(([g, label]) => `<label class="wus-filter-option"><input type="checkbox" data-grp="${g}"${hiddenGroups.has(g) ? "" : " checked"}> ${label}</label>`).join("")}</div>
+      </details>
     </div>
     <div class="wus-timeline">
       <div class="wus-timeline-labels"><div class="wus-timeline-heading">Activity<small>Dates & times · ${esc(tz)}</small></div>${labels || '<div class="wus-timeline-group">No visible activities</div>'}</div>

@@ -160,6 +160,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     if (r.kind === "oob" || r.kind === "oobns" || r.kind === "driver") baseAss.push("userEvents");
     if (r.kind === "driver") baseAss.push("driverDeferral");
     const release = releaseAt(r.date, s.tz);
+    add("update", release, "Update released", "info", baseAss);
 
     if (r.kind === "software") {
       const assumptions: AssumptionId[] = ["softwareUpdates", "discoveryImmediate", "installDuration"];
@@ -167,15 +168,16 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
         add("update", release, "Not offered in this model: Microsoft product updates are not enabled (AllowMUUpdateService = 0)", "muted", assumptions);
         continue;
       }
-      add("update", release, "Update discovered by scan", "info", assumptions);
-      add("update", release, "Offered through Microsoft Update", "info", assumptions);
-      const downloadStart = toOnline(s, release);
+      const discovery = toOnline(s, release);
+      if (!s.onlineAlways) assumptions.push("onlineHours");
+      add("update", discovery, "Discovered / offered through Microsoft Update", "info", assumptions);
+      const downloadStart = discovery;
       const ready = downloadStart + s.downloadMin * MIN;
       let install = s.autoUpdate === 0 || s.autoUpdate === 5 ? null
         : s.autoUpdate === 3 ? schedSlot(s, ready, s.schedDay === 0 ? null : s.schedDay - 1)
         : nextSlot(ready, 3, null);
       if (install === null) {
-        add("update", release, "Waiting for the user; nothing installs automatically", "warn", assumptions);
+        add("update", discovery, "Waiting for the user; nothing installs automatically", "warn", assumptions);
         continue;
       }
       install = toOnline(s, install);
@@ -209,6 +211,8 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     } else {
       if (cp) deferDays = cp.defer;
       offer = release + deferDays * DAY;
+      if (deferDays > 0)
+        add("update", release, `Deferral period (${deferDays} days from release)`, "muted", offerAss.slice(), undefined, offer);
     }
     const ps = s.pauseEnabled ? parseDate(s.pauseStart) : null;
     if (ps !== null && offer >= ps && offer < ps + PAUSE_MAX_DAYS * DAY) {
@@ -220,14 +224,16 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
 
     if (r.kind === "preview") offerAss.push("cloudOptionalContent");
 
-    add("update", release, "Update discovered by scan", "info", ["discoveryImmediate"]);
-    add("update", offer, cp && !cp.auto ? "Offered (manually approved)" : deferDays ? `Offered (release + ${deferDays} day deferral)` : "Offered", "info", offerAss);
-
-    const ready = toOnline(s, offer) + s.downloadMin * MIN;
+    offer = toOnline(s, offer);
     if (!s.onlineAlways) offerAss.push("onlineHours");
+    add("update", offer, cp && !cp.auto ? "Discovered / offered (manually approved)" : "Discovered / offered", "info", [...offerAss, "discoveryImmediate"]);
+
+    const ready = offer + s.downloadMin * MIN;
     const ass: AssumptionId[] = ["discoveryImmediate", "installDuration"];
     const mwOn = s.mwEnabled;
     const deadlineAt = s.deadlineEnabled ? offer + s.deadlineDays * DAY : null;
+    if (deadlineAt !== null)
+      add("update", offer, `Deadline period (${s.deadlineDays} days from scan discovery)`, "warn", ["deadlineClock", ...(s.deadlineDays === 0 ? ["deadlineZero" as const] : [])], undefined, deadlineAt);
     if (deadlineAt !== null) ass.push("deadlineClock", "deadlineImmediate");
     if (deadlineAt !== null && s.deadlineDays === 0) ass.push("deadlineZero");
 

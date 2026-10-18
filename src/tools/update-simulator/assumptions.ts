@@ -49,7 +49,7 @@ export const ASSUMPTIONS = {
     text: "With hotpatch enabled, non-security updates (preview and OOB non-security) are not offered, because they would remove the device from the hotpatch path. The FAQ only names non-security updates in general; the simulator applies it to both.",
     url: OVERVIEW + "#:~:text=If%20a%20policy%20has%20hotpatch%20updates%20enabled%20and%20non-security%20updates%20are%20approved",
   },  deadlineClock: {
-    text: "The deadline ({{ConfigureDeadlineForQualityUpdates}}) clock starts when the device first discovers the update through a scan (the older release-date basis was replaced). The simulator assumes the device discovers the update when the deferral ends (offer time).",
+    text: "The deadline ({{ConfigureDeadlineForQualityUpdates}}) clock starts when the device first discovers the update through a scan (the older release-date basis was replaced). The simulator starts this clock at the first online opportunity after approval, deferral and any modeled pause allow the update to be offered.",
     url: CLOCK,
   },
   autoUpdateVsDeadline: {
@@ -97,11 +97,11 @@ export const ASSUMPTIONS = {
     url: CSPA + "allowautoupdate",
   },
   discoveryImmediate: {
-    text: "The device is assumed to discover the update the moment it is released, so offer = release + deferral. Real devices discover it on their next scan.",
+    text: "Deferral is measured from release, independently of device availability. The device is assumed to scan and discover the update at its first online opportunity once approval, deferral and any modeled pause allow it to be offered. Discovery and offering are shown as one event: treating these as simultaneous is a modeling assumption, not an explicit guarantee in the Windows 11 documentation. Microsoft product updates use the first online opportunity at or after release. No additional scan cadence or random delay is modeled; real devices discover updates on their next scan.",
     url: CLOCK,
   },
   onlineHours: {
-    text: "Online days and hours are when the device is powered on and connected. Before the effective deadline, an automatic restart needs an online period outside active hours (and inside the maintenance window, if used). If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts shift online but their durations run continuously. Other notification times, maintenance windows and the immediate-discovery assumption are not adjusted. Overnight periods belong to the day they start; matching start and end hours mean all day on selected days. This is a simulation input, not a Windows setting.",
+    text: "Online days and hours are when the device is powered on and connected. Discovery and offering wait until the device is online, after approval, deferral and any modeled pause. Before the effective deadline, an automatic restart needs an online period outside active hours (and inside the maintenance window, if used). If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts shift online but their durations run continuously. Other notification times and maintenance windows are not adjusted. Overnight periods belong to the day they start; matching start and end hours mean all day on selected days. This is a simulation input, not a Windows setting.",
     url: CSPA + "allowautoupdate",
   },
   restartPending: {

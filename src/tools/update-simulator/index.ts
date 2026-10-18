@@ -373,6 +373,9 @@ const tool: ToolDefinition = {
     };
 
     const run = () => {
+      const layersOpen = resultEl.querySelector<HTMLDetailsElement>(".wus-layers")?.open ?? false;
+      const focusedLayer = document.activeElement instanceof HTMLInputElement
+        ? document.activeElement.dataset.grp : undefined;
       const oldZoom = container.querySelector<HTMLInputElement>("#wus-zoom")?.value ?? "0";
       const oldViewport = resultEl.querySelector<HTMLElement>(".wus-timeline-viewport");
       const oldScroll = oldViewport?.scrollLeft ?? 0;
@@ -487,6 +490,8 @@ const tool: ToolDefinition = {
         return approval.auto || approval.approveAfter !== null;
       });
       resultEl.innerHTML = renderTimeline(start, simulate(settings, start, releases), calendarReleases, tz, settings, hidden);
+      resultEl.querySelector<HTMLDetailsElement>(".wus-layers")!.open = layersOpen;
+      if (focusedLayer) resultEl.querySelector<HTMLInputElement>(`input[data-grp="${focusedLayer}"]`)?.focus({ preventScroll: true });
       syncCspValues();
       container.querySelector<HTMLInputElement>("#wus-zoom")!.value = monthChanged ? "0" : oldZoom;
       setTimelineZoom(resultEl, monthChanged ? 0 : Number(oldZoom));
@@ -561,10 +566,23 @@ const tool: ToolDefinition = {
         setTimeout(() => row?.classList.remove("is-flash"), 1200);
       }
     };
+    const closeLayers = (e: Event) => {
+      const layers = resultEl.querySelector<HTMLDetailsElement>(".wus-layers");
+      if (!layers?.open) return;
+      if (e instanceof KeyboardEvent) {
+        if (e.key !== "Escape") return;
+        layers.open = false;
+        layers.querySelector("summary")!.focus();
+      } else if (e.target instanceof Node && !layers.contains(e.target)) {
+        layers.open = false;
+      }
+    };
     container.addEventListener("input", onInput);
     container.addEventListener("change", onInput);
     container.addEventListener("click", onClick);
     container.addEventListener("wheel", onNumberWheel, { passive: false });
+    document.addEventListener("click", closeLayers);
+    document.addEventListener("keydown", closeLayers);
     run();
     const cleanupTimeline = wireTimelineInteractions(container);
 
@@ -574,6 +592,8 @@ const tool: ToolDefinition = {
       container.removeEventListener("change", onInput);
       container.removeEventListener("click", onClick);
       container.removeEventListener("wheel", onNumberWheel);
+      document.removeEventListener("click", closeLayers);
+      document.removeEventListener("keydown", closeLayers);
     };
   },
 };
