@@ -77,7 +77,7 @@ export const ASSUMPTIONS = {
     url: RELEASE,
   },
   driverDeferral: {
-    text: "Managed driver deferral is a separate cloud-side Intune / Autopatch Driver Update policy setting, not the quality-update deferral CSP shown in this tool. Microsoft documents that {{DeferQualityUpdatesPeriodInDays}} does not apply to drivers approved through a Driver Update policy; quality-update deadline and grace settings do apply. The simulator does not yet model a separate Driver Update policy: reusing the quality-update deferral and pause for drivers is a simulation simplification, not documented driver-policy behavior. The driver release row controls whether a restart is required.",
+    text: "Managed driver deferral is a separate cloud-side Intune / Autopatch Driver Update policy setting, not {{DeferQualityUpdatesPeriodInDays}}. The simulator assumes automatic driver approval with zero deferral (\"Make updates available after\"), independently of client and cloud quality-update deferrals. The entered release date represents when the driver update is released; inventory and approval processing delays and manual driver approval are not modeled. Quality-update deadline and grace settings still apply, starting at online scan discovery. Reusing the quality-update pause for drivers remains a simulation simplification, not documented driver-policy behavior. The driver release row controls whether a restart is required.",
     url: "https://learn.microsoft.com/intune/device-updates/windows/driver-updates-faq#how-do-i-set-deferrals-for-drivers",
   },
   softwareUpdates: {

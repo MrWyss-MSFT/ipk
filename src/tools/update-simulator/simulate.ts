@@ -199,7 +199,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
       add("update", release, "Not offered: hotpatch is enabled, non-security updates would take the device off the hotpatch path", "muted", [...offerAss, "hotpatchNonSecurity"]);
       continue;
     }
-    let deferDays = s.deferDays;
+    let deferDays = r.kind === "driver" ? 0 : s.deferDays;
     let offer: number;
     if (cp && !cp.auto) {
       offerAss.push("manualApproval");

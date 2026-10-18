@@ -635,13 +635,40 @@ a.wus-csp:focus-visible {
 }
 
 .wus-timeline-group {
-  padding: 3px var(--space-3);
+  display: flex;
+  align-items: center;
+  padding: 3px calc(var(--space-3) - 2px);
   line-height: 1.15;
   font-size: 0.75rem;
   font-weight: 700;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.wus-timeline-group > a,
+.wus-timeline-group > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.wus-group-toggle {
+  flex: 1;
+  align-self: stretch;
+  min-width: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  text-align: right;
+  cursor: pointer;
+}
+
+.wus-group-toggle:hover {
+  color: var(--accent);
 }
 
 .wus-timeline-label,
@@ -656,6 +683,7 @@ a.wus-csp:focus-visible {
   line-height: 1.15;
   width: 100%;
   padding: var(--space-1) var(--space-3);
+  padding-left: calc(var(--space-3) + 2px);
   border-top: 0;
   border-inline: 0;
   border-radius: 0;
@@ -959,7 +987,7 @@ button.wus-timeline-label:hover {
     grid-template-columns: 160px minmax(0, 1fr);
   }
   .wus-timeline-label {
-    padding-inline: var(--space-2);
+    padding-inline: calc(var(--space-3) + 2px) var(--space-2);
   }
   .wus-timeline-label strong {
     font-size: 0.7rem;

@@ -165,7 +165,7 @@ const DEPLOYMENT_RING_HTML = `
         <td><input type="number" id="wus-deferDays" min="0" max="30" value="${DEFAULTS.deferDays}" aria-label="Deferral in days">${cspLink("DeferQualityUpdatesPeriodInDays")}</td>
         <td><input type="number" id="wus-deadlineDays" min="0" max="30" value="${DEFAULTS.deadlineDays}" placeholder="Not set" aria-label="Deadline in days">${cspLink("ConfigureDeadlineForQualityUpdates")}</td>
         <td><input type="number" id="wus-graceDays" min="0" max="7" value="${DEFAULTS.graceDays}" placeholder="2" aria-label="Grace period in days">${cspLink("ConfigureDeadlineGracePeriod")}</td>
-        <td><input type="number" value="1" disabled aria-label="Driver update deferrals (not simulated)"><span class="wus-csp" title="Managed in the &quot;Driver Update&quot; policy, equivalent to &quot;Make updates available after (days)&quot;. Cloud policy (WUfB-DS), simulate with a Driver Release and Release date.">NoCSP</span></td>
+        <td><input type="number" value="0" disabled aria-label="Driver update deferral in days (fixed at zero)"><span class="wus-csp" title="Separate cloud-side Driver Update policy, not a CSP. The simulator assumes automatic approval with zero deferral (&quot;Make updates available after&quot;). The entered release date represents when the driver update is released.">Driver Update policy</span></td>
       </tr></tbody>
     </table>
     </div>
@@ -296,7 +296,7 @@ const tool: ToolDefinition = {
           <div class="ipk-table-scroll wus-panel">
             <table class="wus-policy-table wus-release-table">
               <thead><tr><th>Include release</th><th>Release date (selected month)</th><th>Requires restart</th></tr></thead>
-              <tbody>${RELEASE_ROWS.map(([kind, label]) => `<tr>
+              <tbody>${RELEASE_ROWS.map(([kind, label]) => `<tr id="wus-release-config-${kind}" tabindex="-1">
                 <th scope="row">${kind === "software"
                   ? '<div class="wus-software-release"><input type="checkbox" id="wus-release-software-enabled" aria-label="Include Microsoft product update"><input type="text" id="wus-release-software-title" aria-label="Microsoft product release title" value="Microsoft product update"></div>'
                   : `<label class="wus-check"><input type="checkbox" id="wus-release-${kind}-enabled" ${kind === "cu" ? "checked" : ""}> ${label}</label>`}</th>
@@ -335,7 +335,26 @@ const tool: ToolDefinition = {
     let tz = BROWSER_TZ;
     let start = monthStart();
     const hidden = new Set<EventGroup>();
+    const collapsedGroups = new Set<string>();
     const resultEl = container.querySelector<HTMLElement>("#wus-result")!;
+    const syncCollapsedGroups = () => {
+      const labels = resultEl.querySelectorAll<HTMLElement>(".wus-timeline-labels > :not(.wus-timeline-heading)");
+      const tracks = resultEl.querySelectorAll<HTMLElement>(".wus-timeline-tracks > *");
+      let collapsed = false;
+      labels.forEach((label, index) => {
+        if (label.dataset.groupId !== undefined) {
+          collapsed = collapsedGroups.has(label.dataset.groupId);
+          const button = label.querySelector<HTMLButtonElement>(".wus-group-toggle")!;
+          button.setAttribute("aria-expanded", String(!collapsed));
+          const name = label.querySelector("a, span")!.textContent;
+          button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${name}`);
+          button.textContent = collapsed ? "▸" : "▾";
+        } else {
+          label.hidden = collapsed;
+          tracks[index].hidden = collapsed;
+        }
+      });
+    };
     wireCopyButton(container.querySelector<HTMLButtonElement>("#wus-copy-policies")!, () =>
       Array.from(container.querySelectorAll<HTMLElement>("#wus-policy-values .wus-policy-value-row"), (row) =>
         `${row.querySelector(".wus-policy-value-name")!.textContent} ${row.querySelector(".wus-policy-value")!.textContent}`,
@@ -490,6 +509,7 @@ const tool: ToolDefinition = {
         return approval.auto || approval.approveAfter !== null;
       });
       resultEl.innerHTML = renderTimeline(start, simulate(settings, start, releases), calendarReleases, tz, settings, hidden);
+      syncCollapsedGroups();
       resultEl.querySelector<HTMLDetailsElement>(".wus-layers")!.open = layersOpen;
       if (focusedLayer) resultEl.querySelector<HTMLInputElement>(`input[data-grp="${focusedLayer}"]`)?.focus({ preventScroll: true });
       syncCspValues();
@@ -518,13 +538,21 @@ const tool: ToolDefinition = {
     };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      const group = t.closest<HTMLElement>(".wus-timeline-group[data-group-id]");
+      if (group && !t.closest(".wus-config-link")) {
+        const id = group.dataset.groupId!;
+        if (collapsedGroups.has(id)) collapsedGroups.delete(id);
+        else collapsedGroups.add(id);
+        syncCollapsedGroups();
+        return;
+      }
       const configLink = t.closest<HTMLAnchorElement>(".wus-config-link");
       if (configLink) {
         e.preventDefault();
         const heading = container.querySelector<HTMLElement>(configLink.hash)!;
         heading.closest<HTMLDetailsElement>("details")!.open = true;
         heading.focus({ preventScroll: true });
-        const section = heading.closest<HTMLElement>("section")!;
+        const section = heading.closest<HTMLElement>("tr, section")!;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         section.scrollIntoView({ block: "center", behavior: reducedMotion ? "instant" : "smooth" });
         section.getAnimations().filter((animation) => animation.id === "wus-config-highlight").forEach((animation) => animation.cancel());

@@ -243,7 +243,9 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   const shown = numbered.filter(({ e }) => !hiddenGroups.has(eventGroup(e)));
   const onlineTotal = result.availability.reduce((total, w) => total + w.end - w.start, 0);
   const alwaysOnline = onlineTotal === end - start;
-  let labels = `<div class="wus-timeline-group"><a class="wus-config-link" href="#wus-device-availability">Device availability</a></div><div class="wus-timeline-label"><strong>Online<em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
+  const groupHeader = (id: string, name: string, link?: string) =>
+    `<div class="wus-timeline-group" data-group-id="${esc(id)}">${link ? `<a class="wus-config-link" href="${link}">${esc(name)}</a>` : `<span>${esc(name)}</span>`}<button type="button" class="wus-group-toggle" aria-expanded="true" aria-label="Collapse ${esc(name)}">▾</button></div>`;
+  let labels = `${groupHeader("availability", "Device availability", "#wus-device-availability")}<div class="wus-timeline-label"><strong>Online<em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
   const availabilityBars = result.availability.map((w) => {
     const title = esc(`Device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)}`);
     return `<span class="wus-timeline-availability" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
@@ -283,7 +285,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
     const title = esc(`Configured scheduled install: ${fmtDateTime(at)} (${tz}). This is a schedule, not an actual install event; device availability and deadlines can affect execution.`);
     return `<span class="wus-timeline-install-slot" role="img" aria-label="${title}" title="${title}" style="left:${pct(at)}%"></span>`;
   }).join("");
-  labels += `<div class="wus-timeline-group"><a class="wus-config-link" href="#wus-user-behavior">User behavior</a></div><div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}" tabindex="0"><strong><span class="wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></span><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
+  labels += `${groupHeader("behavior", "User behavior", "#wus-user-behavior")}<div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}" tabindex="0"><strong><span class="wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></span><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
   tracks += `<div class="wus-timeline-group-track"></div><div class="wus-timeline-track">${scheduledInstall ? scheduleBars : activeBars}</div>`;
   const dateLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
   const shortDate = (at: number) => `${dateLabel.format(at)} · ${fmtDateTime(at).slice(11)}`;
@@ -292,7 +294,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
     if (!activities.length) continue;
     const download = activities.find(({ e }) => e.text.startsWith("Downloaded"));
     const installation = activities.find(({ e }) => e.text.startsWith("Installed"));
-    labels += `<div class="wus-timeline-group" title="${esc(release.label)}">${esc(release.label)}</div>`;
+    labels += groupHeader(release.id, release.kind === "driver" ? "Driver" : release.label, `#wus-release-config-${release.kind}`);
     tracks += '<div class="wus-timeline-group-track"></div>';
     for (const { e, n } of activities) {
       if (installation && e === download?.e) continue;
