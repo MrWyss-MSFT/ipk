@@ -6,6 +6,7 @@ import { autoReleases, KIND_LABEL, simulate, type Release, type UpdateKind } fro
 import { BROWSER_TZ, fmtDate, lastDayOfMonth, parseDate, patchTuesday } from "./calendar";
 import { setTimelineZoom, renderTimeline, wireTimelineInteractions, type EventGroup } from "./timeline";
 import { ASSUMPTIONS, ASSUMPTION_GROUPS, assumptionHtml, cspLink } from "./assumptions";
+import { DEFAULT_SCHEDULE, parseSchedule, wireScheduleEditor } from "./schedule-editor";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const timeValue = (hour: number) => `${String(Math.floor(hour)).padStart(2, "0")}:${String(Math.round(hour % 1 * 60)).padStart(2, "0")}`;
@@ -86,10 +87,8 @@ function readSettings(root: HTMLElement): Settings {
     : s.installMode === "scheduled" && s.schedSub === "scheduled" ? 3 : 2;
   s.activeStart = timeHour(num("localStart") || timeValue(DEFAULTS.activeStart));
   s.activeEnd = timeHour(num("localEnd") || timeValue(DEFAULTS.activeEnd));
-  s.onlineAlways = root.querySelector<HTMLInputElement>("#wus-onlineAlways")?.checked ?? DEFAULTS.onlineAlways;
-  s.onlineDays = WEEKDAYS.map((_, i) => root.querySelector<HTMLInputElement>(`#wus-online-day-${i}`)?.checked ?? DEFAULTS.onlineDays[i]);
-  s.onlineStart = timeHour(num("onlineStartTime") || timeValue(DEFAULTS.onlineStart));
-  s.onlineEnd = timeHour(num("onlineEndTime") || timeValue(DEFAULTS.onlineEnd));
+  s.onlineAlways = false;
+  s.weeklySchedule = parseSchedule(root.querySelector<HTMLTextAreaElement>("#wus-weekly-schedule")!.value);
   if (s.installMode === "scheduled" && s.schedSub === "active") {
     s.activeStart = Number(num("activeStart"));
     s.activeEnd = Number(num("activeEnd"));
@@ -224,38 +223,24 @@ const DEPLOYMENT_RING_HTML = `
     </section>
   </details>`;
 
-const DEVICE_USER_HTML = `
-  <details class="wus-group" id="wus-device-simulation">
-    <summary class="wus-summary" id="wus-device-simulation-summary">Simulate Device / User</summary>
-    <section class="wus-section wus-panel">
-    <h3 id="wus-device-availability" tabindex="-1">Device availability</h3>
-    <label class="wus-check" title="Before the effective deadline, automatic restarts need an online period outside active hours. If none exists, restart stays pending; at or after the effective deadline, active hours no longer block it."><input type="checkbox" id="wus-onlineAlways" ${DEFAULTS.onlineAlways ? "checked" : ""}> Device is always online (powered on and connected)</label>
-    <div class="wus-fields" id="wus-online-box" ${DEFAULTS.onlineAlways ? "hidden" : ""}>
-      <fieldset class="wus-online-days"><legend title="Select the days when the device is online. Overnight hours belong to the selected start day and continue into the following day.">Online days</legend><div class="wus-weekly">${WEEKDAYS.map((day, i) => `<label class="wus-check"><input type="checkbox" id="wus-online-day-${i}" ${DEFAULTS.onlineDays[i] ? "checked" : ""}> ${day}</label>`).join("")}</div></fieldset>
-      <div class="wus-field"><label for="wus-onlineStartTime" title="Hours use the selected device time zone. Matching start and end hours mean all day on selected days.">Online hours start</label><input type="time" id="wus-onlineStartTime" step="60" value="${timeValue(DEFAULTS.onlineStart)}" required aria-describedby="wus-availability-error"></div>
-      <div class="wus-field"><label for="wus-onlineEndTime" title="Hours use the selected device time zone. An end time earlier than the start continues into the following day; matching start and end hours mean all day on selected days.">Online hours end</label><input type="time" id="wus-onlineEndTime" step="60" value="${timeValue(DEFAULTS.onlineEnd)}" required aria-describedby="wus-availability-error"></div>
-    </div>
-    <p class="wus-error" id="wus-availability-error" role="alert" hidden></p>
-    </section>
-    <section class="wus-section wus-panel">
-      <h3 id="wus-user-behavior" tabindex="-1">User behavior</h3>
+const DEVICE_USER_STATE_HTML = `
+  <!-- Canonical fields remain mounted for central persistence, including legacy schedule migration. -->
+  <div hidden>
+      <input type="checkbox" id="wus-onlineAlways">
+      ${WEEKDAYS.map((_, i) => `<input type="checkbox" id="wus-online-day-${i}" ${DEFAULTS.onlineDays[i] ? "checked" : ""}>`).join("")}
+      <input type="time" id="wus-onlineStartTime" value="${timeValue(DEFAULTS.onlineStart)}">
+      <input type="time" id="wus-onlineEndTime" value="${timeValue(DEFAULTS.onlineEnd)}">
+    <textarea id="wus-weekly-schedule" hidden aria-label="Weekly online schedule">${JSON.stringify(DEFAULT_SCHEDULE)}</textarea>
       <div class="wus-fields">${GROUPS.filter((g) => g.id === "user-behavior").flatMap((g) => g.fields).map(fieldHtml).join("")}</div>
       <h4 class="wus-subheading"><span id="wus-local-active-hours-title" title="${esc(LOCAL_ACTIVE_HOURS_HELP)}" tabindex="0">Local active hours</span></h4>
       <div class="wus-fields" id="wus-local-active-hours">
         <div class="wus-field"><label for="wus-localStart">Start</label><input type="time" id="wus-localStart" step="60" value="${timeValue(DEFAULTS.activeStart)}" required aria-describedby="wus-local-hours-error"></div>
         <div class="wus-field"><label for="wus-localEnd">End (max 18 hours)</label><input type="time" id="wus-localEnd" step="60" value="${timeValue(DEFAULTS.activeEnd)}" required aria-describedby="wus-local-hours-error"></div>
       </div>
-      <p class="wus-error" id="wus-local-hours-error" role="alert" hidden></p>
-      <a class="wus-csp" href="ms-settings:windowsupdate-activehours" title="Open Windows Update active hours">ms-settings:windowsupdate-activehours</a>
-    </section>
-    <section class="wus-section wus-panel">
-      <h3>Update duration</h3>
-      <div class="wus-fields">
-        <div class="wus-field"><label for="wus-downloadMin">Download time (minutes)</label><input type="number" id="wus-downloadMin" min="0" max="1440" placeholder="5"></div>
-        <div class="wus-field"><label for="wus-installMin">Install time (minutes)</label><input type="number" id="wus-installMin" min="0" max="1440" placeholder="20"></div>
-      </div>
-    </section>
-  </details>`;
+  </div>
+  <p class="wus-error" id="wus-availability-error" role="alert" hidden></p>
+  <p class="wus-error" id="wus-local-hours-error" role="alert" hidden></p>
+  <button type="button" class="wus-btn" id="wus-edit-schedule" aria-haspopup="dialog" hidden>Edit device availability & user behavior</button>`;
 
 /** Device-local calendar dates stored as UTC epoch ms, like the rest of the engine. */
 const monthStart = () => {
@@ -293,9 +278,13 @@ const tool: ToolDefinition = {
         <div class="wus-result" id="wus-result"></div>
         ${DEPLOYMENT_RING_HTML}
         <details class="wus-group" id="wus-releases"><summary class="wus-summary" id="wus-releases-summary">Simulate releases</summary>
+          <div class="wus-fields wus-panel">
+            <div class="wus-field"><label for="wus-downloadMin">Default download (minutes)</label><input type="number" id="wus-downloadMin" min="0" max="1440" step="1" placeholder="5"></div>
+            <div class="wus-field"><label for="wus-installMin">Default install (minutes)</label><input type="number" id="wus-installMin" min="0" max="1440" step="1" placeholder="20"></div>
+          </div>
           <div class="ipk-table-scroll wus-panel">
             <table class="wus-policy-table wus-release-table">
-              <thead><tr><th>Include release</th><th>Release date (selected month)</th><th>Requires restart</th></tr></thead>
+              <thead><tr><th>Include release</th><th>Release date (selected month)</th><th>Requires restart</th><th>Download (min)</th><th>Install (min)</th></tr></thead>
               <tbody>${RELEASE_ROWS.map(([kind, label]) => `<tr id="wus-release-config-${kind}" tabindex="-1">
                 <th scope="row">${kind === "software"
                   ? '<div class="wus-software-release"><input type="checkbox" id="wus-release-software-enabled" aria-label="Include Microsoft product update"><input type="text" id="wus-release-software-title" aria-label="Microsoft product release title" value="Microsoft product update"></div>'
@@ -306,14 +295,16 @@ const tool: ToolDefinition = {
                   : kind === "oob" || kind === "oobns"
                     ? `<select id="wus-release-${kind}-restart" aria-label="${label} requires restart"><option value="auto">Automatic (release default)</option><option value="yes">Yes (override)</option><option value="no">No (override)</option></select>`
                     : `<input type="checkbox" id="wus-release-${kind}-restart" aria-label="${label} requires restart" ${kind !== "driver" ? "checked" : ""}>`}</td>
+                ${["downloadMin", "installMin"].map((key) => `<td><input type="number" id="wus-release-${kind}-${key}" min="0" max="1440" step="1" aria-label="${label} ${key === "downloadMin" ? "download" : "install"} duration in minutes" aria-describedby="wus-duration-note"></td>`).join("")}
               </tr>`).join("")}</tbody>
             </table>
           </div>
           <p class="wus-help" id="wus-release-note">Choose releases for this month. Policies still apply; restart overrides are simulation-only.</p>
+          <p class="wus-help" id="wus-duration-note">Blank duration overrides use the defaults above (5 minutes download, 20 minutes install unless changed). Zero means instantaneous. Monthly B-week overrides apply to every modeled B release.</p>
           <p class="wus-help">Microsoft product releases use AllowMUUpdateService and approximate download/install timing, without restart modeling or Windows quality-update policies. See <a href="https://learn.microsoft.com/en-us/windows/deployment/update/update-other-microsoft-products" target="_blank" rel="noopener">Microsoft's list of products that might be updated</a>. Setting the policy to 0 on a real device does not automatically unregister an existing Microsoft Update service.</p>
           <p class="wus-error" id="wus-release-error" role="alert" hidden></p>
         </details>
-        ${DEVICE_USER_HTML}
+        ${DEVICE_USER_STATE_HTML}
         ${QUALITY_POLICY_HTML}
         ${groups}
         <details class="wus-group"><summary class="wus-summary" id="wus-assumptions-summary">All assumptions used by this tool</summary>
@@ -337,6 +328,13 @@ const tool: ToolDefinition = {
     const hidden = new Set<EventGroup>();
     const collapsedGroups = new Set<string>();
     const resultEl = container.querySelector<HTMLElement>("#wus-result")!;
+    const scheduleField = container.querySelector<HTMLTextAreaElement>("#wus-weekly-schedule")!;
+    const scheduleEditor = wireScheduleEditor(container, scheduleField, () => tz, () => ({
+      installMode: container.querySelector<HTMLInputElement>('input[name="wus-installMode"]:checked')!.value,
+      schedSub: container.querySelector<HTMLInputElement>('input[name="wus-schedSub"]:checked')!.value,
+      activeStart: Number(container.querySelector<HTMLSelectElement>("#wus-activeStart")!.value),
+      activeEnd: Number(container.querySelector<HTMLSelectElement>("#wus-activeEnd")!.value),
+    }));
     const syncCollapsedGroups = () => {
       const labels = resultEl.querySelectorAll<HTMLElement>(".wus-timeline-labels > :not(.wus-timeline-heading)");
       const tracks = resultEl.querySelectorAll<HTMLElement>(".wus-timeline-tracks > *");
@@ -380,7 +378,6 @@ const tool: ToolDefinition = {
       for (const input of localHours.querySelectorAll<HTMLInputElement>("input")) {
         input.disabled = localHoursOverridden;
       }
-      container.querySelector<HTMLElement>("#wus-online-box")!.hidden = m.onlineAlways;
       container.querySelector<HTMLInputElement>("#wus-deferDays")!.disabled = m.cloudEnabled;
       for (const [k] of CLOUD_ROWS) {
         const auto = m.cloud[k].auto;
@@ -392,6 +389,14 @@ const tool: ToolDefinition = {
     };
 
     const run = () => {
+      const scheduleError = container.querySelector<HTMLElement>("#wus-availability-error")!;
+      try { parseSchedule(scheduleField.value); } catch (e) {
+        scheduleError.textContent = `Invalid weekly schedule: ${(e as Error).message}`;
+        scheduleError.hidden = false;
+        resultEl.hidden = true;
+        container.querySelector<HTMLElement>("#wus-edit-schedule")!.hidden = false;
+        return;
+      }
       const layersOpen = resultEl.querySelector<HTMLDetailsElement>(".wus-layers")?.open ?? false;
       const focusedLayer = document.activeElement instanceof HTMLInputElement
         ? document.activeElement.dataset.grp : undefined;
@@ -419,15 +424,34 @@ const tool: ToolDefinition = {
       patchEl.textContent = patchDate;
       const releases: Release[] = [];
       const invalidReleases: string[] = [];
+      const durationDefaults = readSettings(container);
+      for (const key of ["downloadMin", "installMin"]) {
+        const input = container.querySelector<HTMLInputElement>(`#wus-${key}`)!;
+        input.setAttribute("aria-invalid", String(!input.validity.valid));
+        if (!input.validity.valid) invalidReleases.push(`Default ${key === "downloadMin" ? "download" : "install"} duration`);
+      }
       for (const [kind, label] of RELEASE_ROWS) {
         const enabled = container.querySelector<HTMLInputElement>(`#wus-release-${kind}-enabled`)!.checked;
+        const durations: Pick<Release, "downloadMin" | "installMin"> = {};
+        let invalidDuration = false;
+        for (const key of ["downloadMin", "installMin"] as const) {
+          const input = container.querySelector<HTMLInputElement>(`#wus-release-${kind}-${key}`)!;
+          input.disabled = !enabled;
+          input.placeholder = String(durationDefaults[key]);
+          const invalid = enabled && !input.validity.valid;
+          input.setAttribute("aria-invalid", String(invalid));
+          invalidDuration ||= invalid;
+          if (input.value !== "" && !invalid) durations[key] = Number(input.value);
+        }
+        if (invalidDuration) invalidReleases.push(`${label} (enter durations from 0 to 1440 whole minutes)`);
         if (kind === "cu") {
           const restartInput = container.querySelector<HTMLSelectElement>("#wus-release-cu-restart")!;
           restartInput.disabled = !enabled;
           const restartOverride = restartInput.value === "auto" ? undefined : restartInput.value === "yes";
-          if (enabled) releases.push(...autoReleases(start).map((release) =>
-            release.date >= start && release.date <= monthEnd ? { ...release, restartOverride } : release,
-          ));
+          if (enabled && !invalidDuration) releases.push(...autoReleases(start).map((release) => ({
+            ...release, ...durations,
+            ...(release.date >= start && release.date <= monthEnd ? { restartOverride } : {}),
+          })));
           continue;
         }
         const input = container.querySelector<HTMLInputElement>(`#wus-release-${kind}-date`)!;
@@ -440,7 +464,7 @@ const tool: ToolDefinition = {
         const invalid = enabled && (date === null || !input.validity.valid);
         input.setAttribute("aria-invalid", String(invalid));
         if (invalid) invalidReleases.push(label);
-        if (!enabled || invalid || date === null) continue;
+        if (!enabled || invalid || invalidDuration || date === null) continue;
         const restartOverride = restartInput instanceof HTMLSelectElement && restartInput.value !== "auto"
           ? restartInput.value === "yes"
           : undefined;
@@ -450,11 +474,11 @@ const tool: ToolDefinition = {
         const title = kind === "software"
           ? container.querySelector<HTMLInputElement>("#wus-release-software-title")!.value.trim() || KIND_LABEL.software
           : KIND_LABEL[kind];
-        releases.push({ id: `${kind}-${date}`, kind, date, label: `${title} ${fmtDate(date)}`, restart, restartOverride, auto: false });
+        releases.push({ id: `${kind}-${date}`, kind, date, label: `${title} ${fmtDate(date)}`, restart, restartOverride, auto: false, ...durations });
       }
       const releaseError = container.querySelector<HTMLElement>("#wus-release-error")!;
       releaseError.hidden = invalidReleases.length === 0;
-      releaseError.textContent = invalidReleases.length ? `Choose a release date within the selected month to include: ${invalidReleases.join(", ")}.` : "";
+      releaseError.textContent = invalidReleases.length ? `Check release dates (within the selected month) and durations (0–1440 whole minutes): ${invalidReleases.join(", ")}.` : "";
       const settings = { ...readSettings(container), tz };
       const policyValues = new Map(configuredPolicies({ ...settings, mwEnabled: true }));
       policyValues.set("MaintenanceWindowEnabled", String(Number(settings.mwEnabled)));
@@ -479,10 +503,6 @@ const tool: ToolDefinition = {
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))
         .map(([name, value]) => `<div class="wus-policy-value-row"><span class="wus-policy-value-name${DEVICE_APPLIED_DEFAULTS.has(name) ? " wus-csp-device-default" : ""}"${DEVICE_APPLIED_DEFAULTS.has(name) ? ` title="Device-applied default: ${DEVICE_APPLIED_DEFAULTS.get(name)} on the device even when not configured"` : ""}>${esc(name)} =</span><span class="wus-policy-value mono">${esc(value)}</span>${/^MaintenanceWindow(Daily|Weekly|Monthly)Interval$/.test(name) ? '<span class="wus-help">Windows Insider Preview · non-default intervals not simulated</span>' : ""}</div>`)
         .join("");
-      const onlineInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-online-box input[type=time]")];
-      const invalidOnlineTimes = !settings.onlineAlways && onlineInputs.some((input) => !input.validity.valid);
-      const invalidAvailability = !settings.onlineAlways && (!settings.onlineDays.some(Boolean) || invalidOnlineTimes);
-      for (const input of onlineInputs) input.setAttribute("aria-invalid", String(invalidOnlineTimes));
       const localInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-local-active-hours input")];
       const invalidLocalHours = settings.installMode === "auto" && (
         localInputs.some((input) => !input.validity.valid) ||
@@ -493,11 +513,11 @@ const tool: ToolDefinition = {
       localHoursError.textContent = invalidLocalHours ? "Enter start and end times no more than 18 hours apart." : "";
       for (const input of localInputs) input.setAttribute("aria-invalid", String(invalidLocalHours));
       const availabilityError = container.querySelector<HTMLElement>("#wus-availability-error")!;
-      availabilityError.hidden = !invalidAvailability;
-      availabilityError.textContent = invalidOnlineTimes ? "Enter valid online start and end times." : invalidAvailability ? "Select at least one online day, or enable always online." : "";
-      resultEl.hidden = invalidAvailability || invalidLocalHours;
-      if (invalidAvailability || invalidLocalHours) {
-        container.querySelector<HTMLDetailsElement>("#wus-device-simulation")!.open = true;
+      availabilityError.hidden = true;
+      availabilityError.textContent = "";
+      resultEl.hidden = invalidLocalHours;
+      container.querySelector<HTMLElement>("#wus-edit-schedule")!.hidden = !invalidLocalHours;
+      if (invalidLocalHours) {
         return;
       }
       const calendarReleases = releases.filter((r) => {
@@ -519,6 +539,17 @@ const tool: ToolDefinition = {
     };
 
     const onInput = (e: Event) => {
+      if (e.target instanceof HTMLInputElement && /^wus-online(?:Always|-day-\d|StartTime|EndTime)$/.test(e.target.id)) {
+        const always = container.querySelector<HTMLInputElement>("#wus-onlineAlways")!.checked;
+        const startTime = Math.round(timeHour(container.querySelector<HTMLInputElement>("#wus-onlineStartTime")!.value) * 60);
+        const endTime = Math.round(timeHour(container.querySelector<HTMLInputElement>("#wus-onlineEndTime")!.value) * 60);
+        const migrated = WEEKDAYS.flatMap((_, day) => {
+          if (!always && !container.querySelector<HTMLInputElement>(`#wus-online-day-${day}`)!.checked) return [];
+          return [{ day, start: always || startTime === endTime ? 0 : startTime,
+            end: always || startTime === endTime ? 1440 : endTime <= startTime ? endTime + 1440 : endTime }];
+        });
+        scheduleField.value = JSON.stringify(migrated);
+      }
       if (e.target instanceof HTMLInputElement && e.target.id === "wus-zoom") {
         setTimelineZoom(resultEl, Number(e.target.value));
         return;
@@ -538,6 +569,11 @@ const tool: ToolDefinition = {
     };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      if (t.closest("#wus-edit-schedule, .wus-online-edit, .wus-behavior-edit")) {
+        e.preventDefault();
+        scheduleEditor.open();
+        return;
+      }
       const group = t.closest<HTMLElement>(".wus-timeline-group[data-group-id]");
       if (group && !t.closest(".wus-config-link")) {
         const id = group.dataset.groupId!;
@@ -615,6 +651,7 @@ const tool: ToolDefinition = {
     const cleanupTimeline = wireTimelineInteractions(container);
 
     return () => {
+      scheduleEditor.cleanup();
       cleanupTimeline();
       container.removeEventListener("input", onInput);
       container.removeEventListener("change", onInput);

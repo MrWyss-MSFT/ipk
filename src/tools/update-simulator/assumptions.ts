@@ -105,7 +105,7 @@ export const ASSUMPTIONS = {
     url: CLOCK,
   },
   onlineHours: {
-    text: "Online days and hours are when the device is powered on and connected. Discovery and offering wait until the device is online, after approval, deferral and any modeled pause. Before the effective deadline, an automatic restart needs an online period outside active hours (and inside the maintenance window, if used). If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts shift online but their durations run continuously. Other notification times and maintenance windows are not adjusted. Overnight periods belong to the day they start; matching start and end hours mean all day on selected days. This is a simulation input, not a Windows setting.",
+    text: "The weekly online schedule is when the device is powered on and connected. Each day can have multiple periods; overlapping and adjoining periods are combined. Discovery and offering wait until the device is online, after approval, deferral and any modeled pause. Before the effective deadline, an automatic restart needs an online period outside active hours (and inside the maintenance window, if used). If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts shift online but their durations run continuously. Other notification times and maintenance windows are not adjusted. Overnight periods belong to the day they start; matching start and end times mean 24 hours from that start time. Dragging snaps to half hours; exact fields accept minutes. This is a simulation input, not a Windows setting.",
     url: CSPA + "allowautoupdate",
   },
   restartPending: {
@@ -113,7 +113,7 @@ export const ASSUMPTIONS = {
     url: DEADLINES + "#:~:text=users%20can%20schedule%20restarts%20before%20the%20effective%20deadline",
   },
   installDuration: {
-    text: "Download and installation durations are not documented. They are user-configurable (defaults 5 and 20 minutes); the restart-pending moment is when installation finishes.",
+    text: "Download and installation durations are not documented. Set defaults (initially 5 and 20 minutes) and optional per-release overrides under Simulate releases. Blank overrides inherit the defaults; zero means instantaneous. Monthly B-week overrides apply to every modeled B release. The restart-pending moment is when installation finishes.",
     url: CSPA + "allowautoupdate",
   },
   notifyDefaultOff: {

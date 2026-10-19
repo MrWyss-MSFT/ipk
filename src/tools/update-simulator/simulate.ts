@@ -24,6 +24,8 @@ export interface Release {
   date: number;
   label: string;
   restart: boolean;
+  downloadMin?: number;
+  installMin?: number;
   /** Explicit restart requirement for a release, overriding its automatic behavior. */
   restartOverride?: boolean;
   auto: boolean;
@@ -151,6 +153,8 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
   const activeHours = s.activeStart === s.activeEnd ? "none" : `${formatHour(s.activeStart)}-${formatHour(s.activeEnd)}`;
 
   for (const r of releases.filter((r) => r.date < monthEnd).sort((a, b) => a.date - b.date)) {
+    const downloadMin = r.downloadMin ?? s.downloadMin;
+    const installMin = r.installMin ?? s.installMin;
     const add = (lane: Lane, at: number, text: string, tone: Tone, assumptions: AssumptionId[] = [], from?: number, until?: number) =>
       all.push({ lane, at, releaseId: r.id, label: r.label, text, tone, assumptions, from, until });
 
@@ -172,7 +176,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
       if (!s.onlineAlways) assumptions.push("onlineHours");
       add("update", discovery, "Discovered / offered through Microsoft Update", "info", assumptions);
       const downloadStart = discovery;
-      const ready = downloadStart + s.downloadMin * MIN;
+      const ready = downloadStart + downloadMin * MIN;
       let install = s.autoUpdate === 0 || s.autoUpdate === 5 ? null
         : s.autoUpdate === 3 ? schedSlot(s, ready, s.schedDay === 0 ? null : s.schedDay - 1)
         : nextSlot(ready, 3, null);
@@ -182,7 +186,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
       }
       install = toOnline(s, install);
       add("update", ready, "Downloaded", "info", assumptions, downloadStart);
-      add("update", install + s.installMin * MIN, "Installed (product restart behavior not modeled)", "ok", assumptions, install);
+      add("update", install + installMin * MIN, "Installed (product restart behavior not modeled)", "ok", assumptions, install);
       continue;
     }
 
@@ -228,7 +232,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     if (!s.onlineAlways) offerAss.push("onlineHours");
     add("update", offer, cp && !cp.auto ? "Discovered / offered (manually approved)" : "Discovered / offered", "info", [...offerAss, "discoveryImmediate"]);
 
-    const ready = offer + s.downloadMin * MIN;
+    const ready = offer + downloadMin * MIN;
     const ass: AssumptionId[] = ["discoveryImmediate", "installDuration"];
     const mwOn = s.mwEnabled;
     const deadlineAt = s.deadlineEnabled ? offer + s.deadlineDays * DAY : null;
@@ -279,7 +283,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     }
 
     add("update", ready, mwOn && s.mwActions === 2 ? "Downloaded (install waits for the maintenance window)" : "Downloaded", "info", ["installDuration"], toOnline(s, offer));
-    const instDone = inst + s.installMin * MIN;
+    const instDone = inst + installMin * MIN;
     const scheduledHotpatch = hotpatchOn && r.kind === "cu" && !HOTPATCH_BASELINE_MONTHS.has(new Date(r.date).getUTCMonth());
     const hasRestartOverride = r.restartOverride !== undefined;
     const restartRequired = hasRestartOverride

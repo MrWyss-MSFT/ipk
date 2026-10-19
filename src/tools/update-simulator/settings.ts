@@ -9,6 +9,12 @@ export interface CloudApproval {
   approveAfter: number | null;
 }
 
+export interface OnlinePeriod {
+  day: number; // Mon = 0 .. Sun = 6
+  start: number; // Minutes after midnight
+  end: number; // May extend into the next day; duration is at most 24 hours
+}
+
 export interface Settings {  // Intune / Autopatch Windows quality update policy
   cloudEnabled: boolean;
   cloud: Record<CloudKind, CloudApproval>;
@@ -39,6 +45,7 @@ export interface Settings {  // Intune / Autopatch Windows quality update policy
   graceDays: number;
   noAutoReboot: boolean;
   // Active hours
+  weeklySchedule?: OnlinePeriod[];
   onlineAlways: boolean;
   onlineDays: boolean[]; // Mon..Sun
   onlineStart: number;

@@ -9,6 +9,25 @@ export interface OnlineWindow {
 /** Overnight periods belong to the weekday on which they start. */
 export function onlineWindows(s: Settings, start: number, end: number): OnlineWindow[] {
   if (s.onlineAlways) return [{ start, end }];
+  if (s.weeklySchedule) {
+    if (!s.weeklySchedule.length) throw new RangeError("Add at least one online period.");
+    const windows: OnlineWindow[] = [];
+    for (let day = startOfDay(start) - DAY; day < end; day += DAY) {
+      const weekday = (new Date(day).getUTCDay() + 6) % 7;
+      for (const period of s.weeklySchedule.filter((p) => p.day === weekday)) {
+        const a = Math.max(start, day + period.start * 60_000);
+        const b = Math.min(end, day + period.end * 60_000);
+        if (b > a) windows.push({ start: a, end: b });
+      }
+    }
+    const merged: OnlineWindow[] = [];
+    for (const window of windows.sort((a, b) => a.start - b.start)) {
+      const last = merged[merged.length - 1];
+      if (last && window.start <= last.end) last.end = Math.max(last.end, window.end);
+      else merged.push({ ...window });
+    }
+    return merged;
+  }
   if (!s.onlineDays.some(Boolean)) throw new RangeError("Select at least one online day.");
   const windows: OnlineWindow[] = [];
   for (let day = startOfDay(start) - DAY; day < end; day += DAY) {

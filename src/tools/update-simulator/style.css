@@ -4,6 +4,293 @@
   gap: var(--space-4);
 }
 
+.wus-schedule {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+
+.wus-schedule::backdrop {
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.wus-schedule header,
+.wus-schedule footer,
+.wus-schedule-tools,
+.wus-schedule-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.wus-schedule header {
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.wus-schedule header > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+}
+
+.wus-schedule h2,
+.wus-schedule p {
+  margin: 0;
+}
+
+.wus-schedule h2 {
+  font-size: 1.1rem;
+}
+
+.wus-schedule button,
+.wus-schedule input,
+.wus-schedule select {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.wus-schedule button {
+  cursor: pointer;
+}
+
+.wus-schedule button:hover {
+  background: var(--bg-hover);
+}
+
+.wus-schedule :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wus-schedule button:disabled,
+.wus-schedule input:disabled,
+.wus-schedule select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wus-schedule-scroll {
+  height: clamp(380px, calc(100dvh - 360px), 600px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin: var(--space-2) 0;
+}
+
+.wus-schedule-grid {
+  display: grid;
+  grid-template-columns: 38px repeat(7, minmax(82px, 1fr));
+  min-width: 640px;
+}
+
+.wus-schedule-day {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg-elevated);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.wus-schedule-hours,
+.wus-schedule-column {
+  position: relative;
+  height: 768px;
+}
+
+.wus-schedule-hours span {
+  position: absolute;
+  left: var(--space-2);
+  font: 0.65rem var(--font-mono);
+  color: var(--text-muted);
+}
+
+.wus-schedule-column {
+  border-left: 1px solid var(--border);
+  cursor: crosshair;
+  background: repeating-linear-gradient(to bottom, var(--border) 0 1px, transparent 1px 32px);
+}
+
+.wus-schedule .wus-schedule-block {
+  position: absolute;
+  left: 3px;
+  right: 36%;
+  min-height: 3px;
+  padding: 0 var(--space-1);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-elevated));
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  text-align: center;
+}
+
+.wus-schedule-lah {
+  position: absolute;
+  left: 68%;
+  right: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px dashed var(--success);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--success) 15%, var(--bg-elevated));
+  color: var(--text);
+  font: 0.6rem var(--font-mono);
+  cursor: default;
+}
+
+.wus-compare-hours .wus-schedule-ah {
+  left: 66%;
+  right: 18%;
+}
+
+.wus-compare-hours .wus-schedule-lah.is-overridden {
+  left: 84%;
+  opacity: 0.5;
+  border-color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 12%, var(--bg-elevated));
+}
+
+.wus-schedule-legend [data-action="toggle-lah"] {
+  min-height: 0;
+  padding: 0 0 0 var(--space-2);
+  border: 0;
+  border-left: 3px dashed var(--text-muted);
+  border-radius: 0;
+  font: inherit;
+}
+
+.wus-schedule-legend [data-action="toggle-lah"][aria-pressed="false"] {
+  opacity: 0.5;
+}
+
+.wus-schedule-legend [data-action="toggle-lah"]:disabled {
+  opacity: 1;
+}
+
+.wus-schedule-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-left: auto;
+  font-size: 0.75rem;
+}
+
+.wus-schedule-legend span {
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-2);
+}
+
+.wus-schedule-legend span + span {
+  border-left: 3px dashed var(--success);
+}
+
+.wus-behavior-editor {
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.wus-behavior-editor h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.wus-schedule .wus-schedule-block.is-selected {
+  border: 2px solid var(--accent);
+  z-index: 2;
+}
+
+.wus-schedule-block b {
+  font: 0.65rem var(--font-mono);
+  cursor: pointer;
+}
+
+.wus-period-popup {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+
+.wus-period-popup .wus-schedule-edit {
+  margin: 0;
+}
+
+.wus-schedule-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.wus-schedule-handle::after {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 3px auto;
+  background: var(--accent);
+}
+
+.wus-schedule-handle.is-top { top: 0; }
+.wus-schedule-handle.is-bottom { bottom: 0; }
+
+.wus-schedule-edit {
+  margin-bottom: var(--space-2);
+  font-size: 0.8rem;
+}
+
+.wus-schedule-edit label {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.wus-schedule footer {
+  margin-top: var(--space-3);
+  justify-content: flex-end;
+}
+
+.wus-schedule footer > span {
+  margin-right: auto;
+}
+
+.wus-schedule [data-action="apply"] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
 .wus-tool input[type="radio"],
 .wus-tool input[type="checkbox"] {
   accent-color: var(--accent);
@@ -569,20 +856,6 @@ a.wus-csp:focus-visible {
   background: color-mix(in srgb, var(--accent) 25%, var(--bg-elevated));
 }
 
-.wus-online-days {
-  grid-column: 1 / -1;
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-}
-
-.wus-online-days legend {
-  padding-inline: var(--space-1);
-  font-size: 0.85rem;
-}
-
 .wus-error {
   color: var(--danger);
   font-size: 0.85rem;
@@ -760,6 +1033,132 @@ button.wus-timeline-label:hover {
 .wus-config-link {
   color: inherit;
   text-decoration: none;
+}
+
+.wus-online-edit,
+.wus-behavior-edit {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.wus-online-edit:hover,
+.wus-online-edit:focus-visible,
+.wus-behavior-edit:hover,
+.wus-behavior-edit:focus-visible {
+  color: var(--accent);
+}
+
+.wus-day-hours {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.wus-day-hours legend {
+  font-size: 0.85rem;
+  padding-inline: var(--space-1);
+}
+
+.wus-day-hours:disabled .wus-day-scroll {
+  opacity: 0.5;
+}
+
+.wus-day-scroll {
+  overflow-x: auto;
+  padding: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.wus-day-grid {
+  min-width: 640px;
+}
+
+.wus-day-ticks {
+  position: relative;
+  height: 18px;
+  font: 0.65rem var(--font-mono);
+  color: var(--text-muted);
+}
+
+.wus-day-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.wus-day-track {
+  position: relative;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: repeating-linear-gradient(to right, var(--border) 0 1px, transparent 1px calc(100% / 24));
+}
+
+.wus-day-block {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--success);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--success) 18%, var(--bg-elevated));
+  font: 0.65rem var(--font-mono);
+  white-space: nowrap;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.wus-day-block > span:not(.wus-day-handle) {
+  pointer-events: none;
+}
+
+.wus-schedule .wus-day-time {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
+.wus-day-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: ew-resize;
+}
+
+.wus-day-handle::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 4px;
+  width: 2px;
+  background: var(--success);
+}
+
+.wus-day-handle.is-start { left: 0; }
+.wus-day-handle.is-end { right: 0; }
+
+.wus-behavior-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  font-size: 0.8rem;
+}
+
+.wus-schedule .wus-behavior-settings input {
+  min-height: auto;
+  accent-color: var(--accent);
 }
 
 .wus-config-link:hover,
