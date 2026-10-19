@@ -5,7 +5,7 @@ import { configuredPolicies, DEFAULTS, DEVICE_APPLIED_DEFAULTS, GROUPS, LOCAL_AC
 import { autoReleases, KIND_LABEL, simulate, type Release, type UpdateKind } from "./simulate";
 import { BROWSER_TZ, fmtDate, lastDayOfMonth, parseDate, patchTuesday } from "./calendar";
 import { setTimelineZoom, renderTimeline, wireTimelineInteractions, type EventGroup } from "./timeline";
-import { ASSUMPTIONS, ASSUMPTION_GROUPS, assumptionHtml, cspLink } from "./assumptions";
+import { ASSUMPTIONS, ASSUMPTION_BASES, ASSUMPTION_GROUPS, assumptionHtml, cspLink } from "./assumptions";
 import { DEFAULT_SCHEDULE, parseSchedule, wireScheduleEditor } from "./schedule-editor";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -316,10 +316,24 @@ const tool: ToolDefinition = {
         ${QUALITY_POLICY_HTML}
         ${groups}
         <details class="wus-group"><summary class="wus-summary" id="wus-assumptions-summary">All assumptions used by this tool</summary>
-          ${Object.entries(ASSUMPTION_GROUPS).map(([title, ids]) => `<details class="wus-assumption-group"><summary>${esc(title)} (${ids.length})</summary><ul class="wus-assumptions">${ids.map((id) => {
+          <p class="wus-help wus-assumption-scale">Initial editorial confidence in how closely the model represents Windows behavior, based on the cited guidance and known simplifications; not a measured probability or fresh source verification. 5/5: strong explicit support · 4/5: supported with caveats · 3/5: mixed evidence or interpretation · 2/5: weak support or substantial simplification · 1/5: unverified or illustrative. IDs remain stable when entries are reordered.</p>
+          <div class="wus-assumption-filters wus-fields wus-panel">
+            <div class="wus-field"><label for="wus-assumption-search">Search assumptions</label><input type="search" id="wus-assumption-search" placeholder="ID, policy, text or rationale"></div>
+            <div class="wus-field"><label for="wus-assumption-category">Category</label><select id="wus-assumption-category"><option value="">All categories</option>${Object.keys(ASSUMPTION_GROUPS).map((title) => `<option>${esc(title)}</option>`).join("")}</select></div>
+            <div class="wus-field"><label for="wus-assumption-basis" title="Primary classification; secondary caveats remain in the text and rationale. Documentation contradiction: conflicting guidance. Documentation gap: missing or ambiguous guidance. Simulator limitation: behavior omitted or unsupported by this tool. Modeling approximation: real behavior simplified for timing or calculation. Scenario input: user-selected or assumed device/release conditions. Documented behavior: primarily supported by explicit guidance.">Basis / limitation</label><select id="wus-assumption-basis"><option value="">All bases / limitations</option>${ASSUMPTION_BASES.map((basis) => `<option>${basis}</option>`).join("")}</select></div>
+            <div class="wus-field"><label for="wus-assumption-confidence">Confidence</label><select id="wus-assumption-confidence"><option value="">All ratings</option>${[1, 2, 3, 4, 5].map((n) => `<option value="${n}">${n}/5</option>`).join("")}</select></div>
+            <button type="button" class="wus-btn" id="wus-assumption-reset">Clear filters</button>
+          </div>
+          <p class="wus-help wus-assumption-count" id="wus-assumption-count" role="status"></p>
+          <div class="ipk-table-scroll">
+          <table class="wus-table wus-assumption-table">
+            <thead><tr>${[["id", "ID"], ["category", "Category"], ["text", "Assumption"], ["confidence", "Confidence"], ["rationale", "Rating rationale"], ["basis", "Basis / limitation"]].map(([key, label]) => `<th scope="col" aria-sort="${key === "id" ? "ascending" : "none"}"><button type="button" data-assumption-sort="${key}">${label}<span aria-hidden="true">${key === "id" ? " ↑" : " ↕"}</span></button></th>`).join("")}<th scope="col">Source</th></tr></thead>
+            <tbody>${Object.entries(ASSUMPTION_GROUPS).flatMap(([title, ids]) => ids.map((id) => {
             const a = ASSUMPTIONS[id];
-            return `<li>${assumptionHtml(a.text)} <a href="${a.url}" target="_blank" rel="noopener">Docs</a></li>`;
-          }).join("")}</ul></details>`).join("")}
+            return `<tr id="wus-assumption-${id}" tabindex="-1" data-confidence="${a.confidence}"><th scope="row">${a.id}</th><td>${esc(title)}</td><td>${assumptionHtml(a.text)}</td><td>${a.confidence}/5</td><td>${esc(a.rationale)}</td><td>${a.basis}</td><td><a href="${a.url}" target="_blank" rel="noopener">Docs</a></td></tr>`;
+          })).join("")}</tbody>
+          </table>
+          </div>
         </details>
         <section class="wus-section" id="wus-configured-policies">
           <h3>Configured policies</h3>
@@ -336,6 +350,49 @@ const tool: ToolDefinition = {
     const hidden = new Set<EventGroup>();
     const collapsedGroups = new Set<string>();
     const resultEl = container.querySelector<HTMLElement>("#wus-result")!;
+    const assumptionTable = container.querySelector<HTMLTableElement>(".wus-assumption-table")!;
+    const assumptionSearch = container.querySelector<HTMLInputElement>("#wus-assumption-search")!;
+    const assumptionCategory = container.querySelector<HTMLSelectElement>("#wus-assumption-category")!;
+    const assumptionBasis = container.querySelector<HTMLSelectElement>("#wus-assumption-basis")!;
+    const assumptionConfidence = container.querySelector<HTMLSelectElement>("#wus-assumption-confidence")!;
+    const sortColumns = { id: 0, category: 1, text: 2, confidence: 3, rationale: 4, basis: 5 };
+    type AssumptionSort = keyof typeof sortColumns;
+    let assumptionSort: AssumptionSort = "id";
+    let assumptionAscending = true;
+    const updateAssumptions = () => {
+      const terms = assumptionSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const rows = [...assumptionTable.tBodies[0].rows];
+      rows.sort((a, b) => {
+        const column = sortColumns[assumptionSort];
+        const comparison = assumptionSort === "confidence"
+          ? Number(a.dataset.confidence) - Number(b.dataset.confidence)
+          : a.cells[column].textContent!.localeCompare(b.cells[column].textContent!);
+        return (assumptionAscending ? comparison : -comparison) || a.cells[0].textContent!.localeCompare(b.cells[0].textContent!);
+      });
+      let visible = 0;
+      for (const row of rows) {
+        row.hidden = !terms.every((term) => row.textContent!.toLowerCase().includes(term)) ||
+          (assumptionCategory.value !== "" && row.cells[1].textContent !== assumptionCategory.value) ||
+          (assumptionBasis.value !== "" && row.cells[5].textContent !== assumptionBasis.value) ||
+          (assumptionConfidence.value !== "" && row.dataset.confidence !== assumptionConfidence.value);
+        if (!row.hidden) visible++;
+        assumptionTable.tBodies[0].append(row);
+      }
+      container.querySelector<HTMLElement>("#wus-assumption-count")!.textContent =
+        visible ? `${visible} of ${rows.length} assumptions` : `No matching assumptions (0 of ${rows.length}).`;
+      for (const button of assumptionTable.querySelectorAll<HTMLButtonElement>("[data-assumption-sort]")) {
+        const active = button.dataset.assumptionSort === assumptionSort;
+        button.closest("th")!.setAttribute("aria-sort", active ? assumptionAscending ? "ascending" : "descending" : "none");
+        button.querySelector("span")!.textContent = active ? assumptionAscending ? " ↑" : " ↓" : " ↕";
+      }
+    };
+    const clearAssumptionFilters = () => {
+      for (const input of [assumptionSearch, assumptionCategory, assumptionBasis, assumptionConfidence]) {
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    };
+    updateAssumptions();
     const scheduleField = container.querySelector<HTMLTextAreaElement>("#wus-weekly-schedule")!;
     const scheduleEditor = wireScheduleEditor(container, scheduleField, () => tz, () => ({
       installMode: container.querySelector<HTMLInputElement>('input[name="wus-installMode"]:checked')!.value,
@@ -534,7 +591,7 @@ const tool: ToolDefinition = {
       policyValues.set("NoUpdateNotificationsDuringActiveHours", String(Number(settings.noNotifActive)));
       const syncCspValues = () => {
         for (const link of container.querySelectorAll<HTMLAnchorElement>("a[data-csp]")) {
-          if (link.closest(".wus-assumptions")) continue;
+          if (link.closest(".wus-assumption-table")) continue;
           const name = link.dataset.csp!;
           let value = policyValues.get(name);
           const option = link.dataset.radioCsp;
@@ -587,6 +644,10 @@ const tool: ToolDefinition = {
     };
 
     const onInput = (e: Event) => {
+      if (e.target instanceof Element && e.target.closest(".wus-assumption-filters")) {
+        updateAssumptions();
+        return;
+      }
       if (e.target instanceof HTMLSelectElement && e.target.id.endsWith("-duration-mode") && e.target.value === "default") {
         // Do not overwrite saved overrides before their fields restore after the mode selector.
         const inputs = [...e.target.closest<HTMLElement>(".wus-release-card")!.querySelectorAll<HTMLInputElement>('input[type="number"]')]
@@ -629,6 +690,21 @@ const tool: ToolDefinition = {
     };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      const sortButton = t.closest<HTMLButtonElement>("[data-assumption-sort]");
+      if (sortButton) {
+        const key = sortButton.dataset.assumptionSort!;
+        if (Object.prototype.hasOwnProperty.call(sortColumns, key)) {
+          const next = key as AssumptionSort;
+          assumptionAscending = next === assumptionSort ? !assumptionAscending : true;
+          assumptionSort = next;
+          updateAssumptions();
+        }
+        return;
+      }
+      if (t.closest("#wus-assumption-reset")) {
+        clearAssumptionFilters();
+        return;
+      }
       const releaseEdit = t.closest<HTMLButtonElement>("[data-release-edit]");
       if (releaseEdit) {
         expandRelease(releaseEdit.dataset.releaseEdit!, releaseEdit.getAttribute("aria-expanded") !== "true");
@@ -647,15 +723,18 @@ const tool: ToolDefinition = {
         syncCollapsedGroups();
         return;
       }
-      const configLink = t.closest<HTMLAnchorElement>(".wus-config-link");
+      const configLink = t.closest<HTMLAnchorElement>(".wus-config-link, .wus-assume");
       if (configLink) {
         e.preventDefault();
         const heading = container.querySelector<HTMLElement>(configLink.hash)!;
-        heading.closest<HTMLDetailsElement>("details")!.open = true;
+        if (configLink.matches(".wus-assume") && heading.hidden) clearAssumptionFilters();
+        for (let details = heading.closest<HTMLDetailsElement>("details"); details; details = details.parentElement?.closest<HTMLDetailsElement>("details") ?? null) {
+          details.open = true;
+        }
         const releaseEdit = heading.querySelector<HTMLButtonElement>("[data-release-edit]");
         if (releaseEdit) expandRelease(releaseEdit.dataset.releaseEdit!, true);
         heading.focus({ preventScroll: true });
-        const section = heading.closest<HTMLElement>("tr, section")!;
+        const section = heading.closest<HTMLElement>("li, tr, section")!;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         section.scrollIntoView({ block: "center", behavior: reducedMotion ? "instant" : "smooth" });
         section.getAnimations().filter((animation) => animation.id === "wus-config-highlight").forEach((animation) => animation.cancel());

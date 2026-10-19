@@ -349,7 +349,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   const rows = numbered.map(({ e, n }) => {
     const notes = [...new Set(e.assumptions)].map((id) => {
       const a = ASSUMPTIONS[id];
-      return `<a class="wus-assume" href="${a.url}" target="_blank" rel="noopener" title="${esc(assumptionPlain(a.text))}">Assumption</a>`;
+      return `<a class="wus-assume" href="#wus-assumption-${id}" title="${esc(`${a.id} · Confidence ${a.confidence}/5\n${assumptionPlain(a.text)}\nRating: ${a.rationale}`)}">${a.id}</a>`;
     }).join(" ");
     return `<tr id="wus-row-${n}"><td>${n}</td><td class="wus-nowrap">${fmtDateTime(e.at)}</td><td>${e.lane === "update" ? "Update" : "Notification"}</td><td>${esc(e.label)}</td><td>${esc(e.text)}</td><td>${notes}</td></tr>`;
   }).join("");
@@ -381,7 +381,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
       </div>
     </div>
     <details class="wus-group wus-event-details"><summary class="wus-summary" id="wus-event-details-summary">Events (${numbered.length})</summary><div class="ipk-table-scroll"><table class="wus-table">
-      <thead><tr><th>#</th><th>When</th><th>Lane</th><th>Update</th><th>Event</th><th>Notes</th></tr></thead>
+      <thead><tr><th>#</th><th>When</th><th>Lane</th><th>Update</th><th>Event</th><th>Assumption</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="6">No events in this period.</td></tr>'}</tbody>
     </table></div></details>`;
 }

@@ -533,23 +533,46 @@ a.wus-csp:focus-visible {
   border-color: var(--accent);
 }
 
-.wus-assumptions {
-  margin: 0;
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  font-size: 0.85rem;
+.wus-assumption-scale {
+  padding: var(--space-3);
 }
 
-.wus-assumption-group {
-  border-top: 1px solid var(--border);
+.wus-assumption-filters {
+  align-items: flex-end;
 }
 
-.wus-assumption-group > summary {
-  padding: var(--space-2) var(--space-3);
+.wus-assumption-filters input[type="search"] {
+  width: 30ch;
+}
+
+.wus-assumption-count {
+  padding: 0 var(--space-3);
+}
+
+.wus-assumption-table {
+  min-width: 850px;
+}
+
+.wus-assumption-table td:nth-child(3) {
+  min-width: 32ch;
+}
+
+.wus-assumption-table td:nth-child(5) {
+  min-width: 24ch;
+}
+
+.wus-assumption-table tbody th,
+.wus-assumption-table td:nth-child(4) {
+  white-space: nowrap;
+}
+
+.wus-assumption-table thead button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  font-weight: 600;
 }
 
 .wus-timeline-controls {
