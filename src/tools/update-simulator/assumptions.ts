@@ -113,7 +113,7 @@ export const ASSUMPTIONS = {
     url: DEADLINES + "#:~:text=users%20can%20schedule%20restarts%20before%20the%20effective%20deadline",
   },
   installDuration: {
-    text: "Download and installation durations are not documented. Set defaults (initially 5 and 20 minutes) and optional per-release overrides under Simulate releases. Blank overrides inherit the defaults; zero means instantaneous. Monthly B-week overrides apply to every modeled B release. The restart-pending moment is when installation finishes.",
+    text: "Download and installation durations are not documented. Set defaults (initially 5 and 20 minutes) at the bottom of Simulate releases. Expand a release and choose Custom for this release to override them. Use defaults clears its overrides; blank overrides inherit the defaults and zero means instantaneous. Monthly B-week overrides apply to every modeled B release. The restart-pending moment is when installation finishes.",
     url: CSPA + "allowautoupdate",
   },
   notifyDefaultOff: {

@@ -278,30 +278,38 @@ const tool: ToolDefinition = {
         <div class="wus-result" id="wus-result"></div>
         ${DEPLOYMENT_RING_HTML}
         <details class="wus-group" id="wus-releases"><summary class="wus-summary" id="wus-releases-summary">Simulate releases</summary>
-          <div class="wus-fields wus-panel">
-            <div class="wus-field"><label for="wus-downloadMin">Default download (minutes)</label><input type="number" id="wus-downloadMin" min="0" max="1440" step="1" placeholder="5"></div>
-            <div class="wus-field"><label for="wus-installMin">Default install (minutes)</label><input type="number" id="wus-installMin" min="0" max="1440" step="1" placeholder="20"></div>
-          </div>
-          <div class="ipk-table-scroll wus-panel">
-            <table class="wus-policy-table wus-release-table">
-              <thead><tr><th>Include release</th><th>Release date (selected month)</th><th>Requires restart</th><th>Download (min)</th><th>Install (min)</th></tr></thead>
-              <tbody>${RELEASE_ROWS.map(([kind, label]) => `<tr id="wus-release-config-${kind}" tabindex="-1">
-                <th scope="row">${kind === "software"
-                  ? '<div class="wus-software-release"><input type="checkbox" id="wus-release-software-enabled" aria-label="Include Microsoft product update"><input type="text" id="wus-release-software-title" aria-label="Microsoft product release title" value="Microsoft product update"></div>'
-                  : `<label class="wus-check"><input type="checkbox" id="wus-release-${kind}-enabled" ${kind === "cu" ? "checked" : ""}> ${label}</label>`}</th>
-                <td>${kind === "cu" ? '<span><time id="wus-patch-date" title="Patch Tuesday: second Tuesday of the selected month"></time> (PT)</span>' : `<input type="date" id="wus-release-${kind}-date" aria-label="Release date for ${label}" aria-describedby="wus-release-note wus-release-error">`}</td>
-                <td>${kind === "software" ? "Not modeled" : kind === "cu"
+          <div class="wus-panel">
+            <div class="wus-release-list">
+              ${RELEASE_ROWS.map(([kind, label]) => `<section class="wus-release-card" id="wus-release-config-${kind}" tabindex="-1">
+                <div class="wus-release-heading">
+                  <input type="checkbox" id="wus-release-${kind}-enabled" ${kind === "cu" ? "checked" : ""} aria-label="Include ${label}">
+                  <div class="wus-release-heading-text"><label for="wus-release-${kind}-enabled">${label}</label><span class="wus-release-summary" id="wus-release-${kind}-summary"></span></div>
+                  <button type="button" class="wus-release-edit" data-release-edit="${kind}" aria-expanded="false" aria-controls="wus-release-${kind}-controls">Edit ▾</button>
+                </div>
+                <div class="wus-release-controls" id="wus-release-${kind}-controls" hidden>
+                ${kind === "software" ? '<div class="wus-field"><label for="wus-release-software-title">Release title</label><input type="text" id="wus-release-software-title" value="Microsoft product update"></div>' : ""}
+                <div class="wus-field"><label${kind === "cu" ? "" : ` for="wus-release-${kind}-date"`}>Release date</label>${kind === "cu" ? '<span><time id="wus-patch-date" title="Patch Tuesday: second Tuesday of the selected month"></time> · Automatic (PT)</span>' : `<input type="date" id="wus-release-${kind}-date" aria-label="Release date for ${label}" aria-describedby="wus-release-${kind}-date-error"><span class="wus-release-date-error wus-error" id="wus-release-${kind}-date-error" role="alert" hidden></span>`}</div>
+                <div class="wus-field"><label${kind === "software" ? "" : ` for="wus-release-${kind}-restart"`}>Requires restart</label>${kind === "software" ? "<span>Not modeled</span>" : kind === "cu"
                   ? '<select id="wus-release-cu-restart" aria-label="Monthly B-week CU requires restart"><option value="auto">Automatic (hotpatch schedule)</option><option value="yes">Yes (override)</option><option value="no">No (override)</option></select>'
                   : kind === "oob" || kind === "oobns"
                     ? `<select id="wus-release-${kind}-restart" aria-label="${label} requires restart"><option value="auto">Automatic (release default)</option><option value="yes">Yes (override)</option><option value="no">No (override)</option></select>`
-                    : `<input type="checkbox" id="wus-release-${kind}-restart" aria-label="${label} requires restart" ${kind !== "driver" ? "checked" : ""}>`}</td>
-                ${["downloadMin", "installMin"].map((key) => `<td><input type="number" id="wus-release-${kind}-${key}" min="0" max="1440" step="1" aria-label="${label} ${key === "downloadMin" ? "download" : "install"} duration in minutes" aria-describedby="wus-duration-note"></td>`).join("")}
-              </tr>`).join("")}</tbody>
-            </table>
+                    : `<input type="checkbox" id="wus-release-${kind}-restart" aria-label="${label} requires restart" ${kind !== "driver" ? "checked" : ""}>`}</div>
+                <div class="wus-field"><label for="wus-release-${kind}-duration-mode" title="Blank overrides inherit the defaults. Zero means instantaneous.${kind === "cu" ? " Monthly B-week overrides apply to every modeled B release." : ""}">Durations</label><select id="wus-release-${kind}-duration-mode"><option value="default">Use defaults</option><option value="custom">Custom for this release</option></select></div>
+                <div class="wus-release-custom" id="wus-release-${kind}-custom" hidden>
+                ${["downloadMin", "installMin"].map((key) => `<div class="wus-field"><label for="wus-release-${kind}-${key}">${key === "downloadMin" ? "Download" : "Install"} (min)</label><input type="number" id="wus-release-${kind}-${key}" min="0" max="1440" step="1" aria-label="${label} ${key === "downloadMin" ? "download" : "install"} duration in minutes" aria-describedby="wus-duration-note"></div>`).join("")}
+                </div>
+                ${kind === "software" ? '<p class="wus-help wus-release-info">Microsoft product releases use AllowMUUpdateService and approximate download/install timing, without restart modeling or Windows quality-update policies. See <a href="https://learn.microsoft.com/en-us/windows/deployment/update/update-other-microsoft-products" target="_blank" rel="noopener">Microsoft\'s list of products that might be updated</a>. Setting the policy to 0 on a real device does not automatically unregister an existing Microsoft Update service.</p>' : ""}
+                </div>
+              </section>`).join("")}
+            </div>
+            <div class="wus-release-defaults">
+              <strong>Default durations</strong>
+              <label for="wus-downloadMin">Download <input type="number" id="wus-downloadMin" min="0" max="1440" step="1" placeholder="5"> min</label>
+              <label for="wus-installMin">Install <input type="number" id="wus-installMin" min="0" max="1440" step="1" placeholder="20"> min</label>
+            </div>
           </div>
           <p class="wus-help" id="wus-release-note">Choose releases for this month. Policies still apply; restart overrides are simulation-only.</p>
-          <p class="wus-help" id="wus-duration-note">Blank duration overrides use the defaults above (5 minutes download, 20 minutes install unless changed). Zero means instantaneous. Monthly B-week overrides apply to every modeled B release.</p>
-          <p class="wus-help">Microsoft product releases use AllowMUUpdateService and approximate download/install timing, without restart modeling or Windows quality-update policies. See <a href="https://learn.microsoft.com/en-us/windows/deployment/update/update-other-microsoft-products" target="_blank" rel="noopener">Microsoft's list of products that might be updated</a>. Setting the policy to 0 on a real device does not automatically unregister an existing Microsoft Update service.</p>
+          <p class="wus-help" id="wus-duration-note" hidden>Blank duration overrides inherit the defaults (5 minutes download, 20 minutes install unless changed). Zero means instantaneous. Monthly B-week overrides apply to every modeled B release.</p>
           <p class="wus-error" id="wus-release-error" role="alert" hidden></p>
         </details>
         ${DEVICE_USER_STATE_HTML}
@@ -388,6 +396,14 @@ const tool: ToolDefinition = {
       }
     };
 
+    const expandRelease = (kind: string, open: boolean) => {
+      const controls = container.querySelector<HTMLElement>(`#wus-release-${kind}-controls`)!;
+      const button = container.querySelector<HTMLButtonElement>(`[data-release-edit="${kind}"]`)!;
+      controls.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      button.textContent = open ? "Close ▴" : "Edit ▾";
+    };
+
     const run = () => {
       const scheduleError = container.querySelector<HTMLElement>("#wus-availability-error")!;
       try { parseSchedule(scheduleField.value); } catch (e) {
@@ -432,6 +448,15 @@ const tool: ToolDefinition = {
       }
       for (const [kind, label] of RELEASE_ROWS) {
         const enabled = container.querySelector<HTMLInputElement>(`#wus-release-${kind}-enabled`)!.checked;
+        const card = container.querySelector<HTMLElement>(`#wus-release-config-${kind}`)!;
+        card.classList.toggle("is-included", enabled);
+        const mode = container.querySelector<HTMLSelectElement>(`#wus-release-${kind}-duration-mode`)!;
+        const durationInputs = [...card.querySelectorAll<HTMLInputElement>('input[type="number"]')];
+        if (durationInputs.some((input) => input.value !== "")) mode.value = "custom";
+        mode.disabled = !enabled;
+        container.querySelector<HTMLElement>(`#wus-release-${kind}-custom`)!.hidden = mode.value !== "custom";
+        const titleInput = card.querySelector<HTMLInputElement>('input[type="text"]');
+        if (titleInput) titleInput.disabled = !enabled;
         const durations: Pick<Release, "downloadMin" | "installMin"> = {};
         let invalidDuration = false;
         for (const key of ["downloadMin", "installMin"] as const) {
@@ -444,6 +469,39 @@ const tool: ToolDefinition = {
           if (input.value !== "" && !invalid) durations[key] = Number(input.value);
         }
         if (invalidDuration) invalidReleases.push(`${label} (enter durations from 0 to 1440 whole minutes)`);
+        const dateInput = card.querySelector<HTMLInputElement>('input[type="date"]');
+        let date: number | null = null;
+        let invalidDate = false;
+        if (dateInput) {
+          dateInput.disabled = !enabled;
+          dateInput.required = enabled;
+          dateInput.min = fmtDate(start);
+          dateInput.max = fmtDate(monthEnd);
+          date = parseDate(dateInput.value);
+          invalidDate = enabled && (date === null || !dateInput.validity.valid);
+          dateInput.setAttribute("aria-invalid", String(invalidDate));
+          const error = card.querySelector<HTMLElement>(".wus-release-date-error")!;
+          error.hidden = !invalidDate;
+          error.textContent = invalidDate ? `Choose a release date from ${fmtDate(start)} to ${fmtDate(monthEnd)}.` : "";
+          if (invalidDate) {
+            invalidReleases.push(label);
+            expandRelease(kind, true);
+          }
+        }
+        card.classList.toggle("has-error", invalidDate || invalidDuration);
+        const restartInput = container.querySelector<HTMLInputElement | HTMLSelectElement>(`#wus-release-${kind}-restart`);
+        if (restartInput) restartInput.disabled = !enabled;
+        const restartSummary = restartInput instanceof HTMLSelectElement
+          ? restartInput.selectedOptions[0].textContent!
+          : restartInput ? (restartInput.checked ? "Restart required" : "No restart") : "Restart not modeled";
+        const status = !enabled ? "Not included" : invalidDate ? `${dateInput!.value ? "Invalid date" : "Date required"} · Not simulated`
+          : invalidDuration ? "Invalid duration · Not simulated" : "Included";
+        const durationSummary = invalidDuration ? "Check durations"
+          : `DL ${durations.downloadMin ?? durationDefaults.downloadMin}m + Install ${durations.installMin ?? durationDefaults.installMin}m`;
+        container.querySelector<HTMLElement>(`#wus-release-${kind}-summary`)!.textContent = [
+          status, kind === "cu" ? patchDate : dateInput!.value || "Choose date", restartSummary,
+          durationSummary, mode.value === "custom" ? "Custom" : "Defaults",
+        ].join(" · ");
         if (kind === "cu") {
           const restartInput = container.querySelector<HTMLSelectElement>("#wus-release-cu-restart")!;
           restartInput.disabled = !enabled;
@@ -454,17 +512,7 @@ const tool: ToolDefinition = {
           })));
           continue;
         }
-        const input = container.querySelector<HTMLInputElement>(`#wus-release-${kind}-date`)!;
-        const restartInput = container.querySelector<HTMLInputElement | HTMLSelectElement>(`#wus-release-${kind}-restart`);
-        input.disabled = !enabled;
-        if (restartInput) restartInput.disabled = !enabled;
-        input.min = fmtDate(start);
-        input.max = fmtDate(monthEnd);
-        const date = parseDate(input.value);
-        const invalid = enabled && (date === null || !input.validity.valid);
-        input.setAttribute("aria-invalid", String(invalid));
-        if (invalid) invalidReleases.push(label);
-        if (!enabled || invalid || invalidDuration || date === null) continue;
+        if (!enabled || invalidDate || invalidDuration || date === null) continue;
         const restartOverride = restartInput instanceof HTMLSelectElement && restartInput.value !== "auto"
           ? restartInput.value === "yes"
           : undefined;
@@ -539,6 +587,18 @@ const tool: ToolDefinition = {
     };
 
     const onInput = (e: Event) => {
+      if (e.target instanceof HTMLSelectElement && e.target.id.endsWith("-duration-mode") && e.target.value === "default") {
+        // Do not overwrite saved overrides before their fields restore after the mode selector.
+        const inputs = [...e.target.closest<HTMLElement>(".wus-release-card")!.querySelectorAll<HTMLInputElement>('input[type="number"]')]
+          .filter((input) => input.value !== "");
+        inputs.forEach((input) => { input.value = ""; });
+        inputs.forEach((input) => input.dispatchEvent(new Event("input", { bubbles: true })));
+      }
+      if (e.type === "change" && e.target instanceof HTMLInputElement && e.target.checked && /^wus-release-.+-enabled$/.test(e.target.id)) {
+        const kind = e.target.id.slice("wus-release-".length, -"-enabled".length);
+        expandRelease(kind, true);
+        if (e.isTrusted) container.querySelector<HTMLInputElement>(`#wus-release-${kind}-date`)?.focus();
+      }
       if (e.target instanceof HTMLInputElement && /^wus-online(?:Always|-day-\d|StartTime|EndTime)$/.test(e.target.id)) {
         const always = container.querySelector<HTMLInputElement>("#wus-onlineAlways")!.checked;
         const startTime = Math.round(timeHour(container.querySelector<HTMLInputElement>("#wus-onlineStartTime")!.value) * 60);
@@ -569,6 +629,11 @@ const tool: ToolDefinition = {
     };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      const releaseEdit = t.closest<HTMLButtonElement>("[data-release-edit]");
+      if (releaseEdit) {
+        expandRelease(releaseEdit.dataset.releaseEdit!, releaseEdit.getAttribute("aria-expanded") !== "true");
+        return;
+      }
       if (t.closest("#wus-edit-schedule, .wus-online-edit, .wus-behavior-edit")) {
         e.preventDefault();
         scheduleEditor.open();
@@ -587,6 +652,8 @@ const tool: ToolDefinition = {
         e.preventDefault();
         const heading = container.querySelector<HTMLElement>(configLink.hash)!;
         heading.closest<HTMLDetailsElement>("details")!.open = true;
+        const releaseEdit = heading.querySelector<HTMLButtonElement>("[data-release-edit]");
+        if (releaseEdit) expandRelease(releaseEdit.dataset.releaseEdit!, true);
         heading.focus({ preventScroll: true });
         const section = heading.closest<HTMLElement>("tr, section")!;
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

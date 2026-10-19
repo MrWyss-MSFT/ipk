@@ -697,15 +697,152 @@ a.wus-csp:focus-visible {
   display: block;
 }
 
-.wus-software-release {
+.wus-release-list {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-2);
 }
 
-.wus-software-release input[type="text"] {
-  width: 24ch;
-  margin: 0;
+.wus-release-card {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.wus-release-card.is-included {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+}
+
+.wus-release-card.has-error {
+  border-color: var(--danger);
+}
+
+.wus-release-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.wus-release-heading-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.wus-release-heading-text > label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wus-release-summary {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.wus-release-edit {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.wus-release-edit:hover {
+  background: var(--bg-hover);
+}
+
+.wus-release-controls,
+.wus-release-custom {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.wus-release-controls {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 0.8rem;
+}
+
+.wus-release-controls[hidden],
+.wus-release-custom[hidden] {
+  display: none;
+}
+
+.wus-release-controls > .wus-field {
+  flex: 1 1 160px;
+}
+
+.wus-release-controls .wus-field > input[type="checkbox"] {
+  margin-top: var(--space-2);
+}
+
+.wus-release-controls .wus-field > input[type="text"] {
+  width: 100%;
+  text-align: left;
+}
+
+.wus-release-info {
+  flex-basis: 100%;
+}
+
+.wus-release-date-error {
+  max-width: 28ch;
+}
+
+.wus-release-defaults,
+.wus-release-defaults label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.wus-release-defaults {
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  gap: var(--space-2) var(--space-3);
+  font-size: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.wus-release-defaults input[type="number"] {
+  width: 7ch;
+  height: 26px;
+  text-align: center;
+}
+
+.wus-release-defaults input,
+.wus-release-edit,
+.wus-release-controls .wus-field > input[type="text"] {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+}
+
+.wus-release-edit {
+  font-size: 0.8rem;
+}
+
+.wus-release-card input:disabled,
+.wus-release-card select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wus-release-card input[aria-invalid="true"],
+.wus-release-defaults input[aria-invalid="true"] {
+  border-color: var(--danger);
 }
 
 .wus-policy-table input[type="checkbox"] {
