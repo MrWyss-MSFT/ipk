@@ -245,7 +245,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   const alwaysOnline = onlineTotal === end - start;
   const groupHeader = (id: string, name: string, link?: string) =>
     `<div class="wus-timeline-group" data-group-id="${esc(id)}">${link ? `<a class="wus-config-link" href="${link}">${esc(name)}</a>` : `<span>${esc(name)}</span>`}<button type="button" class="wus-group-toggle" aria-expanded="true" aria-label="Collapse ${esc(name)}">▾</button></div>`;
-  let labels = `${groupHeader("availability", "Device availability")}<div class="wus-timeline-label"><strong><button type="button" class="wus-online-edit" aria-haspopup="dialog">Online</button><em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
+  let labels = `${groupHeader("availability", "Device / User Schedule")}<div class="wus-timeline-label"><strong><button type="button" class="wus-online-edit" aria-haspopup="dialog">Online</button><em>${durationText(onlineTotal)}</em></strong><small>${alwaysOnline ? "Always on & connected" : `${result.availability.length} online periods · gaps are offline`}</small></div>`;
   const availabilityBars = result.availability.map((w) => {
     const title = esc(`Device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)}`);
     return `<span class="wus-timeline-availability" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
@@ -286,8 +286,8 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
     const title = esc(`Configured scheduled install: ${fmtDateTime(at)} (${tz}). This is a schedule, not an actual install event; device availability and deadlines can affect execution.`);
     return `<span class="wus-timeline-install-slot" role="img" aria-label="${title}" title="${title}" style="left:${pct(at)}%"></span>`;
   }).join("");
-  labels += `${groupHeader("behavior", "User behavior")}<div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}"><strong><button type="button" class="wus-behavior-edit wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}: edit local active hours and user behavior" aria-haspopup="dialog"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></button><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
-  tracks += `<div class="wus-timeline-group-track"></div><div class="wus-timeline-track">${scheduledInstall ? scheduleBars : activeBars}</div>`;
+  labels += `<div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}"><strong><button type="button" class="wus-behavior-edit wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}: edit local active hours and user behavior" aria-haspopup="dialog"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></button><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
+  tracks += `<div class="wus-timeline-track">${scheduledInstall ? scheduleBars : activeBars}</div>`;
   const dateLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
   const shortDate = (at: number) => `${dateLabel.format(at)} · ${fmtDateTime(at).slice(11)}`;
   for (const release of releases) {
