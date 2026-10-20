@@ -774,12 +774,17 @@ const tool: ToolDefinition = {
         const accept = container.querySelector<HTMLButtonElement>("#wus-policy-accept")!;
         const text = editor.innerText;
         const parsed = parsePolicyImport(text);
+        const pendingEnrollment = parsed.reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name));
+        const savedEnrollment = container.querySelector<HTMLElement>("#wus-policy-enrollment")!;
+        savedEnrollment.hidden = pendingEnrollment || !parsePolicyImport(
+          container.querySelector<HTMLTextAreaElement>("#wus-reported-policies")!.value,
+        ).reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name));
         editor.setAttribute("aria-invalid", String(parsed.errors.length > 0));
         preview.innerHTML = [
           ...parsed.errors.map((message) => `<p class="wus-error" role="alert">${esc(message)}</p>`),
           ...(parsed.warnings.length ? [`<div class="wus-import-warnings"><strong>Warnings — confirmation required</strong><ul>${parsed.warnings.map((message) => `<li>${esc(message)}</li>`).join("")}</ul></div>`] : []),
-          ...(parsed.reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)) ? [
-            `<div><strong>Cloud policy enrollment status</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Informational only. After applying, these also appear beneath Enable policy in Cloud approval policy.</p></div>`,
+          ...(pendingEnrollment ? [
+            `<div><strong>Cloud policy enrollment status</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Pending import — informational only; not yet applied.</p></div>`,
           ] : []),
         ].join("");
         accept.hidden = parsed.errors.length > 0 || !parsed.warnings.length;
