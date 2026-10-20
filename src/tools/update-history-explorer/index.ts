@@ -313,7 +313,7 @@ const tool: ToolDefinition = {
         </p>
 
         <p class="uhe-step-label">1. Get the update history <span class="ipk-step-note">(copies to clipboard)</span></p>
-        ${psCommandTabsHtml("uhe-cmd")}
+        ${psCommandTabsHtml("uhe-cmd", { requiresAdmin: true })}
 
         <p class="uhe-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">

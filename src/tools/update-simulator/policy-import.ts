@@ -9,7 +9,7 @@ export interface PolicyImport {
   policies: [string, string][];
 }
 
-export const POLICY_EXPORT_COMMANDS = makePsCommandVariants('($p.PSObject.Properties | Where-Object { $_.Name -notlike \'PS*\' -and $_.Name -notlike \'*_ProviderSet\' -and $_.Name -notlike \'*_WinningProvider\' -and $_.Name -notlike \'*_LastWrite\' } | ForEach-Object { "{0} = {1}" -f $_.Name, $_.Value }) -join [Environment]::NewLine', {
+export const POLICY_EXPORT_COMMANDS = makePsCommandVariants('($p.PSObject.Properties | Where-Object Name -notmatch \'^PS|_(ProviderSet|WinningProvider|LastWrite)$\' | ForEach-Object { "{0} = {1}" -f $_.Name, $_.Value }) -join [Environment]::NewLine', {
   setup: "$p = Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\Update' -ErrorAction Stop; ",
 });
 
