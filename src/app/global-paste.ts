@@ -8,12 +8,12 @@
  * Wire once per mount, right alongside the field's own "input" listener, and
  * call the returned unwire function in the cleanup callback.
  */
-export function wireGlobalPaste(target: HTMLTextAreaElement | HTMLInputElement): () => void {
+export function wireGlobalPaste(target: HTMLElement): () => void {
   const onPaste = (e: ClipboardEvent) => {
     const active = e.target as HTMLElement | null;
     const isOtherEditable =
       active &&
-      active !== target &&
+      !target.contains(active) &&
       (active.tagName === "TEXTAREA" || active.tagName === "INPUT" || active.isContentEditable);
     if (isOtherEditable) return;
 
@@ -21,7 +21,8 @@ export function wireGlobalPaste(target: HTMLTextAreaElement | HTMLInputElement):
     if (!text) return;
 
     e.preventDefault();
-    target.value = text;
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) target.value = text;
+    else target.innerText = text;
     // Setting .value programmatically doesn't fire a native "input" event, which both the
     // tool's own listener and the generic sessionStorage persistence (layout.ts) rely on.
     target.dispatchEvent(new Event("input", { bubbles: true }));

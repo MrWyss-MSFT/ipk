@@ -1,12 +1,15 @@
 import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
+import { psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
+import { wireGlobalPaste } from "@/app/global-paste";
 import { configuredPolicies, DEFAULTS, DEVICE_APPLIED_DEFAULTS, GROUPS, LOCAL_ACTIVE_HOURS_HELP, WEEKDAYS, type CloudKind, type Field, type Settings } from "./settings";
 import { autoReleases, KIND_LABEL, scenarioReleases, simulate, type Release, type UpdateKind } from "./simulate";
 import { BROWSER_TZ, fmtDate, lastDayOfMonth, parseDate, patchTuesday } from "./calendar";
 import { setTimelineZoom, renderTimeline, wireTimelineInteractions, type EventGroup } from "./timeline";
 import { ASSUMPTIONS, ASSUMPTION_BASES, ASSUMPTION_GROUPS, assumptionHtml, assumptionLink, cspLink } from "./assumptions";
 import { DEFAULT_SCHEDULE, parseSchedule, wireScheduleEditor } from "./schedule-editor";
+import { parsePolicyImport, POLICY_EXPORT_COMMANDS, ENROLLMENT_POLICIES, NON_SIMULATED_POLICIES } from "./policy-import";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const timeValue = (hour: number) => `${String(Math.floor(hour)).padStart(2, "0")}:${String(Math.round(hour % 1 * 60)).padStart(2, "0")}`;
@@ -139,6 +142,7 @@ const QUALITY_POLICY_HTML = `
         <div><h3>Cloud approval policy</h3><p>Control when each update type becomes available.</p></div>
         <label class="wus-check"><input type="checkbox" id="wus-cloudEnabled"> Enable policy</label>
       </div>
+      <div id="wus-reported-enrollment" hidden></div>
       <p class="wus-cloud-note" id="wus-cloud-note"></p>
       <h3>Release approvals</h3>
       <div class="wus-cloud-list">
@@ -355,12 +359,23 @@ const tool: ToolDefinition = {
           </div>
         </details>
         <section class="wus-section" id="wus-configured-policies">
+          <textarea id="wus-reported-policies" hidden aria-label="Imported informational policies"></textarea>
+          <details class="wus-group wus-policy-import"><summary class="wus-summary">Import policies</summary>
+            <p class="ipk-hint">Paste a copied CSP list or the command output into Configured policies below. PowerShell Format-List and JSON are also accepted. Valid edits apply automatically. Warnings require confirmation; errors leave the last valid configuration unchanged. Missing policies reset to simulator defaults. Releases, device/user inputs and cloud settings stay unchanged.</p>
+            <p class="wus-import-step">Get the Update registry values <span class="ipk-step-note">(copies to clipboard)</span></p>
+            ${psCommandTabsHtml("wus-policy-export")}
+            <p class="wus-help">Reads the current device Update key from PolicyManager; it does not change the device. Copies and displays one PolicyName = value per line, matching Configured policies. Registry exports may contain policies this simulator cannot represent.</p>
+          </details>
           <h3>Configured policies</h3>
-            <p class="wus-help">Simulated values, not a device export. Dimmed policies are device defaults; others are absent unless configured. Enabled cloud approvals and deferrals override client deferral.</p>
+            <p class="wus-help" id="wus-policy-editor-help">Edit here or paste anywhere on the page to apply policies automatically. Invalid edits leave the last valid configuration unchanged. Dimmed policies are device defaults. Enabled cloud approvals and deferrals override client deferral.</p>
             <div class="ipk-copy-wrap">
-              <div class="wus-policy-values" id="wus-policy-values"></div>
+              <div class="wus-policy-values" id="wus-policy-values" contenteditable="plaintext-only" role="textbox" aria-label="Configured policies" aria-multiline="true" aria-describedby="wus-policy-editor-help" spellcheck="false"></div>
               ${copyButtonHtml("wus-copy-policies", "Copy configured policies")}
             </div>
+            <div id="wus-policy-enrollment" hidden></div>
+            <div id="wus-not-simulated-policies" class="wus-help"></div>
+            <div id="wus-policy-editor-status" aria-live="polite"></div>
+            <button type="button" class="wus-btn" id="wus-policy-accept" hidden>Accept warnings and apply active policies</button>
         </section>
       </div>`;
 
@@ -438,9 +453,7 @@ const tool: ToolDefinition = {
       });
     };
     wireCopyButton(container.querySelector<HTMLButtonElement>("#wus-copy-policies")!, () =>
-      Array.from(container.querySelectorAll<HTMLElement>("#wus-policy-values .wus-policy-value-row"), (row) =>
-        `${row.querySelector(".wus-policy-value-name")!.textContent} ${row.querySelector(".wus-policy-value")!.textContent}`,
-      ).join("\n"),
+      container.querySelector<HTMLElement>("#wus-policy-values")!.innerText,
     );
 
     const syncVisibility = () => {
@@ -636,9 +649,26 @@ const tool: ToolDefinition = {
         }
       };
       syncCspValues();
-      container.querySelector<HTMLElement>("#wus-policy-values")!.innerHTML = configuredPolicies(settings)
+      const reported = parsePolicyImport(container.querySelector<HTMLTextAreaElement>("#wus-reported-policies")!.value).reported;
+      const enrollment = container.querySelector<HTMLElement>("#wus-reported-enrollment")!;
+      const enrollmentRows = reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name));
+      enrollment.hidden = !enrollmentRows.length;
+      enrollment.innerHTML = `<strong>Reported cloud policy enrollment</strong><div class="wus-enrollment-list">${enrollmentRows.map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}" title="${esc(`${name} = ${value}. Reported by PolicyManager; does not change the simulation.`)}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div>`;
+      const policyEnrollment = container.querySelector<HTMLElement>("#wus-policy-enrollment")!;
+      policyEnrollment.hidden = enrollment.hidden;
+      policyEnrollment.innerHTML = enrollment.innerHTML;
+      const notSimulated = reported.filter(([name]) => !Object.hasOwn(ENROLLMENT_POLICIES, name));
+      container.querySelector<HTMLElement>("#wus-not-simulated-policies")!.innerHTML = notSimulated.length
+        ? `${notSimulated.map(([name, value]) => `<div>${esc(name)} = ${esc(value)} · Not simulated</div>`).join("")}<a href="${esc(__APP_REPO_URL__ ? `${__APP_REPO_URL__}/issues/new?template=feature_request.yml` : "#/tool/about")}" target="_blank" rel="noopener noreferrer">Contribute or request support for these policies</a>`
+        : "";
+      const reportedNames = new Set(reported.map(([name]) => name));
+      if (!editingPolicies) container.querySelector<HTMLElement>("#wus-policy-values")!.innerHTML = [...configuredPolicies(settings).filter(([name]) => !reportedNames.has(name)), ...reported]
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))
-        .map(([name, value]) => `<div class="wus-policy-value-row"><span class="wus-policy-value-name${DEVICE_APPLIED_DEFAULTS.has(name) ? " wus-csp-device-default" : ""}"${DEVICE_APPLIED_DEFAULTS.has(name) ? ` title="Device-applied default: ${DEVICE_APPLIED_DEFAULTS.get(name)} on the device even when not configured"` : ""}>${esc(name)} =</span><span class="wus-policy-value mono">${esc(value)}</span></div>`)
+        .map(([name, value]) => {
+          const deviceDefault = DEVICE_APPLIED_DEFAULTS.has(name) && value === String(DEVICE_APPLIED_DEFAULTS.get(name));
+          const note = Object.hasOwn(NON_SIMULATED_POLICIES, name) ? "Not simulated." : Object.hasOwn(ENROLLMENT_POLICIES, name) ? "Reported cloud policy enrollment; does not change the simulation." : "";
+          return `<div class="wus-policy-value-row"><span class="wus-policy-value-name${deviceDefault ? " wus-csp-device-default" : ""}" title="${esc(`${note}${deviceDefault ? ` Device-applied default: ${value} even when not configured.` : ""}`)}">${esc(name)} =</span> <span class="wus-policy-value mono">${esc(value)}</span></div>`;
+        })
         .join("");
       const localInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-local-active-hours input")];
       const invalidLocalHours = settings.installMode === "auto" && (
@@ -675,7 +705,23 @@ const tool: ToolDefinition = {
       resultEl.querySelector<HTMLElement>(".wus-timeline-viewport")!.scrollLeft = monthChanged ? 0 : oldScroll;
     };
 
+    let applyingPolicies = false;
+    let editingPolicies = false;
+    let policyEditTimer: ReturnType<typeof setTimeout> | undefined;
     const onInput = (e: Event) => {
+      if (applyingPolicies) return;
+      if (e.target instanceof Element && e.target.closest("#wus-policy-values")) {
+        editingPolicies = true;
+        clearTimeout(policyEditTimer);
+        container.querySelector<HTMLButtonElement>("#wus-policy-accept")!.hidden = true;
+        policyEditTimer = setTimeout(() => applyPolicyEdits(false), 500);
+        return;
+      }
+      clearTimeout(policyEditTimer);
+      editingPolicies = false;
+      container.querySelector<HTMLElement>("#wus-policy-values")!.setAttribute("aria-invalid", "false");
+      container.querySelector<HTMLElement>("#wus-policy-editor-status")!.textContent = "";
+      container.querySelector<HTMLButtonElement>("#wus-policy-accept")!.hidden = true;
       if (e.target instanceof Element && e.target.closest(".wus-assumption-filters")) {
         updateAssumptions();
         return;
@@ -720,8 +766,62 @@ const tool: ToolDefinition = {
       else input.stepDown();
       if (input.value !== previous) input.dispatchEvent(new Event("input", { bubbles: true }));
     };
+    const cleanupPolicyExport = wirePsCommandTabs(container, "wus-policy-export", POLICY_EXPORT_COMMANDS);
+    const cleanupPolicyPaste = wireGlobalPaste(container.querySelector<HTMLElement>("#wus-policy-values")!);
+    const applyPolicyEdits = (acceptWarnings: boolean) => {
+        const editor = container.querySelector<HTMLElement>("#wus-policy-values")!;
+        const preview = container.querySelector<HTMLElement>("#wus-policy-editor-status")!;
+        const accept = container.querySelector<HTMLButtonElement>("#wus-policy-accept")!;
+        const text = editor.innerText;
+        const parsed = parsePolicyImport(text);
+        editor.setAttribute("aria-invalid", String(parsed.errors.length > 0));
+        preview.innerHTML = [
+          ...parsed.errors.map((message) => `<p class="wus-error" role="alert">${esc(message)}</p>`),
+          ...(parsed.warnings.length ? [`<div class="wus-import-warnings"><strong>Warnings — confirmation required</strong><ul>${parsed.warnings.map((message) => `<li>${esc(message)}</li>`).join("")}</ul></div>`] : []),
+          ...(parsed.reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)) ? [
+            `<div><strong>Reported cloud policy enrollment</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Informational only. After applying, these also appear beneath Enable policy in Cloud approval policy.</p></div>`,
+          ] : []),
+        ].join("");
+        accept.hidden = parsed.errors.length > 0 || !parsed.warnings.length;
+        if (parsed.errors.length || (parsed.warnings.length && !acceptWarnings)) {
+          preview.insertAdjacentHTML("beforeend", "<p class=\"wus-help\">Not applied. The last valid configuration is unchanged.</p>");
+          return;
+        }
+        const changes: { element: HTMLInputElement | HTMLSelectElement; value: string | boolean }[] = [];
+        for (const [id, value] of Object.entries(parsed.controls)) {
+          const element = id.startsWith("radio:")
+            ? container.querySelector<HTMLInputElement>(`input[name="wus-${id.slice(6)}"][value="${value}"]`)
+            : container.querySelector<HTMLInputElement | HTMLSelectElement>(`#${id}`);
+          if (!element) {
+            preview.textContent = `Import blocked: missing control ${id}. No changes applied.`;
+            return;
+          }
+          changes.push({ element, value: id.startsWith("radio:") ? true : value });
+        }
+        for (const { element, value } of changes) {
+          if (element instanceof HTMLInputElement && (element.type === "checkbox" || element.type === "radio")) element.checked = Boolean(value);
+          else element.value = String(value);
+        }
+        const reportedField = container.querySelector<HTMLTextAreaElement>("#wus-reported-policies")!;
+        reportedField.value = parsed.reported.map(([name, value]) => `${name} = ${value}`).join("\n");
+        applyingPolicies = true;
+        try {
+          reportedField.dispatchEvent(new Event("input", { bubbles: true }));
+          for (const { element } of changes) element.dispatchEvent(new Event("change", { bubbles: true }));
+        } finally {
+          applyingPolicies = false;
+        }
+        run();
+        preview.textContent = "Policies applied. Releases, device/user inputs and cloud settings were preserved.";
+        accept.hidden = true;
+    };
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement;
+      if (t.closest("#wus-policy-accept")) {
+        clearTimeout(policyEditTimer);
+        applyPolicyEdits(true);
+        return;
+      }
       const sortButton = t.closest<HTMLButtonElement>("[data-assumption-sort]");
       if (sortButton) {
         const key = sortButton.dataset.assumptionSort!;
@@ -829,6 +929,9 @@ const tool: ToolDefinition = {
     const cleanupTimeline = wireTimelineInteractions(container);
 
     return () => {
+      cleanupPolicyPaste();
+      clearTimeout(policyEditTimer);
+      cleanupPolicyExport();
       scheduleEditor.cleanup();
       cleanupTimeline();
       container.removeEventListener("input", onInput);
