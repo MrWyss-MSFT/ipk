@@ -653,7 +653,7 @@ const tool: ToolDefinition = {
       const enrollment = container.querySelector<HTMLElement>("#wus-reported-enrollment")!;
       const enrollmentRows = reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name));
       enrollment.hidden = !enrollmentRows.length;
-      enrollment.innerHTML = `<strong>Reported cloud policy enrollment</strong><div class="wus-enrollment-list">${enrollmentRows.map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}" title="${esc(`${name} = ${value}. Reported by PolicyManager; does not change the simulation.`)}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div>`;
+      enrollment.innerHTML = `<strong>Cloud policy enrollment status</strong><div class="wus-enrollment-list">${enrollmentRows.map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}" title="${esc(`${name} = ${value}. Reported by PolicyManager; does not change the simulation.`)}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div>`;
       const policyEnrollment = container.querySelector<HTMLElement>("#wus-policy-enrollment")!;
       policyEnrollment.hidden = enrollment.hidden;
       policyEnrollment.innerHTML = enrollment.innerHTML;
@@ -666,7 +666,7 @@ const tool: ToolDefinition = {
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))
         .map(([name, value]) => {
           const deviceDefault = DEVICE_APPLIED_DEFAULTS.has(name) && value === String(DEVICE_APPLIED_DEFAULTS.get(name));
-          const note = Object.hasOwn(NON_SIMULATED_POLICIES, name) ? "Not simulated." : Object.hasOwn(ENROLLMENT_POLICIES, name) ? "Reported cloud policy enrollment; does not change the simulation." : "";
+          const note = Object.hasOwn(NON_SIMULATED_POLICIES, name) ? "Not simulated." : Object.hasOwn(ENROLLMENT_POLICIES, name) ? "Cloud policy enrollment status; does not change the simulation." : "";
           return `<div class="wus-policy-value-row"><span class="wus-policy-value-name${deviceDefault ? " wus-csp-device-default" : ""}" title="${esc(`${note}${deviceDefault ? ` Device-applied default: ${value} even when not configured.` : ""}`)}">${esc(name)} =</span> <span class="wus-policy-value mono">${esc(value)}</span></div>`;
         })
         .join("");
@@ -779,7 +779,7 @@ const tool: ToolDefinition = {
           ...parsed.errors.map((message) => `<p class="wus-error" role="alert">${esc(message)}</p>`),
           ...(parsed.warnings.length ? [`<div class="wus-import-warnings"><strong>Warnings — confirmation required</strong><ul>${parsed.warnings.map((message) => `<li>${esc(message)}</li>`).join("")}</ul></div>`] : []),
           ...(parsed.reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)) ? [
-            `<div><strong>Reported cloud policy enrollment</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Informational only. After applying, these also appear beneath Enable policy in Cloud approval policy.</p></div>`,
+            `<div><strong>Cloud policy enrollment status</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Informational only. After applying, these also appear beneath Enable policy in Cloud approval policy.</p></div>`,
           ] : []),
         ].join("");
         accept.hidden = parsed.errors.length > 0 || !parsed.warnings.length;
