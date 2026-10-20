@@ -90,6 +90,14 @@ export function autoReleases(startMs: number): Release[] {
   return out;
 }
 
+export function scenarioReleases(s: Settings, startMs: number, releases: Release[]): Release[] {
+  if (!s.mwEnabled || s.mwRepeat !== 1) return releases;
+  const date = new Date(startMs);
+  const monthStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1);
+  const monthEnd = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
+  return releases.filter((release) => release.date >= monthStart && release.date < monthEnd);
+}
+
 export function maintenanceWindows(s: Settings, from: number, to: number): TimeWindow[] {
   if (!s.mwEnabled) return [];
   const m = /^(\d{1,2}):(\d{2})$/.exec(s.mwStart);
@@ -135,10 +143,13 @@ export function schedSlot(s: Settings, t: number, wd: number | null): number {
   return cur;
 }
 
-function nextWindowSlot(windows: TimeWindow[], t: number, tailGuard: number): number | null {
+function nextWindowSlot(s: Settings, windows: TimeWindow[], t: number, tailGuard: number, latest: number | null = null): number | null {
   for (const w of windows) {
-    const cand = Math.max(t, w.start);
-    if (cand < w.end - tailGuard) return cand;
+    const start = Math.max(t, w.start);
+    const end = Math.min(w.end - tailGuard, latest ?? Infinity);
+    if (end <= start) continue;
+    const online = onlineWindows(s, start, end)[0];
+    if (online) return online.start;
   }
   return null;
 }
@@ -147,12 +158,16 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
   if (s.autoUpdate === 6) s = { ...s, autoUpdate: 2 };
   const date = new Date(startMs);
   const monthEnd = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
-  const windows = maintenanceWindows(s, startMs, monthEnd + 90 * DAY);
+  const includedReleases = scenarioReleases(s, startMs, releases)
+    .filter((r) => r.date < monthEnd)
+    .sort((a, b) => a.date - b.date);
+  const historyStart = includedReleases.reduce((earliest, release) => Math.min(earliest, release.date), startMs);
+  const windows = maintenanceWindows(s, historyStart, monthEnd + 90 * DAY);
   const all: SimEvent[] = [];
   const formatHour = (hour: number) => `${String(Math.floor(hour)).padStart(2, "0")}:${String(Math.round(hour % 1 * 60)).padStart(2, "0")}`;
   const activeHours = s.activeStart === s.activeEnd ? "none" : `${formatHour(s.activeStart)}-${formatHour(s.activeEnd)}`;
 
-  for (const r of releases.filter((r) => r.date < monthEnd).sort((a, b) => a.date - b.date)) {
+  for (const r of includedReleases) {
     const downloadMin = r.downloadMin ?? s.downloadMin;
     const installMin = r.installMin ?? s.installMin;
     const add = (lane: Lane, at: number, text: string, tone: Tone, assumptions: AssumptionId[] = [], from?: number, until?: number) =>
@@ -232,7 +247,6 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     if (!s.onlineAlways) offerAss.push("onlineHours");
     add("update", offer, cp && !cp.auto ? "Discovered / offered (manually approved)" : "Discovered / offered", "info", [...offerAss, "discoveryImmediate"]);
 
-    const ready = offer + downloadMin * MIN;
     const ass: AssumptionId[] = ["discoveryImmediate", "installDuration"];
     const mwOn = s.mwEnabled;
     const deadlineAt = s.deadlineEnabled ? offer + s.deadlineDays * DAY : null;
@@ -241,14 +255,29 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     if (deadlineAt !== null) ass.push("deadlineClock", "deadlineImmediate");
     if (deadlineAt !== null && s.deadlineDays === 0) ass.push("deadlineZero");
 
+    let downloadStart: number | null = offer;
+    if (mwOn && s.mwActions === 1) {
+      downloadStart = nextWindowSlot(s, windows, offer, 0);
+      if (deadlineAt !== null && (downloadStart === null || downloadStart > deadlineAt))
+        downloadStart = toOnline(s, deadlineAt);
+      if (downloadStart === null) {
+        add("update", offer, "Download pending: no online maintenance-window opportunity in the modeled horizon; user can act manually", "warn", ["mwWindow", "onlineHours"]);
+        continue;
+      }
+    }
+    const ready = downloadStart + downloadMin * MIN;
+    const addDownloaded = () => add("update", ready, mwOn && s.mwActions === 2 ? "Downloaded (install waits for the maintenance window)" : "Downloaded", "info",
+      ["installDuration", ...(mwOn && s.mwActions === 1 ? ["mwWindow" as const] : [])], downloadStart);
+
     // ---- installation
     let inst: number | null;
     let forcedInstall = false;
     const schedWd = s.schedDay === 0 ? null : s.schedDay - 1;
 
     if (mwOn && s.mwActions <= 2) {
+      addDownloaded();
       ass.push("mwWindow");
-      inst = nextWindowSlot(windows, ready, 0);
+      inst = nextWindowSlot(s, windows, ready, 0);
     } else if (deadlineAt !== null) {
       ass.push("autoUpdateVsDeadline");
       if (s.autoUpdate === 3) {
@@ -268,21 +297,25 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
       inst = nextSlot(ready, 3, null);
     }
 
+    if (inst !== null) inst = toOnline(s, inst);
     if (deadlineAt !== null && (inst === null || inst > deadlineAt)) {
-      if (inst !== null && mwOn) ass.push("mwWindow");
-      inst = Math.max(deadlineAt, ready);
+      if (mwOn && !ass.includes("mwWindow")) ass.push("mwWindow");
+      inst = toOnline(s, Math.max(deadlineAt, ready));
       forcedInstall = true;
     }
 
-    if (inst !== null) inst = toOnline(s, inst);
     if (inst === null) {
+      if (mwOn && s.mwActions <= 2) {
+        add("update", ready, "Installation pending: no online maintenance-window opportunity in the modeled horizon; user can act manually", "warn", ass);
+        continue;
+      }
       add("update", offer, `Waiting for the user (AllowAutoUpdate = ${s.autoUpdate}); nothing installs automatically`, "warn", ass);
       if (s.autoUpdate === 0 && s.notifLevel === 0)
         add("notify", offer, "Notification: updates are available to download", "info", ["noReminders"]);
       continue;
     }
 
-    add("update", ready, mwOn && s.mwActions === 2 ? "Downloaded (install waits for the maintenance window)" : "Downloaded", "info", ["installDuration"], toOnline(s, offer));
+    addDownloaded();
     const instDone = inst + installMin * MIN;
     const scheduledHotpatch = hotpatchOn && r.kind === "cu" && !HOTPATCH_BASELINE_MONTHS.has(new Date(r.date).getUTCMonth());
     const hasRestartOverride = r.restartOverride !== undefined;
@@ -301,7 +334,7 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
     const pending = instDone;
     const grace = s.deadlineEnabled ? s.graceDays * DAY : 0;
     const effDeadline = deadlineAt !== null ? Math.max(deadlineAt, pending + grace) : null;
-    const rAss: AssumptionId[] = s.autoUpdate === 3 && !mwOn ? ["mode3Countdown"] : ["activeHours"];
+    const rAss: AssumptionId[] = mwOn ? ["mwWindow"] : s.autoUpdate === 3 ? ["mode3Countdown"] : ["activeHours"];
     if (hasRestartOverride) rAss.push("restartOverride");
     if (!s.onlineAlways) rAss.push("onlineHours");
     let earliest = pending + 15 * MIN;
@@ -315,10 +348,9 @@ export function simulate(s: Settings, startMs: number, releases: Release[]): Sim
 
     let cand: number | null = null;
     if (windowRestart) {
-      rAss.push("mwWindow");
       if (userOptIn) earliest = Math.max(earliest, pending + 24 * HOUR);
       if (!blockEarlyRestart)
-        cand = nextRestartOpportunity(s, earliest, effDeadline, windows.map((w) => ({ start: w.start, end: w.end - 30 * MIN })));
+        cand = nextWindowSlot(s, windows, earliest, 30 * MIN, effDeadline);
     } else if (s.autoUpdate === 3 && !blockEarlyRestart) {
       const online = toOnline(s, earliest);
       cand = effDeadline === null || online < effDeadline ? online : null;

@@ -190,7 +190,7 @@ export const ASSUMPTIONS = {
     id: "A023", confidence: 2,
     basis: "Modeling approximation",
     rationale: "Online availability is necessary, but exact return-online behavior and continuous durations are simplified.",
-    text: "The weekly online schedule is when the device is powered on and connected. Each day can have multiple periods; overlapping and adjoining periods are combined. Discovery and offering wait until the device is online, after approval, deferral and any modeled pause. Before the effective deadline, an automatic restart needs an online period outside active hours (and inside the maintenance window, if used). If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts shift online but their durations run continuously. Other notification times and maintenance windows are not adjusted. Overnight periods belong to the day they start; matching start and end times mean 24 hours from that start time. Dragging snaps to half hours; exact fields accept minutes. This is a simulation input, not a Windows setting.",
+    text: "The weekly online schedule is when the device is powered on and connected. Each day can have multiple periods; overlapping and adjoining periods are combined. Discovery and offering wait until the device is online, after approval, deferral and any modeled pause. Before the effective deadline, an automatic restart needs an online period outside active hours, unless maintenance windows govern the restart: then it needs an online maintenance-window opportunity instead, regardless of active hours. If none exists, it waits for the effective deadline, or stays pending if none is set. An offline device restarts at its first online opportunity at or after the effective deadline, ignoring active hours. A deadline warning is only shown if the device is online before that restart; a full 15-minute warning is not guaranteed on return from offline. Download and install starts require online availability and, for restricted actions, a maintenance window unless the deadline has expired. Their durations run continuously. Other notification times are not adjusted. Overnight periods belong to the day they start; matching start and end times mean 24 hours from that start time. Dragging snaps to half hours; exact fields accept minutes. This is a simulation input, not a Windows setting.",
     url: CSPA + "allowautoupdate",
   },
   restartPending: {
@@ -252,9 +252,9 @@ export const ASSUMPTIONS = {
   mwWindow: {
     id: "A032", confidence: 4,
     basis: "Documented behavior",
-    rationale: "Action restrictions, the final 30-minute restart exclusion and deadline precedence are described by the CSP.",
-    text: "Maintenance window: only the selected actions ({{MaintenanceWindowUpdateActions}}) are limited to the window, and a restart is not started in the last 30 minutes of a window. An expired deadline overrides the window. Docs recommend using either a maintenance window or deadlines, not both.",
-    url: CSPA + "maintenancewindowupdateactions",
+    rationale: "The compliance-deadline article documents action-start restrictions, window precedence and the 30-minute restart example. Some edge cases remain simplified.",
+    text: "Maintenance window: selected automatic actions ({{MaintenanceWindowUpdateActions}}) must start while the device is online inside the window; they may finish outside it. Window-controlled restarts take precedence over active hours and do not start in the last 30 minutes, following Microsoft's example. Expired deadlines override the window. Docs recommend using either maintenance windows or deadlines, not both. Simulator limitations: no undocumented download/install end-of-window buffer is invented; stale one-time windows and the 90-day configuration limit are not handled; non-default Insider repeat intervals are not applied; Microsoft product releases bypass windows. Manual user actions are not simulated. Whether normal notification opt-in and no-auto-reboot settings should delay maintenance-window restarts is not established here; the simulator retains those restrictions.",
+    url: DEADLINES + "#policies-for-maintenance-windows",
   },
   mwLast: {
     id: "A033", confidence: 3,
@@ -284,7 +284,21 @@ export const ASSUMPTIONS = {
     text: "A pause holds back offers until 35 days after the pause start date ({{PauseQualityUpdatesStartTime}}); the update is then offered immediately.",
     url: CSPA + "pausequalityupdatesstarttime",
   },
+  mwOneTimeScope: {
+    id: "A037", confidence: 1,
+    basis: "Simulator limitation",
+    rationale: "This is an intentional scenario scope rule, not documented Windows update behavior.",
+    text: "When maintenance windows are enabled with {{MaintenanceWindowRepeatScheduleOption}} = 1 (one time), the simulator includes only releases dated within the selected simulation month, excluding earlier backlog. Included releases may still have actions in later months. This is a simulator scope rule, not a restriction imposed by Windows; recurring windows retain earlier releases with unfinished work.",
+    url: DEADLINES + "#policies-for-maintenance-windows",
+  },
 } satisfies Record<string, Assumption>;
+
+export function assumptionLink(id: AssumptionId): string {
+  const a = ASSUMPTIONS[id];
+  const title = `${a.id} · Confidence ${a.confidence}/5\n${assumptionPlain(a.text)}\nRating: ${a.rationale}`
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return `<a class="wus-assume" href="#wus-assumption-${id}" title="${title}">${a.id}</a>`;
+}
 
 /** Assumption text uses {{SettingName}} markers for CSP setting names. */
 export function assumptionPlain(text: string): string {
@@ -316,5 +330,5 @@ export const ASSUMPTION_GROUPS = {
   "Active hours and restarts": ["activeHours", "mode3Countdown", "restartPending", "independentRestarts"],
   "Deadlines and grace periods": ["deadlineClock", "autoUpdateVsDeadline", "deadlineImmediate", "deadlineZero", "noAutoReboot", "deadlineForcedRestart"],
   "Notifications": ["notifyDefaultOff", "noReminders", "notifLevelMeaning", "noNotifActiveHours"],
-  "Maintenance windows": ["mwWindow", "mwLast"],
+  "Maintenance windows": ["mwWindow", "mwLast", "mwOneTimeScope"],
 } satisfies Record<string, AssumptionId[]>;

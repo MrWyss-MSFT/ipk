@@ -1,6 +1,6 @@
 import { DAY, HOUR, fmtDate, fmtDateTime, patchTuesday, releaseAt, timeZones } from "./calendar";
 import { schedSlot, type Release, type SimResult, type SimEvent } from "./simulate";
-import { ASSUMPTIONS, assumptionPlain } from "./assumptions";
+import { assumptionLink } from "./assumptions";
 import { onlineWindows } from "./availability";
 import { LOCAL_ACTIVE_HOURS_HELP, type Settings } from "./settings";
 
@@ -272,7 +272,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   }));
   const activeTotal = activePeriods.reduce((total, w) => total + w.end - w.start, 0);
   const activeBars = activePeriods.map((w) => {
-    const title = esc(`${modeName} while device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)} (${tz}). Automatic restarts are blocked during active hours before the effective deadline.`);
+    const title = esc(`${modeName} while device online: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)} (${tz}). ${settings.mwEnabled ? "Maintenance-window restarts take precedence over active hours." : "Automatic restarts are blocked during active hours before the effective deadline."}`);
     return `<span class="wus-timeline-availability wus-timeline-active-hours" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
   }).join("");
   const installTimes: number[] = [];
@@ -288,6 +288,16 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
   }).join("");
   labels += `<div class="wus-timeline-label wus-behavior-label" title="${esc(modeHelp)}"><strong><button type="button" class="wus-behavior-edit wus-behavior-name wus-behavior-${mode}" aria-label="${modeName}: edit local active hours and user behavior" aria-haspopup="dialog"><span class="wus-behavior-full" aria-hidden="true">${modeName}</span><span class="wus-behavior-short" aria-hidden="true">${mode.toUpperCase()}</span></button><em>${scheduledInstall ? `${installTimes.length} slots` : durationText(activeTotal)}</em></strong><small>User ${settings.userSignedIn ? "signed in" : "not signed in"} · Restart notification ${settings.userRestartNotify ? "On" : "Off"}</small></div>`;
   tracks += `<div class="wus-timeline-track">${scheduledInstall ? scheduleBars : activeBars}</div>`;
+  const maintenancePeriods = result.windows.flatMap((w) => {
+    const a = Math.max(start, w.start), b = Math.min(end, w.end);
+    return b > a ? [{ start: a, end: b }] : [];
+  });
+  const maintenanceBars = maintenancePeriods.map((w) => {
+    const title = esc(`Configured maintenance window: ${fmtDateTime(w.start)} to ${fmtDateTime(w.end)} (${tz}). Selected actions also require device availability. Restarts do not start in the final 30 minutes; expired deadlines override the window.`);
+    return `<span class="wus-timeline-availability wus-timeline-maintenance" role="img" aria-label="${title}" title="${title}" style="left:${pct(w.start)}%;width:${pct(w.end) - pct(w.start)}%"></span>`;
+  }).join("");
+  labels += `<div class="wus-timeline-label wus-behavior-label"><strong><a class="wus-config-link wus-behavior-ma" href="#wus-maintenance-config" aria-label="Maintenance windows" title="Maintenance windows"><span class="wus-behavior-full" aria-hidden="true">Maintenance windows</span><span class="wus-behavior-short" aria-hidden="true">MA</span></a><em>${settings.mwEnabled ? `${maintenancePeriods.length} windows` : "Off"}</em></strong><small>${settings.mwEnabled ? ["", "Download, install & restart", "Install & restart", "Restart only"][settings.mwActions] : "Click to configure"}</small></div>`;
+  tracks += `<div class="wus-timeline-track">${maintenanceBars}</div>`;
   const dateLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
   const shortDate = (at: number) => `${dateLabel.format(at)} · ${fmtDateTime(at).slice(11)}`;
   for (const release of releases) {
@@ -347,10 +357,7 @@ export function renderTimeline(start: number, result: SimResult, releases: Relea
     return b > a ? `<div class="wus-timeline-window" style="left:${pct(a)}%;width:${pct(b) - pct(a)}%" title="Maintenance window ${fmtDateTime(a)} – ${fmtDateTime(b)}"></div>` : "";
   }).join("");
   const rows = numbered.map(({ e, n }) => {
-    const notes = [...new Set(e.assumptions)].map((id) => {
-      const a = ASSUMPTIONS[id];
-      return `<a class="wus-assume" href="#wus-assumption-${id}" title="${esc(`${a.id} · Confidence ${a.confidence}/5\n${assumptionPlain(a.text)}\nRating: ${a.rationale}`)}">${a.id}</a>`;
-    }).join(" ");
+    const notes = [...new Set(e.assumptions)].map(assumptionLink).join(" ");
     return `<tr id="wus-row-${n}"><td>${n}</td><td class="wus-nowrap">${fmtDateTime(e.at)}</td><td>${e.lane === "update" ? "Update" : "Notification"}</td><td>${esc(e.label)}</td><td>${esc(e.text)}</td><td>${notes}</td></tr>`;
   }).join("");
   return `

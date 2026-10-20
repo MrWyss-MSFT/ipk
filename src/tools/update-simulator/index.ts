@@ -2,10 +2,10 @@ import "./style.css";
 import type { ToolDefinition } from "@/types/tool";
 import { copyButtonHtml, wireCopyButton } from "@/app/copy-button";
 import { configuredPolicies, DEFAULTS, DEVICE_APPLIED_DEFAULTS, GROUPS, LOCAL_ACTIVE_HOURS_HELP, WEEKDAYS, type CloudKind, type Field, type Settings } from "./settings";
-import { autoReleases, KIND_LABEL, simulate, type Release, type UpdateKind } from "./simulate";
+import { autoReleases, KIND_LABEL, scenarioReleases, simulate, type Release, type UpdateKind } from "./simulate";
 import { BROWSER_TZ, fmtDate, lastDayOfMonth, parseDate, patchTuesday } from "./calendar";
 import { setTimelineZoom, renderTimeline, wireTimelineInteractions, type EventGroup } from "./timeline";
-import { ASSUMPTIONS, ASSUMPTION_BASES, ASSUMPTION_GROUPS, assumptionHtml, cspLink } from "./assumptions";
+import { ASSUMPTIONS, ASSUMPTION_BASES, ASSUMPTION_GROUPS, assumptionHtml, assumptionLink, cspLink } from "./assumptions";
 import { DEFAULT_SCHEDULE, parseSchedule, wireScheduleEditor } from "./schedule-editor";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -26,7 +26,7 @@ function fieldHtml(f: Field): string {
   let control = "";
   switch (f.type) {
     case "bool":
-      control = `<label class="wus-check"><input type="checkbox" id="${id}" ${(f.key === "excludeDrivers" ? !def : def) ? "checked" : ""}> ${esc(f.label)}</label>`;
+      control = `<label class="wus-check"${f.key === "mwEnabled" ? ` title="${esc("Selected actions start only while the device is online during the maintenance window, but may finish later. Restarts are allowed during active hours, except in the window's final 30 minutes. Expired deadlines can force actions outside the window.")}"` : ""}><input type="checkbox" id="${id}" ${(f.key === "excludeDrivers" ? !def : def) ? "checked" : ""}> ${esc(f.label)}</label>`;
       if (!isExtraPolicy) return `<div class="wus-field">${control}${csp}</div>`;
       control = `<label class="wus-check"><input type="checkbox" id="${id}" ${def ? "checked" : ""} aria-label="${esc(f.label)}"> On</label>`;
       break;
@@ -41,6 +41,7 @@ function fieldHtml(f: Field): string {
       break;
     case "select":
       control = `<select id="${id}">${(f.options ?? []).map(([v, t]) => `<option value="${v}" ${v === def ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+      if (f.key === "mwRepeat") control = `<div class="wus-maintenance-repeat">${control}<span class="wus-maintenance-rule" data-mw-rule="once">${assumptionLink("mwOneTimeScope")}</span></div>`;
       break;
   }
   if (isExtraPolicy) {
@@ -268,10 +269,26 @@ const tool: ToolDefinition = {
             ).join("")}</div><span>${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => cspLink(`MaintenanceWindowWeekly${day}`)).join(" / ")}</span></div>`
           : "";
       const fields = g.fields.filter((f) => f.key !== "excludeDrivers" && f.key !== "allowMUUpdateService").map(fieldHtml).join("");
-      const body = g.id === "extra"
+      const maintenanceFields = (...keys: (keyof Settings)[]) => g.fields.filter((f) => keys.includes(f.key)).map(fieldHtml).join("");
+      const body = g.id === "maintenance"
+        ? `<section class="wus-panel wus-maintenance-panel" id="wus-maintenance-config" tabindex="-1">
+            <div class="wus-maintenance-enable">${maintenanceFields("mwEnabled")}</div>
+            <div class="wus-fields">${maintenanceFields("mwActions", "mwStart", "mwDuration", "mwRepeat")}</div>
+            <div class="wus-fields wus-maintenance-rule" data-mw-rule="once">${maintenanceFields("mwStartDate")}</div>
+            <div class="wus-maintenance-rule" data-mw-rule="weekly">${extra}</div>
+            <div class="wus-fields wus-maintenance-rule" data-mw-rule="monthly">${maintenanceFields("mwMonthlySchedule")}
+              <div class="wus-fields wus-maintenance-rule" data-mw-rule="month-day">${maintenanceFields("mwDayOfMonth")}</div>
+              <div class="wus-fields wus-maintenance-rule" data-mw-rule="month-week">${maintenanceFields("mwWeekOccurrence", "mwWeekDay")}</div>
+            </div>
+            <details class="wus-maintenance-insider"><summary>Windows Insider Preview · not simulated</summary>
+              <p class="wus-help">These Insider-only policies are not configured and are excluded from Configured policies and its copied output. Simulation uses an interval of 1.</p>
+              <div class="wus-fields">${maintenanceFields("mwDailyInterval", "mwWeeklyInterval", "mwMonthlyInterval")}</div>
+            </details>
+          </section>`
+        : g.id === "extra"
         ? `<div class="wus-panel"><p class="wus-help wus-extra-note">Documentation only; not simulated. Check Include to add a setting to Configured policies.</p><div class="ipk-table-scroll"><table class="wus-table wus-extra-table"><thead><tr><th scope="col">Include</th><th scope="col">Setting</th><th scope="col">Value</th></tr></thead><tbody>${fields}</tbody></table></div></div>`
         : `<div class="wus-fields wus-panel">${fields}${extra}</div>`;
-      return `<details class="wus-group"><summary class="wus-summary" id="wus-${g.id}-summary">${esc(g.title)}${g.id === "maintenance" ? ' <span class="ipk-badge wus-todo-chip">TODO</span>' : ""}</summary>${body}</details>`;
+      return `<details class="wus-group"><summary class="wus-summary" id="wus-${g.id}-summary">${esc(g.title)}</summary>${body}</details>`;
     }).join("");
 
     container.innerHTML = `
@@ -446,6 +463,13 @@ const tool: ToolDefinition = {
         input.disabled = localHoursOverridden;
       }
       container.querySelector<HTMLInputElement>("#wus-deferDays")!.disabled = m.cloudEnabled;
+      const maintenanceRules: Record<string, boolean> = {
+        once: m.mwRepeat === 1, weekly: m.mwRepeat === 3, monthly: m.mwRepeat === 4,
+        "month-day": m.mwMonthlySchedule === 1, "month-week": m.mwMonthlySchedule === 2,
+      };
+      for (const rule of container.querySelectorAll<HTMLElement>("[data-mw-rule]")) {
+        rule.hidden = !maintenanceRules[rule.dataset.mwRule!];
+      }
       container.querySelector<HTMLElement>("#wus-cloud-note")!.textContent = m.cloudEnabled
         ? "Cloud approvals and deferrals replace the client quality-update deferral."
         : "Policy is off. Values below are retained but do not affect the simulation.";
@@ -614,7 +638,7 @@ const tool: ToolDefinition = {
       syncCspValues();
       container.querySelector<HTMLElement>("#wus-policy-values")!.innerHTML = configuredPolicies(settings)
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))
-        .map(([name, value]) => `<div class="wus-policy-value-row"><span class="wus-policy-value-name${DEVICE_APPLIED_DEFAULTS.has(name) ? " wus-csp-device-default" : ""}"${DEVICE_APPLIED_DEFAULTS.has(name) ? ` title="Device-applied default: ${DEVICE_APPLIED_DEFAULTS.get(name)} on the device even when not configured"` : ""}>${esc(name)} =</span><span class="wus-policy-value mono">${esc(value)}</span>${/^MaintenanceWindow(Daily|Weekly|Monthly)Interval$/.test(name) ? '<span class="wus-help">Windows Insider Preview · non-default intervals not simulated</span>' : ""}</div>`)
+        .map(([name, value]) => `<div class="wus-policy-value-row"><span class="wus-policy-value-name${DEVICE_APPLIED_DEFAULTS.has(name) ? " wus-csp-device-default" : ""}"${DEVICE_APPLIED_DEFAULTS.has(name) ? ` title="Device-applied default: ${DEVICE_APPLIED_DEFAULTS.get(name)} on the device even when not configured"` : ""}>${esc(name)} =</span><span class="wus-policy-value mono">${esc(value)}</span></div>`)
         .join("");
       const localInputs = [...container.querySelectorAll<HTMLInputElement>("#wus-local-active-hours input")];
       const invalidLocalHours = settings.installMode === "auto" && (
@@ -633,7 +657,7 @@ const tool: ToolDefinition = {
       if (invalidLocalHours) {
         return;
       }
-      const calendarReleases = releases.filter((r) => {
+      const calendarReleases = scenarioReleases(settings, start, releases).filter((r) => {
         if (r.kind === "cu" && r.auto) return true;
         if (r.kind === "driver") return !settings.excludeDrivers;
         if (r.kind === "software") return true;

@@ -169,7 +169,7 @@ export const GROUPS: Group[] = [
   },
   {
     id: "maintenance",
-    title: "Maintenance window (24H2+ with KB5077181)",
+    title: "Maintenance window",
     fields: [
       { key: "mwEnabled", csp: "MaintenanceWindowEnabled", label: "Enable maintenance window", type: "bool" },
       {
@@ -189,9 +189,9 @@ export const GROUPS: Group[] = [
         options: [[1, "1 - One time"], [2, "2 - Daily"], [3, "3 - Weekly"], [4, "4 - Monthly"]],
       },
       { key: "mwStartDate", csp: "MaintenanceWindowStartDate", label: "Start date (one time)", type: "date" },
-      { key: "mwDailyInterval", csp: "MaintenanceWindowDailyInterval", label: "Daily interval (days, Insider Preview)", type: "number", min: 1, max: 90, help: "Windows Insider Preview only. Default: 1. Non-default intervals are listed below but not applied to the simulated timeline." },
-      { key: "mwWeeklyInterval", csp: "MaintenanceWindowWeeklyInterval", label: "Weekly interval (weeks, Insider Preview)", type: "number", min: 1, max: 12, help: "Windows Insider Preview only. Default: 1. Non-default intervals are listed below but not applied to the simulated timeline." },
-      { key: "mwMonthlyInterval", csp: "MaintenanceWindowMonthlyInterval", label: "Monthly interval (months, Insider Preview)", type: "number", min: 1, max: 3, help: "Windows Insider Preview only. Default: 1. Non-default intervals are listed below but not applied to the simulated timeline." },
+      { key: "mwDailyInterval", csp: "MaintenanceWindowDailyInterval", label: "Daily interval (days, Insider Preview)", type: "number", min: 1, max: 90, help: "Windows Insider Preview only. Not configured or simulated. Simulation uses an interval of 1." },
+      { key: "mwWeeklyInterval", csp: "MaintenanceWindowWeeklyInterval", label: "Weekly interval (weeks, Insider Preview)", type: "number", min: 1, max: 12, help: "Windows Insider Preview only. Not configured or simulated. Simulation uses an interval of 1." },
+      { key: "mwMonthlyInterval", csp: "MaintenanceWindowMonthlyInterval", label: "Monthly interval (months, Insider Preview)", type: "number", min: 1, max: 3, help: "Windows Insider Preview only. Not configured or simulated. Simulation uses an interval of 1." },
       {
         key: "mwMonthlySchedule",
         csp: "MaintenanceWindowMonthlySchedule",
@@ -283,13 +283,18 @@ export function configuredPolicies(s: Settings): [string, string][] {
   for (const g of GROUPS.filter((group) => group.id !== "user-behavior")) {
     if (g.id === "maintenance" && !s.mwEnabled) continue;
     for (const f of g.fields) {
+      if (f.key === "mwDailyInterval" || f.key === "mwWeeklyInterval" || f.key === "mwMonthlyInterval") continue;
+      if (f.key === "mwStartDate" && s.mwRepeat !== 1) continue;
+      if (f.key === "mwMonthlySchedule" && s.mwRepeat !== 4) continue;
+      if (f.key === "mwDayOfMonth" && (s.mwRepeat !== 4 || s.mwMonthlySchedule !== 1)) continue;
+      if ((f.key === "mwWeekOccurrence" || f.key === "mwWeekDay") && (s.mwRepeat !== 4 || s.mwMonthlySchedule !== 2)) continue;
       if (f.key === "optionalContent" && !s.optionalContentEnabled) continue;
       if (f.key === "noNotifActive" && !s.noNotifActiveEnabled) continue;
       const v = s[f.key];
       if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") add(f.csp, v);
     }
   }
-  if (s.mwEnabled) {
+  if (s.mwEnabled && s.mwRepeat === 3) {
     for (const [i, day] of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].entries()) {
       add(`MaintenanceWindowWeekly${day}`, s.mwWeekly[i]);
     }

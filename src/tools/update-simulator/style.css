@@ -4,6 +4,64 @@
   gap: var(--space-4);
 }
 
+.wus-maintenance-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wus-maintenance-enable {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.wus-maintenance-enable > p {
+  flex: 1 1 28ch;
+  margin: 0;
+}
+
+.wus-maintenance-rule[hidden] {
+  display: none;
+}
+
+.wus-maintenance-repeat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wus-maintenance-repeat select {
+  flex: 1;
+  min-width: 0;
+}
+
+.wus-maintenance-rule .wus-csp {
+  overflow-wrap: anywhere;
+}
+
+.wus-maintenance-insider {
+  padding: var(--space-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.wus-maintenance-insider > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.wus-timeline-availability.wus-timeline-maintenance {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border: 1px dashed var(--accent);
+}
+
 .wus-cloud-policy {
   display: flex;
   align-items: center;
@@ -1460,10 +1518,12 @@ button.wus-timeline-label:hover {
 }
 
 @container wus-behavior (min-width: 190px) {
-  .wus-behavior-lah .wus-behavior-full {
+  .wus-behavior-lah .wus-behavior-full,
+  .wus-behavior-ma .wus-behavior-full {
     display: inline;
   }
-  .wus-behavior-lah .wus-behavior-short {
+  .wus-behavior-lah .wus-behavior-short,
+  .wus-behavior-ma .wus-behavior-short {
     display: none;
   }
 }
