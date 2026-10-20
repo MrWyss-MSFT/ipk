@@ -114,11 +114,11 @@ const radio = (name: string, value: string, label: string, tip: string, checked:
   `<label class="wus-radio"><input type="radio" name="${name}" value="${value}" ${checked ? "checked" : ""}> ${esc(label)}${csp ? ` ${cspLink(csp.split(" =")[0], csp).replace('class="wus-csp"', `class="wus-csp" data-radio-csp="${name}-${value}"${tip && tip !== csp ? ` title="${esc(tip)}"` : ""}`)}`
     : tip ? ` ${tip.split(" / ").map((setting) => cspLink(setting)).join(" / ")}` : ""}</label>`;
 
-const CLOUD_ROWS: [CloudKind, string][] = [
-  ["cu", "Monthly B week updates"],
-  ["preview", "Monthly D week preview updates"],
-  ["oob", "Out-of-band security updates"],
-  ["oobns", "Out-of-band non-security updates"],
+const CLOUD_ROWS: [CloudKind, string, string][] = [
+  ["cu", "Monthly B-week", "Security cumulative"],
+  ["preview", "Monthly D-week previews", "Optional non-security"],
+  ["oob", "Out-of-band security", "Unscheduled security releases"],
+  ["oobns", "Out-of-band non-security", "Unscheduled non-security releases"],
 ];
 
 const RELEASE_ROWS: [UpdateKind, string][] = [
@@ -133,24 +133,26 @@ const RELEASE_ROWS: [UpdateKind, string][] = [
 const QUALITY_POLICY_HTML = `
   <details class="wus-group" id="wus-quality-policy">
     <summary class="wus-summary" id="wus-quality-policy-summary">Windows quality update policy</summary>
-    <div class="wus-section wus-panel">
-      <h3>Approval settings</h3>
-      <label class="wus-check"><input type="checkbox" id="wus-cloudEnabled"> Enable policy</label>
-      <div class="ipk-table-scroll">
-      <table class="wus-policy-table">
-        <thead><tr><th>Update type</th><th>Approval method</th><th>Make updates available after</th><th>Approve after release</th></tr></thead>
-        <tbody>${CLOUD_ROWS.map(
-          ([k, label]) => `<tr>
-          <th scope="row">${label}</th>
-          <td><select id="wus-cloud-${k}" aria-label="Approval method for ${label}"><option value="auto" ${k === "cu" ? "selected" : ""}>Automatically approve</option><option value="manual" ${k === "cu" ? "" : "selected"}>Manually review and approve</option></select></td>
-          <td><span id="wus-cloud-${k}-auto"><input type="number" id="wus-cloud-${k}-defer" min="0" max="30" value="0" aria-label="Deferral in days"> days</span><span id="wus-cloud-${k}-na">Not applicable</span></td>
-          <td><span id="wus-cloud-${k}-man"><input type="number" id="wus-cloud-${k}-approve" min="0" max="60" placeholder="Never" aria-label="Days after release until approval (empty = never approved)"> days</span><span id="wus-cloud-${k}-na2">Not applicable</span></td>
-        </tr>`,
-        ).join("")}</tbody>
-      </table>
+    <div class="wus-section wus-panel wus-quality-panel">
+      <div class="wus-cloud-policy">
+        <div><h3>Cloud approval policy</h3><p>Control when each update type becomes available.</p></div>
+        <label class="wus-check"><input type="checkbox" id="wus-cloudEnabled"> Enable policy</label>
       </div>
-      <h3>Automatic update deployment settings</h3>
-      <label class="wus-check"><input type="checkbox" id="wus-hotpatch"> For monthly B-week security updates, when available, apply without restarting the device ("hotpatch") ${cspLink("AllowRebootlessUpdates")}</label>
+      <p class="wus-cloud-note" id="wus-cloud-note"></p>
+      <h3>Release approvals</h3>
+      <div class="wus-cloud-list">
+        ${CLOUD_ROWS.map(([k, label, subtitle]) => `<div class="wus-cloud-row">
+          <div class="wus-cloud-title"><strong>${label}</strong><p>${subtitle}</p></div>
+          <div class="wus-field"><label for="wus-cloud-${k}">Approval method</label><select id="wus-cloud-${k}" aria-label="Approval method for ${label}"><option value="auto" ${k === "cu" ? "selected" : ""}>Automatically approve</option><option value="manual" ${k === "cu" ? "" : "selected"}>Manually review &amp; approve</option></select></div>
+          <div class="wus-field" id="wus-cloud-${k}-auto"><label for="wus-cloud-${k}-defer">Make available after</label><div class="wus-cloud-time"><input type="number" id="wus-cloud-${k}-defer" min="0" max="30" step="1" value="0" aria-label="${label} deferral in days"><span>days after release</span></div></div>
+          <div class="wus-field" id="wus-cloud-${k}-man"><label for="wus-cloud-${k}-approve">Simulate approval after</label><div class="wus-cloud-time"><input type="number" id="wus-cloud-${k}-approve" min="0" max="60" step="1" placeholder="Never" aria-label="${label} days after release until approval (empty = never approved)"><span>days after release</span></div></div>
+          <p class="wus-cloud-summary" id="wus-cloud-${k}-summary"></p>
+        </div>`).join("")}
+      </div>
+      <div class="wus-cloud-hotpatch">
+        <label class="wus-check"><input type="checkbox" id="wus-hotpatch"><span><strong>Apply eligible B-week updates without a restart</strong><span class="wus-cloud-hotpatch-note">Use hotpatch when available. Baseline updates still require a restart.</span></span></label>
+        ${cspLink("AllowRebootlessUpdates")}
+      </div>
     </div>
   </details>`;
 const DEPLOYMENT_RING_HTML = `
@@ -444,12 +446,18 @@ const tool: ToolDefinition = {
         input.disabled = localHoursOverridden;
       }
       container.querySelector<HTMLInputElement>("#wus-deferDays")!.disabled = m.cloudEnabled;
+      container.querySelector<HTMLElement>("#wus-cloud-note")!.textContent = m.cloudEnabled
+        ? "Cloud approvals and deferrals replace the client quality-update deferral."
+        : "Policy is off. Values below are retained but do not affect the simulation.";
       for (const [k] of CLOUD_ROWS) {
         const auto = m.cloud[k].auto;
         container.querySelector<HTMLElement>(`#wus-cloud-${k}-auto`)!.hidden = !auto;
-        container.querySelector<HTMLElement>(`#wus-cloud-${k}-na`)!.hidden = auto;
         container.querySelector<HTMLElement>(`#wus-cloud-${k}-man`)!.hidden = auto;
-        container.querySelector<HTMLElement>(`#wus-cloud-${k}-na2`)!.hidden = !auto;
+        const days = auto ? m.cloud[k].defer : m.cloud[k].approveAfter;
+        container.querySelector<HTMLElement>(`#wus-cloud-${k}-summary`)!.textContent = auto
+          ? `Automatically available ${days} ${days === 1 ? "day" : "days"} after release.`
+          : days === null ? "No approval simulated — leave blank to keep this release unapproved."
+          : `Manual approval simulated ${days} ${days === 1 ? "day" : "days"} after release.`;
       }
     };
 

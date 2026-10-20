@@ -4,6 +4,134 @@
   gap: var(--space-4);
 }
 
+.wus-cloud-policy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.wus-cloud-policy,
+.wus-cloud-hotpatch {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.wus-quality-panel h3,
+.wus-quality-panel p {
+  margin: 0;
+}
+
+.wus-quality-panel h3 {
+  font-size: 0.85rem;
+}
+
+.wus-cloud-policy p,
+.wus-cloud-title p,
+.wus-cloud-note,
+.wus-cloud-summary,
+.wus-cloud-hotpatch-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.wus-cloud-policy p,
+.wus-cloud-title p {
+  margin-top: var(--space-1);
+}
+
+.wus-cloud-list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.wus-cloud-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(145px, 0.9fr) minmax(155px, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  font-size: 0.8rem;
+}
+
+.wus-cloud-row + .wus-cloud-row {
+  border-top: 1px solid var(--border);
+}
+
+.wus-cloud-row .wus-field {
+  min-width: 0;
+}
+
+.wus-cloud-row .wus-field[hidden] {
+  display: none;
+}
+
+.wus-cloud-row .wus-field > label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.wus-cloud-row select {
+  width: 100%;
+  text-align: left;
+}
+
+.wus-cloud-time {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+}
+
+.wus-cloud-time input {
+  width: 8ch;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+}
+
+.wus-cloud-summary {
+  grid-column: 2 / -1;
+}
+
+.wus-cloud-hotpatch {
+  margin-top: var(--space-2);
+}
+
+.wus-cloud-hotpatch .wus-check {
+  align-items: flex-start;
+}
+
+.wus-cloud-hotpatch-note {
+  display: block;
+  margin-top: var(--space-1);
+}
+
+.wus-cloud-hotpatch > .wus-csp {
+  display: block;
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 900px) {
+  .wus-cloud-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .wus-cloud-title,
+  .wus-cloud-summary {
+    grid-column: 1 / -1;
+  }
+}
+
 .wus-schedule {
   width: min(960px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
