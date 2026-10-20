@@ -21,7 +21,7 @@ const timeHour = (value: string) => {
 function fieldHtml(f: Field): string {
   const id = `wus-${f.key}`;
   const def = DEFAULTS[f.key];
-  const isExtraPolicy = f.key === "optionalContent" || f.key === "noNotifActive";
+  const isExtraPolicy = GROUPS.find((g) => g.id === "extra")!.fields.some((field) => field.key === f.key);
   const csp = f.key === "userRestartNotify"
     ? '<a class="wus-csp" href="ms-settings:windowsupdate-options" title="Open Windows Update advanced options">ms-settings:windowsupdate-options</a>'
     : f.csp === "User setting" || f.csp === "Device"
@@ -87,6 +87,9 @@ function readSettings(root: HTMLElement): Settings {
   s.featureUninstallDays = Math.min(60, Math.max(2, Number(num("featureUninstallDays")) || DEFAULTS.featureUninstallDays));
   s.optionalContentEnabled = root.querySelector<HTMLInputElement>("#wus-optionalContentEnabled")!.checked;
   s.noNotifActiveEnabled = root.querySelector<HTMLInputElement>("#wus-noNotifActiveEnabled")!.checked;
+  s.featureDeadlineEnabled = root.querySelector<HTMLInputElement>("#wus-featureDeadlineEnabled")!.checked;
+  s.featureDeferralEnabled = root.querySelector<HTMLInputElement>("#wus-featureDeferralEnabled")!.checked;
+  s.disablePauseUXEnabled = root.querySelector<HTMLInputElement>("#wus-disablePauseUXEnabled")!.checked;
   s.autoUpdate = s.installMode === "auto" && s.resetToDefault ? 6
     : s.installMode === "scheduled" && s.schedSub === "scheduled" ? 3 : 2;
   s.activeStart = timeHour(num("localStart") || timeValue(DEFAULTS.activeStart));
@@ -658,9 +661,14 @@ const tool: ToolDefinition = {
       policyEnrollment.hidden = enrollment.hidden;
       policyEnrollment.innerHTML = enrollment.innerHTML;
       const notSimulated = reported.filter(([name]) => !Object.hasOwn(ENROLLMENT_POLICIES, name));
+      const extraNames = new Set(GROUPS.find((g) => g.id === "extra")!.fields.map((f) => f.csp));
+      const extraPolicies = configuredPolicies(settings).filter(([name]) => extraNames.has(name)
+        && (name !== "SetDisablePauseUXAccess" || settings.disablePauseUXEnabled));
       container.querySelector<HTMLElement>("#wus-not-simulated-policies")!.innerHTML = notSimulated.length
         ? `${notSimulated.map(([name, value]) => `<div>${esc(name)} = ${esc(value)} · Not simulated</div>`).join("")}<a href="${esc(__APP_REPO_URL__ ? `${__APP_REPO_URL__}/issues/new?template=feature_request.yml` : "#/tool/about")}" target="_blank" rel="noopener noreferrer">Contribute or request support for these policies</a>`
         : "";
+      container.querySelector<HTMLElement>("#wus-not-simulated-policies")!.insertAdjacentHTML("afterbegin",
+        extraPolicies.map(([name, value]) => `<div>${esc(name)} = ${esc(value)} · Not simulated · Included in Extra CSPs</div>`).join(""));
       const reportedNames = new Set(reported.map(([name]) => name));
       if (!editingPolicies) container.querySelector<HTMLElement>("#wus-policy-values")!.innerHTML = [...configuredPolicies(settings).filter(([name]) => !reportedNames.has(name)), ...reported]
         .filter(([name, value]) => value !== "Not configured" || DEVICE_APPLIED_DEFAULTS.has(name))

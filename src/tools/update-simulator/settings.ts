@@ -27,6 +27,12 @@ export interface Settings {  // Intune / Autopatch Windows quality update policy
   pauseStart: string;
   optionalContent: number;
   optionalContentEnabled: boolean;
+  featureDeadline: number;
+  featureDeadlineEnabled: boolean;
+  featureDeferral: number;
+  featureDeferralEnabled: boolean;
+  disablePauseUX: boolean;
+  disablePauseUXEnabled: boolean;
   excludeDrivers: boolean;
   allowMUUpdateService: boolean;
   // Automatic update behaviour
@@ -94,6 +100,12 @@ export const DEFAULTS: Settings = {
   pauseStart: "",
   optionalContent: 0,
   optionalContentEnabled: false,
+  featureDeadline: 2,
+  featureDeadlineEnabled: false,
+  featureDeferral: 0,
+  featureDeferralEnabled: false,
+  disablePauseUX: true,
+  disablePauseUXEnabled: false,
   excludeDrivers: false,
   allowMUUpdateService: true,
   autoUpdate: 6,
@@ -218,8 +230,11 @@ export const GROUPS: Group[] = [
   },
   {
     id: "extra",
-    title: "Extra CSPs",
+    title: "Extra CSPs (not simulated)",
     fields: [
+      { key: "featureDeadline", csp: "ConfigureDeadlineForFeatureUpdates", label: "Feature update deadline (days)", type: "number", min: 0, max: 30 },
+      { key: "featureDeferral", csp: "DeferFeatureUpdatesPeriodInDays", label: "Feature update deferral (days)", type: "number", min: 0, max: 365 },
+      { key: "disablePauseUX", csp: "SetDisablePauseUXAccess", label: "Disable access to pause updates", type: "bool" },
       { key: "noNotifActive", csp: "NoUpdateNotificationsDuringActiveHours", label: "Suppress update notifications during active hours", type: "bool" },
       {
         key: "optionalContent",
@@ -268,7 +283,7 @@ export function configuredPolicies(s: Settings): [string, string][] {
   add("AllowAutoUpdate", s.autoUpdate);
   add("SetEDURestart", s.eduRestart);
   add("ConfigureFeatureUpdateUninstallPeriod", s.featureUninstallDays);
-  add("SetDisablePauseUXAccess", DEVICE_APPLIED_DEFAULTS.get("SetDisablePauseUXAccess")!);
+  if (!s.disablePauseUXEnabled) add("SetDisablePauseUXAccess", DEVICE_APPLIED_DEFAULTS.get("SetDisablePauseUXAccess")!);
   add("PauseFeatureUpdates", DEVICE_APPLIED_DEFAULTS.get("PauseFeatureUpdates")!);
   const active = s.installMode === "scheduled" && s.schedSub === "active";
   add("ActiveHoursStart", active ? s.activeStart : "");
@@ -290,6 +305,9 @@ export function configuredPolicies(s: Settings): [string, string][] {
       if ((f.key === "mwWeekOccurrence" || f.key === "mwWeekDay") && (s.mwRepeat !== 4 || s.mwMonthlySchedule !== 2)) continue;
       if (f.key === "optionalContent" && !s.optionalContentEnabled) continue;
       if (f.key === "noNotifActive" && !s.noNotifActiveEnabled) continue;
+      if (f.key === "featureDeadline" && !s.featureDeadlineEnabled) continue;
+      if (f.key === "featureDeferral" && !s.featureDeferralEnabled) continue;
+      if (f.key === "disablePauseUX" && !s.disablePauseUXEnabled) continue;
       const v = s[f.key];
       if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") add(f.csp, v);
     }

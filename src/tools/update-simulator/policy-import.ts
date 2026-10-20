@@ -69,6 +69,7 @@ export function parsePolicyImport(text: string): PolicyImport {
     "wus-autoRebootBeforeDeadline": true, "wus-resetToDefault": true,
     "wus-eduRestart": false, "wus-featureUninstallDays": "30",
     "wus-optionalContentEnabled": false, "wus-noNotifActiveEnabled": false,
+    "wus-featureDeadlineEnabled": false, "wus-featureDeferralEnabled": false, "wus-disablePauseUXEnabled": false,
     "wus-activeStart": "8", "wus-activeEnd": "17",
     "wus-schedDay": "0", "wus-schedTime": "3", "wus-schedFreq": "0",
     "radio:installMode": "auto", "radio:schedSub": "active", "radio:notifLevel": "0",
@@ -112,7 +113,7 @@ export function parsePolicyImport(text: string): PolicyImport {
   };
   for (const [name, value] of values) {
     if (value === "Not configured") continue;
-    if (Object.hasOwn(ENROLLMENT_POLICIES, name) || Object.hasOwn(NON_SIMULATED_POLICIES, name)) {
+    if (Object.hasOwn(ENROLLMENT_POLICIES, name)) {
       const max = Object.hasOwn(ENROLLMENT_POLICIES, name) ? 1 : NON_SIMULATED_POLICIES[name];
       if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) > max) {
         result.errors.push(`${name}: expected a whole number from 0 to ${max}.`);
@@ -166,6 +167,8 @@ export function parsePolicyImport(text: string): PolicyImport {
     else controls[spec.id] = value;
     if (name === "AllowOptionalContent") controls["wus-optionalContentEnabled"] = true;
     if (name === "NoUpdateNotificationsDuringActiveHours") controls["wus-noNotifActiveEnabled"] = true;
+    const extra = GROUPS.find((g) => g.id === "extra")!.fields.find((f) => f.csp === name);
+    if (extra) controls[`wus-${extra.key}Enabled`] = true;
   }
   const active = values.has("ActiveHoursStart") || values.has("ActiveHoursEnd");
   if (active && values.get("AllowAutoUpdate") !== "3") {
