@@ -205,27 +205,6 @@
 
 .ima-app-guid {
   font-size: 0.62rem;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: color 0.15s ease, background-color 0.15s ease;
-}
-
-.ima-app-guid:hover {
-  color: var(--text);
-}
-
-.ima-app-guid.is-copied {
-  color: var(--success);
-  animation: ima-guid-copied 0.5s ease;
-}
-
-@keyframes ima-guid-copied {
-  0% {
-    background-color: color-mix(in srgb, var(--success) 25%, transparent);
-  }
-  100% {
-    background-color: transparent;
-  }
 }
 
 .ima-app-detail {
@@ -334,21 +313,31 @@
 }
 
 .ima-badge-added {
-  color: #fff;
-  background: var(--success);
-  border-color: transparent;
+  --ima-status-color: var(--success);
 }
 
 .ima-badge-removed {
-  color: #fff;
-  background: var(--danger);
-  border-color: transparent;
+  --ima-status-color: var(--danger);
 }
 
 .ima-badge-changed {
-  color: #fff;
-  background: var(--accent);
-  border-color: transparent;
+  --ima-status-color: var(--accent);
+}
+
+.ima-badge-added,
+.ima-badge-removed,
+.ima-badge-changed {
+  color: var(--ima-status-color);
+  background: color-mix(in srgb, var(--ima-status-color) 18%, var(--bg));
+  border-color: color-mix(in srgb, var(--ima-status-color) 50%, var(--border));
+}
+
+.ima-copy-error {
+  margin: 0;
+}
+
+.ima-copy-error:empty {
+  display: none;
 }
 
 @media (max-width: 640px) {

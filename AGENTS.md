@@ -75,7 +75,8 @@ per-tool styling:
 
 Tool-specific classes can remain alongside these for behavior hooks and
 local overrides. Keep specialized layouts, tooltip positioning, status
-semantics, and textarea resizing/auto-grow behavior local.
+semantics, and textarea auto-grow behavior local. Copy-wrapper textareas
+are vertically resizable and scrollable by default; don't duplicate that rule.
 
 ## Adding a Playbook (guide)
 
@@ -260,7 +261,7 @@ Versioning and the changelog are automated with
 
 ## Theming
 
-- Native radio buttons inherit the theme accent and keyboard-focus styling
+- Native radio buttons and checkboxes inherit the theme accent and keyboard-focus styling
   globally from `src/styles/base.css`; don't duplicate those rules per tool.
 - All colors are CSS custom properties in `src/styles/variables.css`
   (`--bg`, `--text`, `--accent`, `--success`, `--danger`, …), redefined under

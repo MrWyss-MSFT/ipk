@@ -522,11 +522,6 @@
   border-color: var(--accent);
 }
 
-.wus-tool input[type="radio"],
-.wus-tool input[type="checkbox"] {
-  accent-color: var(--accent);
-}
-
 .wus-field {
   display: flex;
   flex-direction: column;

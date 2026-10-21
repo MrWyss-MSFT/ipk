@@ -84,9 +84,7 @@
 }
 
 .uhe-chip[data-mode="include"] {
-  background: var(--success, #2e9e5b);
-  border-color: transparent;
-  color: #fff;
+  --uhe-status-color: var(--success);
 }
 
 .uhe-chip[data-mode="include"] .uhe-chip-mark::before {
@@ -94,9 +92,14 @@
 }
 
 .uhe-chip[data-mode="exclude"] {
-  background: var(--danger, #e05252);
-  border-color: transparent;
-  color: #fff;
+  --uhe-status-color: var(--danger);
+}
+
+.uhe-chip[data-mode="include"],
+.uhe-chip[data-mode="exclude"] {
+  color: var(--uhe-status-color);
+  background: color-mix(in srgb, var(--uhe-status-color) 18%, var(--bg));
+  border-color: color-mix(in srgb, var(--uhe-status-color) 50%, var(--border));
 }
 
 .uhe-chip[data-mode="exclude"] .uhe-chip-mark::before {

@@ -207,7 +207,7 @@ function appDiffHtml(diff: ImeAppDiff): string {
       <summary class="ima-app-summary">
         <span class="ima-badge ima-badge-${diff.status}">${STATUS_LABEL[diff.status]}</span>
         <span class="ima-app-name">${escapeHtml(diff.name)}</span>
-        <span class="ima-app-meta">${intentIcon(diff.app.intent)} ${escapeHtml(stripNumberSuffix(intentLabel(diff.app.intent)))} · ${targetTypeIcon(diff.app.targetType)} ${escapeHtml(stripNumberSuffix(targetTypeLabel(diff.app.targetType)))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""} · <span class="ima-app-guid mono" data-guid="${escapeHtml(diff.app.id)}" title="Click to copy">${escapeHtml(diff.app.id)}</span></span>
+        <span class="ima-app-meta">${intentIcon(diff.app.intent)} ${escapeHtml(stripNumberSuffix(intentLabel(diff.app.intent)))} · ${targetTypeIcon(diff.app.targetType)} ${escapeHtml(stripNumberSuffix(targetTypeLabel(diff.app.targetType)))}${diff.app.version !== null ? ` · v${diff.app.version}` : ""} · <button type="button" class="ima-app-guid ipk-copy-value mono" data-guid="${escapeHtml(diff.app.id)}" title="Click to copy" aria-label="Copy app ID">${escapeHtml(diff.app.id)}</button></span>
         ${espBadgeHtml(diff.app.raw)}
       </summary>
       <div class="ima-app-detail">
@@ -393,6 +393,7 @@ const tool: ToolDefinition = {
           </label>
         </div>
 
+        <p id="ima-copy-error" class="ima-copy-error ipk-error" role="alert"></p>
         <ol id="ima-timeline" class="ima-timeline"></ol>
       </div>
     `;
@@ -402,10 +403,12 @@ const tool: ToolDefinition = {
     const input = container.querySelector<HTMLTextAreaElement>("#ima-input")!;
     const statusEl = container.querySelector<HTMLDivElement>("#ima-status")!;
     const timelineEl = container.querySelector<HTMLOListElement>("#ima-timeline")!;
+    const copyErrorEl = container.querySelector<HTMLParagraphElement>("#ima-copy-error")!;
     const toggleWrap = container.querySelector<HTMLDivElement>("#ima-toggle-wrap")!;
     const hideGapsInput = container.querySelector<HTMLInputElement>("#ima-hide-gaps")!;
 
     const render = () => {
+      copyErrorEl.textContent = "";
       const raw = input.value.trim();
       if (!raw) {
         statusEl.textContent = "";
@@ -492,18 +495,23 @@ const tool: ToolDefinition = {
     const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_IME_JSON);
 
     const onTimelineClick = async (e: MouseEvent) => {
-      const guidEl = (e.target as HTMLElement).closest<HTMLElement>(".ima-app-guid");
+      if (!(e.target instanceof Element)) return;
+      const guidEl = e.target.closest<HTMLButtonElement>(".ima-app-guid");
       if (!guidEl) return;
       // Prevent the click from also toggling the parent <details> open/closed.
       e.preventDefault();
       e.stopPropagation();
       const value = guidEl.dataset.guid ?? guidEl.textContent ?? "";
       if (!value) return;
-      await navigator.clipboard.writeText(value);
-      guidEl.classList.remove("is-copied");
-      // Force reflow so retriggering the animation on repeated clicks restarts it.
-      void guidEl.offsetWidth;
-      guidEl.classList.add("is-copied");
+      try {
+        await navigator.clipboard.writeText(value);
+        copyErrorEl.textContent = "";
+        guidEl.classList.remove("is-copied");
+        void guidEl.offsetWidth;
+        guidEl.classList.add("is-copied");
+      } catch (error) {
+        copyErrorEl.textContent = error instanceof Error ? error.message : "Couldn't copy that app ID.";
+      }
     };
     timelineEl.addEventListener("click", onTimelineClick);
 

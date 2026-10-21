@@ -84,17 +84,20 @@ textarea.mono {
   color: var(--accent-contrast);
 }
 
-input[type="radio"] {
+input[type="radio"],
+input[type="checkbox"] {
   accent-color: var(--accent);
   cursor: pointer;
 }
 
-input[type="radio"]:focus-visible {
+input[type="radio"]:focus-visible,
+input[type="checkbox"]:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-input[type="radio"]:disabled {
+input[type="radio"]:disabled,
+input[type="checkbox"]:disabled {
   cursor: default;
 }
 

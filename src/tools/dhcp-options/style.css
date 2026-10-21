@@ -29,11 +29,6 @@
 .dho-tool textarea {
   width: 100%;
   font-size: 0.8rem;
-  resize: none;
-  overflow: hidden;
-}
-
-.dho-input {
   resize: vertical;
   overflow: auto;
 }

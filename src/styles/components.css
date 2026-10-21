@@ -354,11 +354,11 @@ textarea:focus {
   padding-right: 40px;
 }
 
-/* Copyable output never scrolls — JS (autoGrowTextarea) sets height to fit content. */
+/* Auto-grow can set the initial height; users can still resize output manually. */
 .ipk-copy-wrap textarea {
   width: 100%;
-  overflow: hidden;
-  resize: none;
+  overflow: auto;
+  resize: vertical;
 }
 
 /* Syntax-highlighted code block — a readonly, non-editable alternative to a

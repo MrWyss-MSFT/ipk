@@ -22,9 +22,9 @@ export function copyButtonHtml(id: string, label = "Copy to clipboard"): string 
 }
 
 /**
- * Copyable command/output fields should never scroll — grow the textarea to
- * fit its content instead. Call once after mount and again whenever the
- * value changes (e.g. in the same `render()` that sets `.value`).
+ * Grow a textarea to fit its current content, without disabling manual
+ * resizing or scrolling. Call after mount and whenever its value changes
+ * (e.g. in the same `render()` that sets `.value`).
  */
 export function autoGrowTextarea(el: HTMLTextAreaElement): void {
   el.style.height = "auto";

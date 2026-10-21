@@ -18,8 +18,3 @@
   width: 100%;
   resize: vertical;
 }
-
-.b64-tool #b64-output {
-  resize: vertical;
-  overflow: auto;
-}

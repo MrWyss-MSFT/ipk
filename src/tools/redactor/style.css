@@ -60,11 +60,6 @@
   resize: vertical;
 }
 
-#rdx-output {
-  resize: vertical;
-  overflow: auto;
-}
-
 .rdx-summary {
   font-size: 0.82rem;
   color: var(--text-muted);
