@@ -67,7 +67,7 @@ export function hasReleaseEntries(markdown: string): boolean {
 }
 
 /**
- * Returns just the "## [x.y.z](...)" sections strictly newer than
+ * Returns release sections with plain or linked version headings strictly newer than
  * `sinceVersion`, in their original markdown form (ready to pass through
  * renderChangelogHtml). Used to show a "what's new since your last visit"
  * excerpt instead of the entire history.
@@ -78,10 +78,10 @@ export function sliceChangelogSince(markdown: string, sinceVersion: string): str
   let current: { version: string; lines: string[] } | null = null;
 
   for (const line of lines) {
-    const match = /^## \[(\d+(?:\.\d+)*)\]/.exec(line.trim());
+    const match = /^## (?:\[(\d+(?:\.\d+)*)\](?:\([^)]*\))?|(\d+(?:\.\d+)*))(?=\s|$)/.exec(line.trim());
     if (match) {
       if (current) sections.push(current);
-      current = { version: match[1], lines: [line] };
+      current = { version: match[1] ?? match[2], lines: [line] };
     } else if (current) {
       current.lines.push(line);
     }
