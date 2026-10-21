@@ -12,8 +12,8 @@
 
 .mac-tool textarea {
   width: 100%;
-  overflow: hidden;
-  resize: none;
+  overflow: auto;
+  resize: vertical;
 }
 
 .mac-format-radios {
