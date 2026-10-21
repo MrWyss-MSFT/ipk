@@ -9,6 +9,24 @@
   font-size: 0.8rem;
 }
 
+.aph-csv-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.aph-csv-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 0.85rem;
+}
+
+.aph-csv-fields input {
+  min-width: 0;
+}
+
 .aph-label {
   font-size: 0.8rem;
   color: var(--text-muted);

@@ -5,6 +5,7 @@ import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
+import { buildAutopilotCsv } from "./csv";
 
 const PS_VARIANTS = makePsCommandVariants(
   '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData',
@@ -109,6 +110,17 @@ const tool: ToolDefinition = {
           placeholder="AAAAAAEAHAAAAAoAAAAAwMBAAAAAAAAACgAAAAEABQAAAAEAAAAAAAAAAAAAAIABAAChDjmGH...(very long Base64 string)"
         ></textarea>
         <span class="aph-error" id="aph-error" role="alert"></span>
+        <details class="aph-csv">
+          <summary>Export Autopilot CSV</summary>
+          <div class="aph-csv-fields">
+            <label>Device Serial Number<input id="aph-csv-serial" type="text" readonly></label>
+            <label>Windows Product ID (optional)<input id="aph-csv-product" type="text" readonly></label>
+            <label>Group Tag (optional)<input id="aph-csv-group" type="text"></label>
+            <label>Assigned User (optional UPN)<input id="aph-csv-user" type="text" placeholder="user@contoso.com"></label>
+          </div>
+          <button type="button" id="aph-csv-download" class="btn btn-primary" disabled>⬇️ Export as .csv</button>
+          <span class="aph-error" id="aph-csv-error" role="alert"></span>
+        </details>
         <label class="aph-label" for="aph-output">Decoded device details</label>
         <div class="aph-output" id="aph-output"></div>
         <details class="aph-raw" hidden>
@@ -129,9 +141,21 @@ const tool: ToolDefinition = {
     const copyBtn = container.querySelector<HTMLButtonElement>("#aph-copy")!;
 
     let rawJson = "";
+    const serialInput = container.querySelector<HTMLInputElement>("#aph-csv-serial")!;
+    const productInput = container.querySelector<HTMLInputElement>("#aph-csv-product")!;
+    const download = container.querySelector<HTMLButtonElement>("#aph-csv-download")!;
+    const csvError = container.querySelector<HTMLElement>("#aph-csv-error")!;
+    let validHash = "";
 
     const render = () => {
       errorEl.textContent = "";
+      validHash = "";
+      download.disabled = true;
+      csvError.textContent = "";
+      serialInput.value = "";
+      serialInput.readOnly = true;
+      productInput.value = "";
+      productInput.readOnly = true;
       if (!input.value.trim()) {
         output.innerHTML = "";
         rawOutput.textContent = "";
@@ -141,6 +165,12 @@ const tool: ToolDefinition = {
       }
       try {
         const decoded = decodeAutopilotHashBase64(input.value);
+        validHash = input.value.replace(/\s/g, "");
+        serialInput.value = decoded.Smbios.SystemSerialNumber ?? "";
+        serialInput.readOnly = Boolean(serialInput.value);
+        productInput.value = decoded.ProductKeyID ?? "";
+        productInput.readOnly = Boolean(productInput.value);
+        download.disabled = false;
         rawJson = JSON.stringify(decoded, null, 2);
         output.innerHTML = renderTree(decoded as unknown as Record<string, unknown>);
         rawOutput.textContent = rawJson;
@@ -176,6 +206,29 @@ const tool: ToolDefinition = {
 
     const exampleBtn = container.querySelector<HTMLButtonElement>("#aph-example")!;
     const unwireExample = wireExampleButton(exampleBtn, input, () => EXAMPLE_HASH_BASE64);
+    let downloadUrl: string | null = null;
+    const onDownload = () => {
+      csvError.textContent = "";
+      try {
+        if (!validHash) throw new Error("Paste a valid hardware hash before exporting.");
+        const csv = buildAutopilotCsv({
+          serialNumber: serialInput.value,
+          productId: container.querySelector<HTMLInputElement>("#aph-csv-product")!.value,
+          hardwareHash: validHash,
+          groupTag: container.querySelector<HTMLInputElement>("#aph-csv-group")!.value,
+          assignedUser: container.querySelector<HTMLInputElement>("#aph-csv-user")!.value,
+        });
+        if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+        downloadUrl = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=us-ascii" }));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "AutopilotHWID.csv";
+        link.click();
+      } catch (error) {
+        csvError.textContent = error instanceof Error ? error.message : "Failed to export CSV.";
+      }
+    };
+    download.addEventListener("click", onDownload);
 
     return () => {
       input.removeEventListener("input", render);
@@ -183,6 +236,8 @@ const tool: ToolDefinition = {
       unwireGlobalPaste();
       unwirePsTabs();
       unwireExample();
+      download.removeEventListener("click", onDownload);
+      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     };
   },
 };
