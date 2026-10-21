@@ -208,7 +208,8 @@ function tableHtml(entries: UpdateHistoryEntry[]): string {
     )
     .join("");
   return `
-    <table class="uhe-table">
+    <div class="uhe-table-wrap ipk-table-scroll">
+    <table class="uhe-table ipk-table ipk-table-hover">
       <thead>
         <tr>
           <th>Title</th>
@@ -220,6 +221,7 @@ function tableHtml(entries: UpdateHistoryEntry[]): string {
       </thead>
       <tbody>${rows}</tbody>
     </table>
+    </div>
   `;
 }
 
