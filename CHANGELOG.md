@@ -2,34 +2,37 @@
 
 ## [0.16.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.15.0...v0.16.0) (2026-10-21)
 
-### ✨ Features
+### 📅 Update Simulator
 
 * 🎉 New Tool: 📅 Update Simulator ([6f40360](https://github.com/MrWyss-MSFT/ipk/commit/6f40360e40c43bd59524bbfbb7ad912716953b17))
 * 🎉 New Tool: 📅 Update Simulator ([5c0186b](https://github.com/MrWyss-MSFT/ipk/commit/5c0186bc5fa97c02c66efcbd1fcc2dd4ddecb31d))
-* add Autopilot hardware hash CSV export ([c8ecddd](https://github.com/MrWyss-MSFT/ipk/commit/c8ecddde387892fc8783128f30937778c8dcaaef))
 * add combined device schedule editor and per-release durations ([81812bd](https://github.com/MrWyss-MSFT/ipk/commit/81812bda7a2983e60f0cb2f155776dc83940b735))
-* add example DeviceLink export script to Autopilot DeviceLink Decoder ([1219e49](https://github.com/MrWyss-MSFT/ipk/commit/1219e49395ed21ca0a60432fa62826a9edb10a72))
-* add read and remove DeviceLink association example scripts ([2d6b139](https://github.com/MrWyss-MSFT/ipk/commit/2d6b139ca97dd8a26e9bed5a46f9779e212326f8))
 * add searchable assumption ratings and classifications ([d02a94f](https://github.com/MrWyss-MSFT/ipk/commit/d02a94f6c299486a733f773706433b986144600b))
 * add two-way simulator policy import ([f4fc0e8](https://github.com/MrWyss-MSFT/ipk/commit/f4fc0e8a8874612e171e3353cb65ccd990d1a59f))
 * combine device and user schedule timeline group ([ed9e250](https://github.com/MrWyss-MSFT/ipk/commit/ed9e25015d14981c081682bae4491d4ec78bdee4))
 * make Update Simulator visible in the tool catalog ([74190d2](https://github.com/MrWyss-MSFT/ipk/commit/74190d2d0d7ae3a60badbad92d006b4e128aee53))
-* **qr-scanner:** add example QR codes, retain scan list, beep sound polish ([dba1db3](https://github.com/MrWyss-MSFT/ipk/commit/dba1db31dc94dd69ac6e9a00f79a9d1b5ab7b658))
 * redesign quality update approval controls ([ff2b4f7](https://github.com/MrWyss-MSFT/ipk/commit/ff2b4f7ea07064fb3895d99bab57b06ab3e0ce48))
 * redesign simulator release controls ([de6dd22](https://github.com/MrWyss-MSFT/ipk/commit/de6dd2295408247f65711e03bf9fffa17810365f))
 * refine maintenance window scheduling and controls ([56e3752](https://github.com/MrWyss-MSFT/ipk/commit/56e3752669a8dbf9f00438293262a0bada615ba6))
 * refine update simulator scheduling and time controls ([8c3d054](https://github.com/MrWyss-MSFT/ipk/commit/8c3d0543d6a410a7ae7a620eca825dc21fe3b090))
-
-### 🐛 Bug Fixes
-
 * align update discovery with availability and clarify timeline ([ffea62e](https://github.com/MrWyss-MSFT/ipk/commit/ffea62e5ba570eeec8db0eeac33495d89631ddbe))
 * honor driver release restart requirement ([544578e](https://github.com/MrWyss-MSFT/ipk/commit/544578ee486d59a1fa01fd40f443e63640c3ba28))
 * label monthly updates using B-week naming ([4ebc2c4](https://github.com/MrWyss-MSFT/ipk/commit/4ebc2c4484588959e321df5dd20adc2e0191aca0))
 * separate driver deferral and refine timeline groups ([373e754](https://github.com/MrWyss-MSFT/ipk/commit/373e754ca642898cfa8bf3dabf20f0a2b5a0b4c1))
-
-### 📝 Documentation
-
 * clarify independent update restart simulation ([3bc789a](https://github.com/MrWyss-MSFT/ipk/commit/3bc789a160a567459bee4f3ac912e821a58be59a))
+
+### 🧾 Autopilot Hardware Hash Decoder
+
+* add Autopilot hardware hash CSV export ([c8ecddd](https://github.com/MrWyss-MSFT/ipk/commit/c8ecddde387892fc8783128f30937778c8dcaaef))
+
+### 🔗 Autopilot DeviceLink Decoder
+
+* add example DeviceLink export script to Autopilot DeviceLink Decoder ([1219e49](https://github.com/MrWyss-MSFT/ipk/commit/1219e49395ed21ca0a60432fa62826a9edb10a72))
+* add read and remove DeviceLink association example scripts ([2d6b139](https://github.com/MrWyss-MSFT/ipk/commit/2d6b139ca97dd8a26e9bed5a46f9779e212326f8))
+
+### 📷 QR Code Scanner
+
+* add example QR codes, retain scan list, beep sound polish ([dba1db3](https://github.com/MrWyss-MSFT/ipk/commit/dba1db31dc94dd69ac6e9a00f79a9d1b5ab7b658))
 
 ## [0.15.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.14.0...v0.15.0) (2026-10-16)
 
