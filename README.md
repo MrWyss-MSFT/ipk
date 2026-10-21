@@ -41,7 +41,7 @@ close the tab).
 
 ## Tools
 
-`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🔤 Base64 Encode / Decode` `🔀 Co-Management Workloads Decoder` `🌐 DHCP Options Decoder` `🖥️ EDID Decoder` `🆔 Entra ID ObjectID ↔ SID` `🧩 ESP Progress Parser` `🔢 GDID ↔ LID` `📦 IME Apps Parser` `🏷️ MAC Address Converter` `🏆 MDM Result` `🗂️ Registry Preview` `🔄 Update History Explorer` `🔎 Find Text in Files` `🏖️ Windows Sandbox Config Generator` `📓 Playbooks` `📚 References` `⬛ Redactor` `📷 QR Code Scanner` `☕ Stay Awake`
+`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🔤 Base64 Encode / Decode` `🔀 Co-Management Workloads Decoder` `🌐 DHCP Options Decoder` `🖥️ EDID Decoder` `🆔 Entra ID ObjectID ↔ SID` `🧩 ESP Progress Parser` `🔢 GDID ↔ LID` `📦 IME Apps Parser` `🏷️ MAC Address Converter` `🏆 MDM Result` `🗂️ Registry Preview` `🔄 Update History Explorer` `📅 Update Simulator` `🔎 Find Text in Files` `🏖️ Windows Sandbox Config Generator` `📓 Playbooks` `📚 References` `⬛ Redactor` `📷 QR Code Scanner` `☕ Stay Awake`
 
 New tools land often — check the in-app sidebar for the current list.
 

@@ -266,7 +266,6 @@ const tool: ToolDefinition = {
   keywords: ["windows update", "wufb", "update policy", "csp", "deadline", "maintenance window", "active hours", "patch tuesday", "restart", "deferral"],
   icon: "📅",
   stage: "alpha",
-  hidden: true,
   mount(container) {
     const groups = GROUPS.filter((g) => g.id !== "user-behavior").map((g) => {
       const extra =
