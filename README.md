@@ -99,7 +99,12 @@ npm run typecheck    # tsc --noEmit only
    type-clean) before opening a PR.
 2. Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/)
    (`feat:`, `fix:`, `perf:`, `revert:`, `docs:`, `chore:`, …) — they drive
-   the auto-generated `CHANGELOG.md` sections (✨ Features, 🐛 Bug Fixes, …).
+   version bumps and the auto-generated `CHANGELOG.md`. Scope tool changes
+   with the folder ID, e.g. `feat(autopilot-hash): add CSV export`.
+   Releases group entries by tool name/icon, with a change-type icon per
+   entry. Use `app` for shared changes; unscoped/unknown scopes fall under
+   **App & shared components**. New tools use
+   `feat(<tool-id>): 🎉 New Tool: <tool icon> <Tool Name>`.
 3. Adding a new tool is just dropping a new `src/tools/<kebab-id>/` folder —
    it's auto-discovered, no registry/router edits needed. See
    [AGENTS.md](AGENTS.md) for the exact folder contract, styling

@@ -197,27 +197,33 @@ the "Playbooks" tool as a whole) shows up as its own result when you search
 
 Versioning and the changelog are automated with
 [release-it](https://github.com/release-it/release-it) +
-`@release-it/conventional-changelog`, configured in `.release-it.json`.
+`@release-it/conventional-changelog`, configured in `.release-it.js`.
 
 - **Commit using [Conventional Commits](https://www.conventionalcommits.org/)**
-  (`feat: ...`, `fix: ...`, `chore: ...`, `docs: ...`, etc.) - the changelog
+  (`feat(<tool-id>): ...`, `fix(<tool-id>): ...`, etc.) - the changelog
   and the version bump (major/minor/patch) are both derived from these commit
   messages, so unconventional messages won't show up in `CHANGELOG.md` and
   won't influence the bump.
-- **Brand-new tool squash-merge commits** use a special `feat:` subject so
-  they stand out in the changelog while still grouping under "✨ Features":
-  `feat: 🎉 New Tool: <tool icon> <Tool Name>` (e.g.
-  `feat: 🎉 New Tool: 🏷️ MAC Address Converter`). Use the same icon the tool
-  defines in its `index.ts`. Regular (non-new-tool) commits keep the plain
-  `feat: <description>` / `fix: <description>` style.
+- **Scope tool changes by folder ID**, e.g.
+  `feat(autopilot-hash): add CSV export` or
+  `fix(update-simulator): honor driver restart requirements`.
+  Each release groups entries by tool, automatically using the name/icon
+  from `src/tools/<tool-id>/index.ts`. Entries retain a change-type icon.
+  Use `app` for shared/cross-tool changes; unscoped and unknown scopes also
+  fall under **App & shared components**. Existing type visibility rules
+  still apply (documentation/chores are normally hidden).
+- **Brand-new tool squash-merge commits** use
+  `feat(<tool-id>): 🎉 New Tool: <tool icon> <Tool Name>` (e.g.
+  `feat(mac-address-converter): 🎉 New Tool: 🏷️ MAC Address Converter`).
+  Use the same icon the tool defines in its `index.ts`.
 - **Cut a release**: `npm run release` (interactive - prompts for the next
   version based on your commits since the last tag, then updates
   `package.json`'s version, prepends to `CHANGELOG.md`, and creates a git
   commit + tag). Preview without changing anything: `npm run release:dry`.
 - **Requires a clean git working tree** on the `main` branch (see
-  `requireCleanWorkingDir`/`requireBranch` in `.release-it.json`) - commit or
+  `requireCleanWorkingDir`/`requireBranch` in `.release-it.js`) - commit or
   stash first.
-- `npm.publish` and `github.release` are both disabled in `.release-it.json`
+- `npm.publish` and `github.release` are both disabled in `.release-it.js`
   (this isn't an npm package, and no `GITHUB_TOKEN`/repo is wired up yet) -
   release-it only bumps the version, updates the changelog, and tags.
 - The running version and a link to the GitHub repo are shown in-app on the
