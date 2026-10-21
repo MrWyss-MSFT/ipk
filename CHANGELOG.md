@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.17.0 (2026-10-21)
+
+### 🌐 DHCP Options Decoder
+
+* ✨ refresh tables and add click-to-copy values ([2c6e3fb](https://github.com/MrWyss-MSFT/ipk/commit/2c6e3fbb49a124fcad2546034c353799de2125c0))
+
+### 🏷️ MAC Address Converter
+
+* 🐛 allow resizing input and output fields ([7579a84](https://github.com/MrWyss-MSFT/ipk/commit/7579a844c8d4c3c86ce3c7a0c8e1622f3720259c))
+
+### 📋 Autopilot Profile Parser
+
+* ✨ redesign results and add click-to-copy values ([14abf84](https://github.com/MrWyss-MSFT/ipk/commit/14abf8498ae6c70a5b2dd5a133c681c04c2da70b))
+
+### 🔀 Co-Management Workloads Decoder
+
+* ✨ redesign workload table with toggle switches ([0035b9c](https://github.com/MrWyss-MSFT/ipk/commit/0035b9c810ec0a45e530c2a45d46deee6990c0ae))
+
+### 🔗 Autopilot DeviceLink Decoder
+
+* ✨ redesign decoded results as compact summary tables ([784c1d2](https://github.com/MrWyss-MSFT/ipk/commit/784c1d2afccbcd7220cfb1500286bdf2fb43504e))
+
+### 🔤 Base64 Encode / Decode
+
+* 🐛 allow resizing the output field ([c1c41d0](https://github.com/MrWyss-MSFT/ipk/commit/c1c41d08e266a4712440f7406c66a08992943d8d))
+
+### 🧩 ESP Progress Parser
+
+* ✨ refresh phase tables and improve dark-mode badges ([64e4e98](https://github.com/MrWyss-MSFT/ipk/commit/64e4e98f2c3d3ba7f1092d3741bef288ffdc0aa9))
+
+### 🧾 Autopilot Hardware Hash Decoder
+
+* ✨ allow custom CSV export labels and filenames ([d2f4ad8](https://github.com/MrWyss-MSFT/ipk/commit/d2f4ad81cdd364c0dece79090ca95091bc40311f))
+
+### App & shared components
+
+* **app:** 🐛 enable Redactor output resizing and theme Stay Awake checkboxes ([4a90da8](https://github.com/MrWyss-MSFT/ipk/commit/4a90da8290c894ba8602c23fb6260aeb7996f4b1))
+* **app:** ✨ share tool styles and expand click-to-copy support ([e733673](https://github.com/MrWyss-MSFT/ipk/commit/e733673f4bd1eaaf338f33d7d3d841144bd89a4a))
+* **app:** 🐛 standardize checkboxes, status colors and output controls ([d6efc5c](https://github.com/MrWyss-MSFT/ipk/commit/d6efc5c471270b9972eb3d6680936286f0b6238d))
+
 ## [0.16.1](https://github.com/MrWyss-MSFT/ipk/compare/v0.16.0...v0.16.1) (2026-10-21)
 
 ### 📝 Documentation
