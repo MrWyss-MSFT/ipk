@@ -41,9 +41,17 @@ close the tab).
 
 ## Tools
 
-`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🔤 Base64 Encode / Decode` `🔀 Co-Management Workloads Decoder` `🌐 DHCP Options Decoder` `🖥️ EDID Decoder` `🆔 Entra ID ObjectID ↔ SID` `🧩 ESP Progress Parser` `🔢 GDID ↔ LID` `📦 IME Apps Parser` `🏷️ MAC Address Converter` `🏆 MDM Result` `🗂️ Registry Preview` `🔄 Update History Explorer` `📅 Update Simulator` `🔎 Find Text in Files` `🏖️ Windows Sandbox Config Generator` `📓 Playbooks` `📚 References` `⬛ Redactor` `📷 QR Code Scanner` `☕ Stay Awake`
+`🔗 Autopilot DeviceLink Decoder` `🧾 Autopilot Hardware Hash Decoder` `📋 Autopilot Profile Parser` `🔤 Base64 Encode / Decode` `🔀 Co-Management Workloads Decoder` `🧮 CSV Merger` `🌐 DHCP Options Decoder` `🖥️ EDID Decoder` `🆔 Entra ID ObjectID ↔ SID` `🧩 ESP Progress Parser` `🔢 GDID ↔ LID` `📦 IME Apps Parser` `🏷️ MAC Address Converter` `🏆 MDM Result` `🗂️ Registry Preview` `🔄 Update History Explorer` `📅 Update Simulator` `🔎 Find Text in Files` `🏖️ Windows Sandbox Config Generator` `📓 Playbooks` `📚 References` `⬛ Redactor` `📷 QR Code Scanner` `☕ Stay Awake`
 
 New tools land often — check the in-app sidebar for the current list.
+
+CSV Merger accepts multiple batches of CSV/TSV files (up to 100 files), joins
+columns by trimmed, case-sensitive header names, and appends rows in file order.
+It streams processing with a 100 MiB default input limit (adjustable to 1 GiB).
+Downloads stream to a selected file in supporting browsers; other browsers
+have a 50 MiB encoded-output cap. Optional memory-only duplicate checking uses
+all or selected columns, with keep-first removal available after a successful
+check. File contents and duplicate indexes are not stored between visits.
 
 ## Running it
 

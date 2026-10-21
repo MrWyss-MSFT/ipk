@@ -12,6 +12,13 @@
  * and call the returned unwire function in the cleanup callback.
  */
 export function wireFileDrop(highlightEl: HTMLElement, onFile: (file: File) => void): () => void {
+  return wireFilesDrop(highlightEl, (files) => {
+    if (files[0]) onFile(files[0]);
+  });
+}
+
+/** Multi-file counterpart; preserves the browser's dropped-file order. */
+export function wireFilesDrop(highlightEl: HTMLElement, onFiles: (files: File[]) => void): () => void {
   // Counts nested dragenter/dragleave pairs (the document and its descendants)
   // so the highlight doesn't flicker off while the pointer moves between them.
   let dragDepth = 0;
@@ -38,8 +45,8 @@ export function wireFileDrop(highlightEl: HTMLElement, onFile: (file: File) => v
     e.preventDefault();
     dragDepth = 0;
     highlightEl.classList.remove("is-drag-over");
-    const file = e.dataTransfer?.files[0];
-    if (file) onFile(file);
+    const files = Array.from(e.dataTransfer?.files ?? []);
+    if (files.length) onFiles(files);
   };
 
   document.addEventListener("dragenter", onDragEnter);
