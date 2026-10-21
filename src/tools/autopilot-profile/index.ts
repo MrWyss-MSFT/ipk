@@ -31,13 +31,18 @@ function escapeHtml(value: string): string {
   return div.innerHTML;
 }
 
+function copyValueHtml(value: string, badge = false): string {
+  if (!value) return "<em>(empty)</em>";
+  return `<button type="button" class="apc-copy-value mono${badge ? " apc-number" : ""}" data-copy-value="${escapeHtml(value)}" title="Click to copy">${escapeHtml(value)}</button>`;
+}
+
 function summaryHtml(result: AutopilotProfileResult): string {
   if (result.summary.length === 0) return "";
   const rows = result.summary
-    .map((f) => `<tr><td>${escapeHtml(f.label)}</td><td class="mono">${escapeHtml(f.value)}</td></tr>`)
+    .map((f) => `<tr><td>${escapeHtml(f.label)}</td><td>${copyValueHtml(f.value)}</td></tr>`)
     .join("");
   return `
-    <section class="apc-section">
+    <section class="apc-section apc-summary">
       <h3>Summary</h3>
       <table class="apc-table"><tbody>${rows}</tbody></table>
     </section>
@@ -52,7 +57,7 @@ function oobeConfigHtml(result: AutopilotProfileResult): string {
       (f) => `
         <tr class="${f.isEnabled ? "is-enabled" : ""}">
           <td>${escapeHtml(f.label)}</td>
-          <td class="mono">${f.value}</td>
+          <td>${copyValueHtml(String(f.value), true)}</td>
           <td>${f.isEnabled ? '<span class="apc-badge apc-badge-on">On</span>' : '<span class="apc-badge apc-badge-off">Off</span>'}</td>
         </tr>
       `,
@@ -77,7 +82,7 @@ function boolFieldsHtml(result: AutopilotProfileResult): string {
         <tr>
           <td>${escapeHtml(f.label)}</td>
           <td>${f.isSet ? '<span class="apc-badge apc-badge-on">Yes</span>' : '<span class="apc-badge apc-badge-off">No</span>'}</td>
-          <td class="mono apc-raw-cell">${escapeHtml(String(f.raw))}</td>
+          <td>${copyValueHtml(String(f.raw), true)}</td>
         </tr>
       `,
     )
@@ -106,7 +111,7 @@ function nestedAadServerDataHtml(result: AutopilotProfileResult): string {
 function otherFieldsHtml(result: AutopilotProfileResult): string {
   if (result.otherFields.length === 0) return "";
   const rows = result.otherFields
-    .map((f) => `<tr><td>${escapeHtml(f.label)}</td><td class="mono">${escapeHtml(f.value) || "<em>(empty)</em>"}</td></tr>`)
+    .map((f) => `<tr><td>${escapeHtml(f.label)}</td><td>${copyValueHtml(f.value)}</td></tr>`)
     .join("");
   return `
     <section class="apc-section">
@@ -186,6 +191,20 @@ const tool: ToolDefinition = {
     };
 
     input.addEventListener("input", render);
+    const onCopy = async (event: MouseEvent) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>(".apc-copy-value");
+      if (!button) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyValue!);
+        statusEl.textContent = "";
+        button.classList.remove("is-copied");
+        void button.offsetWidth;
+        button.classList.add("is-copied");
+      } catch (error) {
+        statusEl.textContent = error instanceof Error ? error.message : "Couldn't copy that value.";
+      }
+    };
+    resultsEl.addEventListener("click", onCopy);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
     const exampleBtn = container.querySelector<HTMLButtonElement>("#apc-example")!;
@@ -193,6 +212,7 @@ const tool: ToolDefinition = {
 
     return () => {
       input.removeEventListener("input", render);
+      resultsEl.removeEventListener("click", onCopy);
       unwireGlobalPaste();
       unwirePsTabs();
       unwireExample();

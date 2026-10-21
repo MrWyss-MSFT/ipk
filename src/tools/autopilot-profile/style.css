@@ -32,12 +32,28 @@
   font-size: 0.85rem;
 }
 
-.apc-section {
+#apc-results {
+  display: grid;
+  gap: var(--space-4);
   margin-top: var(--space-3);
+  min-width: 0;
+}
+
+.apc-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg);
+  min-width: 0;
 }
 
 .apc-section h3 {
-  margin: 0 0 var(--space-1);
+  margin: 0;
+  padding: 14px var(--space-4);
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+  justify-content: space-between;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -47,29 +63,60 @@
   font-size: 0.8rem;
   font-weight: 400;
   color: var(--text-muted);
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  white-space: nowrap;
 }
 
 .apc-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.82rem;
 }
 
 .apc-table th,
 .apc-table td {
   text-align: left;
-  padding: 6px 10px;
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .apc-table th {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.67rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: color-mix(in srgb, var(--text) 2%, var(--bg));
 }
 
 .apc-table tr.is-enabled td {
-  background: color-mix(in srgb, var(--success, #2fa84f) 8%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
+.apc-table tr.is-enabled td:first-child {
+  color: var(--accent);
+}
+
+.apc-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.apc-table td:first-child {
+  font-weight: 500;
+}
+
+.apc-table:has(thead) td:first-child {
+  width: 100%;
+}
+
+.apc-table:has(thead) th:not(:first-child),
+.apc-table:has(thead) td:not(:first-child) {
+  text-align: center;
+  white-space: nowrap;
 }
 
 .apc-raw-cell {
@@ -79,17 +126,17 @@
 
 .apc-badge {
   display: inline-block;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 500;
   border-radius: 999px;
-  padding: 1px 10px;
+  padding: 3px 8px;
   border: 1px solid var(--border);
 }
 
 .apc-badge-on {
-  color: #fff;
-  background: var(--success, #2fa84f);
-  border-color: transparent;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--bg));
+  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
 }
 
 .apc-badge-off {
@@ -107,26 +154,94 @@
   font-size: 0.8rem;
 }
 
-@media (max-width: 640px) {
-  .apc-table,
-  .apc-table tbody,
-  .apc-table tr,
+.apc-summary tbody {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  padding: var(--space-1) var(--space-4);
+  gap: 0 var(--space-4);
+}
+
+.apc-summary tr {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.apc-summary td {
+  display: block;
+  border: 0;
+  padding: 0;
+}
+
+.apc-summary td:first-child {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.apc-copy-value {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  padding: 0 2px;
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  max-width: 100%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.apc-number {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+  padding: 3px 6px;
+}
+
+.apc-copy-value:hover,
+.apc-copy-value:focus-visible {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.apc-copy-value.is-copied {
+  color: var(--success);
+  animation: apc-value-copied 0.5s ease;
+}
+
+@keyframes apc-value-copied {
+  from { background-color: color-mix(in srgb, var(--success) 25%, transparent); }
+  to { background-color: transparent; }
+}
+
+@media (max-width: 520px) {
+  .apc-table th,
   .apc-table td {
-    display: block;
-    width: 100%;
+    padding: 10px;
   }
 
-  .apc-table thead {
-    display: none;
+  .apc-summary td {
+    padding: 0;
   }
 
-  .apc-table tr {
-    border-bottom: 1px solid var(--border);
-    padding: var(--space-2) 0;
+  .apc-table {
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apc-copy-value {
+    transition: none;
   }
 
-  .apc-table td {
-    border-bottom: none;
-    padding: 2px 0;
+  .apc-copy-value.is-copied {
+    animation: none;
   }
 }
