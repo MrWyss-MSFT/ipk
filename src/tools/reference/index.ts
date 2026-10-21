@@ -115,9 +115,12 @@ const tool: ToolDefinition = {
           ).join("")}
         </div>
         <input id="ref-filter" class="mono" type="text" placeholder="Filter..." />
-        <div class="ref-tagbar" id="ref-tagbar"></div>
-        <div class="ipk-table-scroll">
-          <table class="ref-table">
+        <details class="ref-tag-disclosure">
+          <summary id="ref-tag-summary"></summary>
+          <div class="ref-tagbar" id="ref-tagbar"></div>
+        </details>
+        <div class="ref-table-wrap ipk-table-scroll">
+          <table class="ref-table ipk-table ipk-table-hover">
             <thead id="ref-thead"></thead>
             <tbody id="ref-list"></tbody>
           </table>
@@ -151,6 +154,7 @@ const tool: ToolDefinition = {
     const tabButtons = container.querySelectorAll<HTMLButtonElement>("[data-tab]");
     const filterInput = container.querySelector<HTMLInputElement>("#ref-filter")!;
     const tagbar = container.querySelector<HTMLDivElement>("#ref-tagbar")!;
+    const tagSummary = container.querySelector<HTMLElement>("#ref-tag-summary")!;
     const thead = container.querySelector<HTMLTableSectionElement>("#ref-thead")!;
     const list = container.querySelector<HTMLTableSectionElement>("#ref-list")!;
     const emptyEl = container.querySelector<HTMLParagraphElement>("#ref-empty")!;
@@ -190,6 +194,9 @@ const tool: ToolDefinition = {
 
     function renderTagBar() {
       const tags = uniqueTags(itemsForTab(activeTab));
+      tagSummary.textContent = activeTags.size
+        ? `Tags · ${[...activeTags].join(", ")}`
+        : `Tags · ${tags.length} available`;
       tagbar.innerHTML = tags
         .map(
           (t) =>
