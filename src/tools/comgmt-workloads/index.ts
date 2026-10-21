@@ -102,10 +102,10 @@ const tool: ToolDefinition = {
             .join(" ");
           return `
               <tr${rowClass ? ` class="${rowClass}"` : ""}>
-                <td>${r.configMgrName ?? r.workload}</td>
-                <td>${r.value}</td>
+                <td>${r.configMgrName ?? r.workload}${r.isForceAllSwitch ? '<span class="cmw-switch-note">Overrides individual switches</span>' : ""}</td>
+                <td><span class="cmw-flag">${r.value}</span></td>
                 <td class="cmw-enabled-cell">
-                  <input type="checkbox" class="cmw-checkbox" data-flag-value="${r.value}" data-implied-only="${r.impliedOnly ? "true" : "false"}" ${r.isEnabled ? "checked" : ""} ${locked ? "disabled" : ""} />
+                  <input type="checkbox" class="cmw-checkbox" aria-label="${r.configMgrName ?? r.workload}" data-flag-value="${r.value}" data-implied-only="${r.impliedOnly ? "true" : "false"}" ${r.isEnabled ? "checked" : ""} ${locked ? "disabled" : ""} />
                 </td>
               </tr>
             `;

@@ -5,7 +5,8 @@
 }
 
 .cmw-note {
-  margin: 0 0 var(--space-2);
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -40,47 +41,168 @@
 
 .cmw-table {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: var(--space-2);
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: var(--space-1);
+  background: var(--bg);
   font-size: 0.85rem;
 }
 
 .cmw-table th,
 .cmw-table td {
   text-align: left;
-  padding: var(--space-2) var(--space-3);
+  padding: 14px var(--space-4);
   border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
 .cmw-table th {
   color: var(--text-muted);
   font-weight: 600;
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-3) var(--space-4);
 }
 
-.cmw-enabled-cell {
+.cmw-table th:first-child {
+  width: 100%;
+}
+
+.cmw-table th:nth-child(2),
+.cmw-table td:nth-child(2) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cmw-table th:last-child,
+.cmw-table .cmw-enabled-cell {
   text-align: center;
 }
 
+.cmw-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cmw-table tbody tr:not(.cmw-force-all-row):hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
+.cmw-table td:first-child {
+  font-weight: 500;
+}
+
+.cmw-table tbody tr:has(:checked):not(.cmw-locked-row) td:first-child {
+  color: var(--accent);
+}
+
+.cmw-flag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text) 5%, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px 7px;
+  font-weight: 400;
+}
+
 .cmw-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--success);
+  appearance: none;
+  display: inline-block;
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--text) 12%, var(--bg));
+  vertical-align: middle;
+  margin: 0;
+  transition: background 0.15s;
   cursor: pointer;
+}
+
+.cmw-checkbox::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  left: 3px;
+  top: 3px;
+  background: var(--text-muted);
+  transition: transform 0.15s;
+}
+
+.cmw-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cmw-checkbox:checked::after {
+  transform: translateX(14px);
+  background: var(--bg);
+}
+
+.cmw-checkbox:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .cmw-checkbox:disabled {
   cursor: default;
-  accent-color: var(--text-muted);
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .cmw-locked-row td {
   color: var(--text-muted);
 }
 
+.cmw-force-all-row {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
 .cmw-force-all-row td {
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   font-weight: 600;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.cmw-switch-note {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+@media (max-width: 520px) {
+  .cmw-table th,
+  .cmw-table td {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .cmw-table td:first-child {
+    font-size: 0.8rem;
+  }
+
+  .cmw-flag {
+    font-size: 0.68rem;
+    padding: 3px 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmw-checkbox,
+  .cmw-checkbox::after {
+    transition: none;
+  }
 }
 
 .cmw-implied-hidden {
