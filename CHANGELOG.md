@@ -4,6 +4,13 @@
 
 ### 📝 Documentation
 
+* group v0.16.0 changelog entries by tool ([f2b690d](https://github.com/MrWyss-MSFT/ipk/commit/f2b690d1323e88bae016894d711575f525c5949a))
+* note changelog reorganization for v0.16.1 ([bffdd1d](https://github.com/MrWyss-MSFT/ipk/commit/bffdd1d8ea41891524b54b46197529be66364eca))
+
+## [0.16.1](https://github.com/MrWyss-MSFT/ipk/compare/v0.16.0...v0.16.1) (2026-10-21)
+
+### 📝 Documentation
+
 * Group the 0.16.0 changelog entries by tool for easier browsing.
 
 ## [0.16.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.15.0...v0.16.0) (2026-10-21)
