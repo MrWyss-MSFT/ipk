@@ -85,14 +85,13 @@ function phaseHtml(phase: EspPhaseResult): string {
   return `
     <section class="esp-phase">
       <h3>
-        ${phase.label}
+        <span>${phase.label}${phase.phaseText ? `<span class="esp-phase-text">${phase.phaseText}</span>` : ""}</span>
         ${phase.phaseState ? `<span class="esp-badge esp-badge-${stateBucket(phase.phaseState)}">${phase.phaseState}</span>` : ""}
       </h3>
-      ${phase.phaseText ? `<p class="esp-phase-text">${phase.phaseText}</p>` : ""}
-      <table class="esp-table">
+      <div class="ipk-table-scroll"><table class="esp-table">
         <thead><tr><th>Step</th><th>State</th><th>Details</th></tr></thead>
         <tbody>${rows || `<tr><td colspan="3" class="esp-empty">No steps found.</td></tr>`}</tbody>
-      </table>
+      </table></div>
     </section>
   `;
 }
