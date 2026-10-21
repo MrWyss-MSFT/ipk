@@ -91,8 +91,14 @@
   cursor: pointer;
 }
 
-.awk-mode-field input[type="checkbox"] {
+.awk-tool input[type="checkbox"] {
+  accent-color: var(--accent);
   cursor: pointer;
+}
+
+.awk-tool input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .awk-message-field {
@@ -201,10 +207,6 @@
   font-size: 0.78rem;
   color: var(--text-muted);
   cursor: help;
-}
-
-.awk-antiburn-field input[type="checkbox"] {
-  cursor: pointer;
 }
 
 .awk-preview {
