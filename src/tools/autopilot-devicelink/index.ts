@@ -242,21 +242,12 @@ interface ResultField {
   monospace?: boolean;
 }
 
-function buildFieldHtml(field: ResultField, index: number): string {
-  const id = `adl-copy-${index}`;
+function buildFieldHtml(field: ResultField): string {
   return `
-    <div class="adl-field">
-      <span class="adl-field-label ipk-field-label">${escapeHtml(field.label)}</span>
-      <div class="ipk-copy-wrap">
-        <input
-          type="text"
-          class="adl-field-value${field.monospace ? " adl-mono" : ""}"
-          readonly
-          value="${escapeHtml(field.value)}"
-        />
-        ${copyButtonHtml(id, `Copy ${field.label}`)}
-      </div>
-    </div>
+    <tr>
+      <td>${escapeHtml(field.label)}</td>
+      <td><button type="button" class="adl-copy-value ipk-copy-value mono" title="Click to copy" aria-label="Copy ${escapeHtml(field.label)}">${escapeHtml(field.value) || "—"}</button></td>
+    </tr>
   `;
 }
 
@@ -282,7 +273,6 @@ function deviceLinkFields(info: DeviceLinkInfo): ResultField[] {
     { label: "Link ID Created (UTC)", value: info.linkIdCreationTimeUtc },
     { label: "Signing Algorithm", value: info.signingAlgorithm },
     { label: "Signing Key", value: info.signingKeyName },
-    { label: "Decoded JSON", value: info.rawJson, monospace: true },
   ];
 }
 
@@ -300,10 +290,12 @@ function deviceLinkKeysHtml(info: DeviceLinkInfo): string {
     )
     .join("");
   return `
-    <table class="adl-keys">
+    <div class="ipk-table-scroll adl-keys-wrap">
+    <table class="adl-keys ipk-table">
       <thead><tr><th>Key</th><th>Type</th><th>Key ID</th><th>Public key included</th></tr></thead>
       <tbody>${keyRows}</tbody>
     </table>
+    </div>
   `;
 }
 
@@ -311,9 +303,17 @@ function buildResultHtml(info: DeviceLinkInfo, exportId: string): string {
   const fields = deviceLinkFields(info);
   return `
     <div class="adl-result">
-      <p class="adl-result-kind">Autopilot DeviceLink</p>
+      <h3 class="adl-result-kind">Autopilot DeviceLink</h3>
+      <table class="adl-summary ipk-table"><tbody>${fields.map(buildFieldHtml).join("")}</tbody></table>
       ${deviceLinkKeysHtml(info)}
-      ${fields.map(buildFieldHtml).join("")}
+      <details class="adl-json">
+        <summary>Decoded JSON</summary>
+        <div class="ipk-copy-wrap">
+          <textarea class="mono" readonly rows="10" aria-label="Decoded JSON">${escapeHtml(info.rawJson)}</textarea>
+          ${copyButtonHtml(`${exportId}-json-copy`, "Copy decoded JSON")}
+        </div>
+      </details>
+      <p class="adl-copy-error ipk-error" role="alert"></p>
       <button type="button" class="btn btn-primary adl-export" id="${exportId}">⬇️ Export as .devicelink.csv</button>
     </div>
   `;
@@ -321,8 +321,31 @@ function buildResultHtml(info: DeviceLinkInfo, exportId: string): string {
 
 function wireResultFieldsAndExport(resultEl: HTMLElement, info: DeviceLinkInfo, exportId: string) {
   const fields = deviceLinkFields(info);
-  resultEl.querySelectorAll<HTMLButtonElement>(".ipk-copy-btn").forEach((btn, i) => {
-    wireCopyButton(btn, () => fields[i].value);
+  const copyError = resultEl.querySelector<HTMLElement>(".adl-copy-error")!;
+  resultEl.querySelectorAll<HTMLButtonElement>(".adl-copy-value").forEach((btn, i) => {
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(fields[i].value);
+        copyError.textContent = "";
+        btn.classList.remove("is-copied");
+        void btn.offsetWidth;
+        btn.classList.add("is-copied");
+      } catch (error) {
+        copyError.textContent = error instanceof Error ? error.message : "Couldn't copy that value.";
+      }
+    });
+  });
+  resultEl.querySelector<HTMLButtonElement>(".ipk-copy-btn")!.addEventListener("click", async (event) => {
+    const btn = event.currentTarget as HTMLButtonElement;
+    try {
+      await navigator.clipboard.writeText(info.rawJson);
+      copyError.textContent = "";
+      btn.classList.remove("is-copied");
+      void btn.offsetWidth;
+      btn.classList.add("is-copied");
+    } catch (error) {
+      copyError.textContent = error instanceof Error ? error.message : "Couldn't copy decoded JSON.";
+    }
   });
   resultEl.querySelector<HTMLButtonElement>(`#${exportId}`)?.addEventListener("click", () => {
     downloadCsv(deviceLinkCsvFilename(info), buildDeviceLinkCsvText(info));
