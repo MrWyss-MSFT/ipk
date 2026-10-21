@@ -5,7 +5,7 @@ import { wireExampleButton } from "@/app/example-button";
 import { makePsCommandVariants, psCommandTabsHtml, wirePsCommandTabs } from "@/app/ps-command";
 import type { ToolDefinition } from "@/types/tool";
 import { decodeAutopilotHashBase64 } from "./decode";
-import { buildAutopilotCsv } from "./csv";
+import { autopilotCsvFilename, buildAutopilotCsv } from "./csv";
 
 const PS_VARIANTS = makePsCommandVariants(
   '(Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID=\'Ext\' AND ParentID=\'./DevDetail\'").DeviceHardwareData',
@@ -113,7 +113,13 @@ const tool: ToolDefinition = {
         <details class="aph-csv">
           <summary>Export Autopilot CSV</summary>
           <div class="aph-csv-fields">
-            <label>Device Serial Number<input id="aph-csv-serial" type="text" readonly></label>
+            <label>
+              <span class="aph-csv-label-tip" tabindex="0" aria-describedby="aph-csv-serial-tip">
+                Device Serial Nr. or Device Name
+                <span class="aph-csv-tooltip" id="aph-csv-serial-tip" role="tooltip">Used only in the CSV's Device Serial Number column and filename. This does not rename the device or set its name in Autopilot.</span>
+              </span>
+              <input id="aph-csv-serial" type="text" readonly aria-describedby="aph-csv-serial-tip">
+            </label>
             <label>Windows Product ID (optional)<input id="aph-csv-product" type="text" readonly></label>
             <label>Group Tag (optional)<input id="aph-csv-group" type="text"></label>
             <label>Assigned User (optional UPN)<input id="aph-csv-user" type="text" placeholder="user@contoso.com"></label>
@@ -167,7 +173,7 @@ const tool: ToolDefinition = {
         const decoded = decodeAutopilotHashBase64(input.value);
         validHash = input.value.replace(/\s/g, "");
         serialInput.value = decoded.Smbios.SystemSerialNumber ?? "";
-        serialInput.readOnly = Boolean(serialInput.value);
+        serialInput.readOnly = false;
         productInput.value = decoded.ProductKeyID ?? "";
         productInput.readOnly = Boolean(productInput.value);
         download.disabled = false;
@@ -222,7 +228,7 @@ const tool: ToolDefinition = {
         downloadUrl = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=us-ascii" }));
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = "AutopilotHWID.csv";
+        link.download = autopilotCsvFilename(serialInput.value);
         link.click();
       } catch (error) {
         csvError.textContent = error instanceof Error ? error.message : "Failed to export CSV.";

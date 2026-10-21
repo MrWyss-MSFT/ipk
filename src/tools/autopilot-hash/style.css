@@ -27,6 +27,35 @@
   min-width: 0;
 }
 
+.aph-csv-label-tip {
+  position: relative;
+  width: fit-content;
+  cursor: help;
+}
+
+.aph-csv-tooltip {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 1000;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 64px));
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: 400 0.8rem/1.4 var(--font-sans);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.aph-csv-label-tip:hover .aph-csv-tooltip,
+.aph-csv-label-tip:focus-visible .aph-csv-tooltip,
+.aph-csv-fields label:focus-within .aph-csv-tooltip {
+  visibility: visible;
+}
+
 .aph-label {
   font-size: 0.8rem;
   color: var(--text-muted);

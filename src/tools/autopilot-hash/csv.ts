@@ -6,6 +6,11 @@ export interface AutopilotCsvDevice {
   assignedUser: string;
 }
 
+export function autopilotCsvFilename(serialNumber: string): string {
+  const prefix = serialNumber.trim().replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").replace(/[. ]+$/g, "");
+  return prefix ? `${prefix}_AutopilotHWID.csv` : "AutopilotHWID.csv";
+}
+
 export function buildAutopilotCsv(device: AutopilotCsvDevice): string {
   const values = [
     device.serialNumber.trim(), device.productId.trim(),
