@@ -21,6 +21,11 @@
   resize: vertical;
 }
 
+.b64-tool #b64-output {
+  resize: vertical;
+  overflow: auto;
+}
+
 .ipk-copy-wrap textarea {
   width: 100%;
 }
