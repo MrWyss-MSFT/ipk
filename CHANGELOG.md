@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.16.1](https://github.com/MrWyss-MSFT/ipk/compare/v0.16.0...v0.16.1) (2026-10-21)
+
+### 📝 Documentation
+
+* Group the 0.16.0 changelog entries by tool for easier browsing.
+
 ## [0.16.0](https://github.com/MrWyss-MSFT/ipk/compare/v0.15.0...v0.16.0) (2026-10-21)
 
 ### 📅 Update Simulator
