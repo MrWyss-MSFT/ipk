@@ -84,6 +84,20 @@ textarea.mono {
   color: var(--accent-contrast);
 }
 
+input[type="radio"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="radio"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+input[type="radio"]:disabled {
+  cursor: default;
+}
+
 /* The native `hidden` attribute must always win over a class setting `display`
    (e.g. `.btn { display: inline-flex }`) - without this, any element that is
    both `hidden` and carries such a class stays visible, since the author

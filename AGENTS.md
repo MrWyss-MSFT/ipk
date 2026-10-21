@@ -239,6 +239,8 @@ Versioning and the changelog are automated with
 
 ## Theming
 
+- Native radio buttons inherit the theme accent and keyboard-focus styling
+  globally from `src/styles/base.css`; don't duplicate those rules per tool.
 - All colors are CSS custom properties in `src/styles/variables.css`
   (`--bg`, `--text`, `--accent`, `--success`, `--danger`, …), redefined under
   `[data-theme="dark"]`. **Never hard-code colors in a tool's CSS** — use the

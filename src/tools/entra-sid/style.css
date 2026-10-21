@@ -20,16 +20,6 @@
   cursor: pointer;
 }
 
-.sid-cloud input[type="radio"] {
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.sid-cloud input[type="radio"]:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
 .sid-label {
   font-weight: 600;
   color: var(--text);
