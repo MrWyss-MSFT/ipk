@@ -74,8 +74,14 @@
 }
 
 .dho-subheading {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-4) 0 var(--space-2);
   font-size: 0.9rem;
+}
+
+.dho-tool .ipk-table-scroll {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
 }
 
 .dho-table {
@@ -87,18 +93,101 @@
 .dho-table th,
 .dho-table td {
   text-align: left;
-  padding: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .dho-table th {
   color: var(--text-muted);
   font-weight: 600;
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+}
+
+.dho-table th:first-child,
+.dho-table td:first-child {
+  text-align: center;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.dho-table td:nth-child(2) {
+  font-weight: 500;
+}
+
+.dho-table td:last-child {
+  overflow-wrap: anywhere;
+}
+
+.dho-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.dho-code {
+  display: inline-block;
+  padding: 3px 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+}
+
+.dho-copy-value {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  padding: 0 2px;
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  max-width: 100%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.dho-copy-value:hover,
+.dho-copy-value:focus-visible {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.dho-copy-value.is-copied {
+  color: var(--success);
+  animation: dho-value-copied 0.5s ease;
+}
+
+@keyframes dho-value-copied {
+  from { background-color: color-mix(in srgb, var(--success) 25%, transparent); }
+  to { background-color: transparent; }
+}
+
+.dho-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.dho-error:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dho-copy-value {
+    transition: none;
+  }
+
+  .dho-copy-value.is-copied {
+    animation: none;
+  }
 }
 
 .dho-table tbody tr:hover {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
 }
 
 .dho-badge {
@@ -109,27 +198,13 @@
   padding: 0 5px;
 }
 
-@media (max-width: 760px) {
-  .dho-table,
-  .dho-table thead,
-  .dho-table tbody,
+@media (max-width: 520px) {
   .dho-table th,
-  .dho-table td,
-  .dho-table tr {
-    display: block;
-  }
-
-  .dho-table thead {
-    display: none;
-  }
-
-  .dho-table tr {
-    border-bottom: 1px solid var(--border);
-    padding: var(--space-2) 0;
-  }
-
   .dho-table td {
-    border-bottom: none;
-    padding: 2px var(--space-2);
+    padding: 10px;
+  }
+
+  .dho-table {
+    font-size: 0.78rem;
   }
 }

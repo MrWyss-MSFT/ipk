@@ -22,12 +22,18 @@ const EXAMPLE_HEX =
   "03 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 C0 A8 01 01 " +
   "0F 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00 69 70 6B 69 74 70 72 6F 6B 69 74 2E 63 6F 6D 00";
 
+function escapeHtml(value: string): string {
+  const div = document.createElement("div");
+  div.textContent = value;
+  return div.innerHTML.replace(/"/g, "&quot;");
+}
+
 function renderRow(opt: ParsedDhcpOption): string {
   return `
     <tr>
-      <td class="mono">${opt.code}</td>
+      <td><span class="dho-code mono">${opt.code}</span></td>
       <td>${opt.meta.name}${opt.vendorSpecific ? ' <span class="dho-badge">vendor</span>' : ""}</td>
-      <td class="mono">${opt.decoded || "<em>(empty)</em>"}</td>
+      <td>${opt.decoded ? `<button type="button" class="dho-copy-value mono" data-copy-value="${escapeHtml(opt.decoded)}" title="Click to copy">${escapeHtml(opt.decoded)}</button>` : "<em>(empty)</em>"}</td>
     </tr>
   `;
 }
@@ -81,6 +87,7 @@ const tool: ToolDefinition = {
           <span class="dho-count" id="dho-count"></span>
         </div>
 
+        <span class="dho-error" id="dho-copy-error" role="alert"></span>
         <div id="dho-results"></div>
       </div>
     `;
@@ -90,10 +97,12 @@ const tool: ToolDefinition = {
     const hideEmptyCheck = container.querySelector<HTMLInputElement>("#dho-hide-empty")!;
     const countEl = container.querySelector<HTMLSpanElement>("#dho-count")!;
     const results = container.querySelector<HTMLDivElement>("#dho-results")!;
+    const copyError = container.querySelector<HTMLElement>("#dho-copy-error")!;
 
     const unwirePsTabs = wirePsCommandTabs(container, "dho-ps", PS_VARIANTS);
 
     const render = () => {
+      copyError.textContent = "";
       autoGrowTextarea(input);
       const bytes = hexToBytes(input.value);
       countEl.textContent = bytes.length ? `${bytes.length} bytes` : "";
@@ -142,6 +151,20 @@ const tool: ToolDefinition = {
       `;
     };
 
+    const onCopy = async (event: MouseEvent) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>(".dho-copy-value");
+      if (!button) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyValue!);
+        copyError.textContent = "";
+        button.classList.remove("is-copied");
+        void button.offsetWidth;
+        button.classList.add("is-copied");
+      } catch (error) {
+        copyError.textContent = error instanceof Error ? error.message : "Couldn't copy that value.";
+      }
+    };
+    results.addEventListener("click", onCopy);
     input.addEventListener("input", render);
     hideEmptyCheck.addEventListener("change", render);
     const unwireGlobalPaste = wireGlobalPaste(input);
@@ -151,6 +174,7 @@ const tool: ToolDefinition = {
 
     return () => {
       input.removeEventListener("input", render);
+      results.removeEventListener("click", onCopy);
       hideEmptyCheck.removeEventListener("change", render);
       unwireGlobalPaste();
       unwirePsTabs();
