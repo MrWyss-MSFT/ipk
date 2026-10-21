@@ -31,9 +31,9 @@ function escapeHtml(value: string): string {
 function renderRow(opt: ParsedDhcpOption): string {
   return `
     <tr>
-      <td><span class="dho-code mono">${opt.code}</span></td>
+      <td><span class="dho-code ipk-number-badge mono">${opt.code}</span></td>
       <td>${opt.meta.name}${opt.vendorSpecific ? ' <span class="dho-badge">vendor</span>' : ""}</td>
-      <td>${opt.decoded ? `<button type="button" class="dho-copy-value mono" data-copy-value="${escapeHtml(opt.decoded)}" title="Click to copy">${escapeHtml(opt.decoded)}</button>` : "<em>(empty)</em>"}</td>
+      <td>${opt.decoded ? `<button type="button" class="dho-copy-value ipk-copy-value mono" data-copy-value="${escapeHtml(opt.decoded)}" title="Click to copy">${escapeHtml(opt.decoded)}</button>` : "<em>(empty)</em>"}</td>
     </tr>
   `;
 }
@@ -65,12 +65,12 @@ const tool: ToolDefinition = {
             Ingmar Verheij's ReadDhcpOptions.ps1</a>.
         </p>
 
-        <p class="dho-step-label">1. Get the DHCP interface options <span class="ipk-step-note">(copies to clipboard; pick the NIC you care about from the output)</span></p>
+        <p class="dho-step-label ipk-step-label">1. Get the DHCP interface options <span class="ipk-step-note">(copies to clipboard; pick the NIC you care about from the output)</span></p>
         ${psCommandTabsHtml("dho-ps")}
 
-        <p class="dho-step-label">2. Paste anywhere on the page</p>
+        <p class="dho-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="dho-field-label" for="dho-input">DHCP interface options (hex)</label>
+          <label class="dho-field-label ipk-field-label" for="dho-input">DHCP interface options (hex)</label>
           <button type="button" id="dho-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -87,7 +87,7 @@ const tool: ToolDefinition = {
           <span class="dho-count" id="dho-count"></span>
         </div>
 
-        <span class="dho-error" id="dho-copy-error" role="alert"></span>
+        <span class="dho-error ipk-error" id="dho-copy-error" role="alert"></span>
         <div id="dho-results"></div>
       </div>
     `;
@@ -130,7 +130,7 @@ const tool: ToolDefinition = {
 
       const table = (rows: ParsedDhcpOption[]) => `
         <div class="ipk-table-scroll">
-          <table class="dho-table">
+          <table class="dho-table ipk-table ipk-table-hover">
             <thead>
               <tr>
                 <th>Code</th>

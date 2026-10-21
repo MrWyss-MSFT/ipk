@@ -57,15 +57,7 @@
 }
 
 .aph-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
-}
-
-.aph-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
 }
 
 .aph-tool textarea {
@@ -77,17 +69,8 @@
   resize: vertical;
 }
 
-.ipk-copy-wrap textarea {
-  width: 100%;
-}
-
 #aph-output {
   font-size: 0.8rem;
-}
-
-.aph-error {
-  color: var(--danger);
-  font-size: 0.85rem;
 }
 
 .aph-output {
@@ -136,35 +119,16 @@
 
 .aph-leaf-value {
   min-width: 0;
+  max-width: none;
   word-break: break-word;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  padding: 0 2px;
-  transition: color 0.15s ease, background-color 0.15s ease;
-}
-
-.aph-leaf-value:hover {
-  color: var(--text);
-  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.aph-leaf-value.is-copied {
-  color: var(--success);
-  animation: aph-leaf-copied 0.5s ease;
-}
-
-@keyframes aph-leaf-copied {
-  0% {
-    background-color: color-mix(in srgb, var(--success) 25%, transparent);
-  }
-  100% {
-    background-color: transparent;
-  }
+  text-align: start;
 }
 
 .aph-empty {
   color: var(--text-muted);
   cursor: default;
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
 }
 
 .aph-raw {

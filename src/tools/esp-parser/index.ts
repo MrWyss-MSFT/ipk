@@ -88,7 +88,7 @@ function phaseHtml(phase: EspPhaseResult): string {
         <span>${phase.label}${phase.phaseText ? `<span class="esp-phase-text">${phase.phaseText}</span>` : ""}</span>
         ${phase.phaseState ? `<span class="esp-badge esp-badge-${stateBucket(phase.phaseState)}">${phase.phaseState}</span>` : ""}
       </h3>
-      <div class="ipk-table-scroll"><table class="esp-table">
+      <div class="ipk-table-scroll"><table class="esp-table ipk-table ipk-table-hover">
         <thead><tr><th>Step</th><th>State</th><th>Details</th></tr></thead>
         <tbody>${rows || `<tr><td colspan="3" class="esp-empty">No steps found.</td></tr>`}</tbody>
       </table></div>
@@ -130,12 +130,12 @@ const tool: ToolDefinition = {
           phases are both handled automatically.
         </p>
 
-        <p class="esp-step-label">1. Get the ESP registry values <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="esp-step-label ipk-step-label">1. Get the ESP registry values <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("esp-cmd")}
 
-        <p class="esp-step-label">2. Paste anywhere on the page</p>
+        <p class="esp-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="esp-field-label" for="esp-input">ESP registry values (JSON)</label>
+          <label class="esp-field-label ipk-field-label" for="esp-input">ESP registry values (JSON)</label>
           <button type="button" id="esp-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -144,7 +144,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder='{"DeviceSetupCategory.Status":"Succeeded","DeviceSetupCategory.StatusText":"Succeeded","AccountSetupCategory.Status.2026-10-05T13:19:26.888Z":"Succeeded",...}'
         ></textarea>
-        <div id="esp-status" class="esp-status" role="alert"></div>
+        <div id="esp-status" class="esp-status ipk-error" role="alert"></div>
 
         <div id="esp-results"></div>
       </div>

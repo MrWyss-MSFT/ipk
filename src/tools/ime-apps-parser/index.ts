@@ -370,12 +370,12 @@ const tool: ToolDefinition = {
           <a href="https://github.com/jonasatgit/IntuneDebug" target="_blank" rel="noopener">Jonas's IntuneDebug</a>.
         </p>
 
-        <p class="ima-step-label">1. Get the AppWorkload log contents <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="ima-step-label ipk-step-label">1. Get the AppWorkload log contents <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("ima-cmd", { requiresAdmin: true })}
 
-        <p class="ima-step-label">2. Paste anywhere on the page</p>
+        <p class="ima-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="ima-field-label" for="ima-input">AppWorkload log contents (JSON)</label>
+          <label class="ima-field-label ipk-field-label" for="ima-input">AppWorkload log contents (JSON)</label>
           <button type="button" id="ima-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -384,7 +384,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder='[{"Date":"10-5-2026","Time":"14:22:10.123+120","Apps":[{"Id":"11111111-2222-3333-4444-555555555555","Name":"7-Zip","Version":24,"Intent":1,"TargetType":2}]},...]'
         ></textarea>
-        <div id="ima-status" class="ima-status" role="alert"></div>
+        <div id="ima-status" class="ima-status ipk-error" role="alert"></div>
 
         <div class="ima-toggles" id="ima-toggle-wrap" hidden>
           <label class="ima-toggle">

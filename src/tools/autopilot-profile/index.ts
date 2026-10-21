@@ -33,7 +33,7 @@ function escapeHtml(value: string): string {
 
 function copyValueHtml(value: string, badge = false): string {
   if (!value) return "<em>(empty)</em>";
-  return `<button type="button" class="apc-copy-value mono${badge ? " apc-number" : ""}" data-copy-value="${escapeHtml(value)}" title="Click to copy">${escapeHtml(value)}</button>`;
+  return `<button type="button" class="apc-copy-value ipk-copy-value mono${badge ? " ipk-number-badge" : ""}" data-copy-value="${escapeHtml(value)}" title="Click to copy">${escapeHtml(value)}</button>`;
 }
 
 function summaryHtml(result: AutopilotProfileResult): string {
@@ -44,7 +44,7 @@ function summaryHtml(result: AutopilotProfileResult): string {
   return `
     <section class="apc-section apc-summary">
       <h3>Summary</h3>
-      <table class="apc-table"><tbody>${rows}</tbody></table>
+      <table class="apc-table ipk-table"><tbody>${rows}</tbody></table>
     </section>
   `;
 }
@@ -66,7 +66,7 @@ function oobeConfigHtml(result: AutopilotProfileResult): string {
   return `
     <section class="apc-section">
       <h3>OOBE Config <span class="mono apc-raw-value">${raw} (0x${raw.toString(16).toUpperCase()})</span></h3>
-      <table class="apc-table">
+      <table class="apc-table ipk-table">
         <thead><tr><th>Flag</th><th>Bit value</th><th>Enabled</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -90,7 +90,7 @@ function boolFieldsHtml(result: AutopilotProfileResult): string {
   return `
     <section class="apc-section">
       <h3>Flags</h3>
-      <table class="apc-table">
+      <table class="apc-table ipk-table">
         <thead><tr><th>Setting</th><th>Set</th><th>Raw</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -116,7 +116,7 @@ function otherFieldsHtml(result: AutopilotProfileResult): string {
   return `
     <section class="apc-section">
       <h3>Other fields</h3>
-      <table class="apc-table"><tbody>${rows}</tbody></table>
+      <table class="apc-table ipk-table"><tbody>${rows}</tbody></table>
     </section>
   `;
 }
@@ -141,12 +141,12 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="apc-tool">
-        <p class="apc-step-label">1. Get the Autopilot profile <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="apc-step-label ipk-step-label">1. Get the Autopilot profile <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("apc-cmd")}
 
-        <p class="apc-step-label">2. Paste anywhere on the page</p>
+        <p class="apc-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="apc-field-label" for="apc-input">Autopilot profile JSON (PolicyJsonCache)</label>
+          <label class="apc-field-label ipk-field-label" for="apc-input">Autopilot profile JSON (PolicyJsonCache)</label>
           <button type="button" id="apc-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -155,7 +155,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder='{"CloudAssignedTenantDomain":"ipkitprokit.onmicrosoft.com","DeploymentProfileName":"IPK - IT Pro Kit Autopilot","CloudAssignedDeviceName":"IPK-%SERIAL%","AutopilotMode":0,"CloudAssignedOobeConfig":28,...}'
         ></textarea>
-        <div id="apc-status" class="apc-status" role="alert"></div>
+        <div id="apc-status" class="apc-status ipk-error" role="alert"></div>
 
         <div id="apc-results"></div>
       </div>

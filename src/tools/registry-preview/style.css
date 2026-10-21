@@ -16,17 +16,6 @@
   color: var(--text-muted);
 }
 
-.rgp-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
-.rgp-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 /* .rgp-tool's own flex gap (space-3) is too wide between the field header
    row and the field below it - pull it back down to the standard space-2
    gap used elsewhere (the label's own margin above no longer has any
@@ -233,6 +222,14 @@
 .rgp-value-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+#rgp-copy-error {
+  margin: 0 var(--space-3) var(--space-3);
+}
+
+#rgp-copy-error:empty {
+  display: none;
 }
 
 @media (max-width: 860px) {

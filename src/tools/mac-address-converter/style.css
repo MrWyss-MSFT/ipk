@@ -5,8 +5,6 @@
 }
 
 .mac-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin-bottom: calc(var(--space-1) - var(--space-2));
 }
 
@@ -29,11 +27,6 @@
   gap: var(--space-2);
   font-size: 0.85rem;
   cursor: pointer;
-}
-
-.mac-error {
-  color: var(--danger);
-  font-size: 0.85rem;
 }
 
 .mac-section-label {

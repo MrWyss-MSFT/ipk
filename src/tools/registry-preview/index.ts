@@ -81,7 +81,7 @@ const tool: ToolDefinition = {
             PowerToys Registry Preview</a>.
         </p>
 
-        <p class="rgp-step-label">
+        <p class="rgp-step-label ipk-step-label">
           1. Export a registry location (or Registry Editor &rarr; File &rarr; Export) using a command like
         </p>
         <div class="ipk-ps-command">
@@ -94,7 +94,7 @@ const tool: ToolDefinition = {
           </div>
         </div>
 
-        <p class="rgp-step-label">2. Load the file, or paste anywhere on the page</p>
+        <p class="rgp-step-label ipk-step-label">2. Load the file, or paste anywhere on the page</p>
         <div class="rgp-input-row">
           <label class="btn" for="rgp-file">📂 Load .reg file</label>
           <input type="file" id="rgp-file" accept=".reg,text/plain" hidden />
@@ -102,7 +102,7 @@ const tool: ToolDefinition = {
         </div>
 
         <div class="ipk-field-header">
-          <label class="rgp-field-label" for="rgp-input">.reg file contents</label>
+          <label class="rgp-field-label ipk-field-label" for="rgp-input">.reg file contents</label>
           <button type="button" id="rgp-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -124,6 +124,7 @@ const tool: ToolDefinition = {
           <div class="rgp-details-pane">
             <div class="rgp-pane-title">Values</div>
             <div id="rgp-details" class="rgp-details"></div>
+            <p id="rgp-copy-error" class="ipk-error" role="alert"></p>
           </div>
         </div>
       </div>
@@ -139,6 +140,7 @@ const tool: ToolDefinition = {
     const errorsEl = container.querySelector<HTMLDivElement>("#rgp-errors")!;
     const treeEl = container.querySelector<HTMLDivElement>("#rgp-tree")!;
     const detailsEl = container.querySelector<HTMLDivElement>("#rgp-details")!;
+    const copyErrorEl = container.querySelector<HTMLParagraphElement>("#rgp-copy-error")!;
     const spinnerEl = container.querySelector<HTMLDivElement>("#rgp-spinner")!;
 
     let root: RegKeyNode | null = null;
@@ -160,12 +162,13 @@ const tool: ToolDefinition = {
     };
 
     const renderValueRow = (v: RegValue): string => {
+      const name = v.name === "@" ? "(Default)" : v.name;
       const displayValue = v.deleted
         ? '<span class="rgp-deleted-tag">deleted</span>'
-        : `<span class="mono rgp-value-text">${escapeHtml(v.display) || "<em>(empty)</em>"}</span>`;
+        : `<button type="button" class="mono rgp-value-text rgp-copy-value ipk-copy-value" data-copy-value="${escapeAttr(v.display)}" title="Click to copy" aria-label="Copy value">${escapeHtml(v.display) || "<em>(empty)</em>"}</button>`;
       return `
         <tr>
-          <td class="mono">${v.name === "@" ? "(Default)" : escapeHtml(v.name)}</td>
+          <td class="mono"><button type="button" class="mono rgp-copy-value ipk-copy-value" data-copy-value="${escapeAttr(name)}" title="Click to copy" aria-label="Copy value name">${escapeHtml(name)}</button></td>
           <td class="mono">${v.deleted ? "-" : v.type}</td>
           <td>${displayValue}</td>
         </tr>
@@ -173,6 +176,7 @@ const tool: ToolDefinition = {
     };
 
     const renderDetails = () => {
+      copyErrorEl.textContent = "";
       if (!root || !selectedPath) {
         detailsEl.innerHTML = `<p class="rgp-hint">Select a key in the tree to see its values.</p>`;
         return;
@@ -316,6 +320,22 @@ const tool: ToolDefinition = {
 
     wireCopyButton(exportCopyBtn, () => EXPORT_COMMAND);
 
+    const onCopy = async (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest<HTMLButtonElement>(".rgp-copy-value");
+      if (!button) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyValue!);
+        copyErrorEl.textContent = "";
+        button.classList.remove("is-copied");
+        void button.offsetWidth;
+        button.classList.add("is-copied");
+      } catch (error) {
+        copyErrorEl.textContent = error instanceof Error ? error.message : "Couldn't copy that value.";
+      }
+    };
+    detailsEl.addEventListener("click", onCopy);
+
     treeEl.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
       const toggle = target.closest<HTMLElement>(".rgp-toggle");
@@ -419,6 +439,7 @@ const tool: ToolDefinition = {
     const unwireGlobalPaste = wireGlobalPaste(input);
 
     return () => {
+      detailsEl.removeEventListener("click", onCopy);
       input.removeEventListener("input", parse);
       unwireGlobalPaste();
       unwireExample();

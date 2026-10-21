@@ -41,7 +41,7 @@ function renderLeafValue(value: unknown): string {
     return `<span class="aph-leaf-value aph-empty">—</span>`;
   }
   const text = String(value);
-  return `<span class="aph-leaf-value mono" data-copy-value="${escapeHtml(text)}" title="Click to copy">${escapeHtml(
+  return `<span class="aph-leaf-value ipk-copy-value mono" data-copy-value="${escapeHtml(text)}" title="Click to copy">${escapeHtml(
     text,
   )}</span>`;
 }
@@ -96,11 +96,11 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="aph-tool">
-        <p class="aph-step-label">1. Get the hardware hash <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="aph-step-label ipk-step-label">1. Get the hardware hash <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("aph-snippet", { requiresAdmin: true })}
-        <p class="aph-step-label">2. Paste anywhere on the page</p>
+        <p class="aph-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="aph-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
+          <label class="aph-label ipk-field-label" for="aph-input">Base64 hardware hash (DeviceHardwareData)</label>
           <button type="button" id="aph-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -109,7 +109,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder="AAAAAAEAHAAAAAoAAAAAwMBAAAAAAAAACgAAAAEABQAAAAEAAAAAAAAAAAAAAIABAAChDjmGH...(very long Base64 string)"
         ></textarea>
-        <span class="aph-error" id="aph-error" role="alert"></span>
+        <span class="aph-error ipk-error" id="aph-error" role="alert"></span>
         <details class="aph-csv">
           <summary>Export Autopilot CSV</summary>
           <div class="aph-csv-fields">
@@ -125,9 +125,9 @@ const tool: ToolDefinition = {
             <label>Assigned User (optional UPN)<input id="aph-csv-user" type="text" placeholder="user@contoso.com"></label>
           </div>
           <button type="button" id="aph-csv-download" class="btn btn-primary" disabled>⬇️ Export as .csv</button>
-          <span class="aph-error" id="aph-csv-error" role="alert"></span>
+          <span class="aph-error ipk-error" id="aph-csv-error" role="alert"></span>
         </details>
-        <label class="aph-label" for="aph-output">Decoded device details</label>
+        <label class="aph-label ipk-field-label" for="aph-output">Decoded device details</label>
         <div class="aph-output" id="aph-output"></div>
         <details class="aph-raw" hidden>
           <summary>Raw JSON</summary>

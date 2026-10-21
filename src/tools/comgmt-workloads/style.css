@@ -10,15 +10,7 @@
   font-size: 0.8rem;
 }
 
-.cmw-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
 .cmw-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -26,21 +18,18 @@
   width: 100%;
 }
 
-.ipk-copy-wrap textarea {
-  width: 100%;
-}
-
 #cmw-output {
   font-size: 0.8rem;
 }
 
-.cmw-error {
-  color: var(--danger);
-  font-size: 0.85rem;
-}
-
 .cmw-table {
-  width: 100%;
+  --ipk-table-font-size: 0.85rem;
+  --ipk-table-small-font-size: 0.85rem;
+  --ipk-table-cell-padding: 14px var(--space-4);
+  --ipk-table-small-cell-padding: 14px 10px;
+  --ipk-table-heading-size: 0.72rem;
+  --ipk-table-heading-spacing: 0.04em;
+  --ipk-table-heading-tint: 4%;
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--border);
@@ -48,24 +37,9 @@
   overflow: hidden;
   margin-top: var(--space-1);
   background: var(--bg);
-  font-size: 0.85rem;
-}
-
-.cmw-table th,
-.cmw-table td {
-  text-align: left;
-  padding: 14px var(--space-4);
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
 }
 
 .cmw-table th {
-  color: var(--text-muted);
-  font-weight: 600;
-  background: color-mix(in srgb, var(--text) 4%, var(--bg));
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   padding: var(--space-3) var(--space-4);
 }
 
@@ -84,10 +58,6 @@
   text-align: center;
 }
 
-.cmw-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
 .cmw-table tbody tr:not(.cmw-force-all-row):hover {
   background: color-mix(in srgb, var(--accent) 5%, var(--bg));
 }
@@ -101,14 +71,9 @@
 }
 
 .cmw-flag {
-  font-family: var(--font-mono);
+  --ipk-number-tint: 5%;
   font-size: 0.75rem;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--text) 5%, var(--bg));
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
   padding: 3px 7px;
-  font-weight: 400;
 }
 
 .cmw-checkbox {
@@ -182,8 +147,7 @@
 }
 
 @media (max-width: 520px) {
-  .cmw-table th,
-  .cmw-table td {
+  .cmw-table th {
     padding-left: 10px;
     padding-right: 10px;
   }

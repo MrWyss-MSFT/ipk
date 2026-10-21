@@ -356,6 +356,7 @@ textarea:focus {
 
 /* Copyable output never scrolls — JS (autoGrowTextarea) sets height to fit content. */
 .ipk-copy-wrap textarea {
+  width: 100%;
   overflow: hidden;
   resize: none;
 }
@@ -743,6 +744,124 @@ body.ipk-theater-mode .ipk-tool-header {
    itself instead of overflowing the page. */
 .ipk-table-scroll {
   overflow-x: auto;
+}
+
+.ipk-step-label {
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+  color: var(--text);
+}
+
+.ipk-field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ipk-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.ipk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ipk-table-font-size, 0.82rem);
+}
+
+.ipk-table th,
+.ipk-table td {
+  text-align: left;
+  padding: var(--ipk-table-cell-padding, var(--space-3) var(--space-4));
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.ipk-table th {
+  color: var(--text-muted);
+  font-size: var(--ipk-table-heading-size, 0.67rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--ipk-table-heading-spacing, 0.05em);
+  background: color-mix(in srgb, var(--text) var(--ipk-table-heading-tint, 2%), var(--bg));
+}
+
+.ipk-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.ipk-table-hover tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
+.ipk-number-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text) var(--ipk-number-tint, 4%), var(--bg));
+  padding: 3px 6px;
+}
+
+.ipk-copy-value {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  padding: 0 2px;
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  max-width: 100%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.ipk-copy-value.ipk-number-badge {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) var(--ipk-number-tint, 4%), var(--bg));
+  padding: 3px 6px;
+}
+
+.ipk-copy-value:hover,
+.ipk-copy-value:focus-visible {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.ipk-copy-value.is-copied {
+  color: var(--success);
+  animation: ipk-value-copied 0.5s ease;
+}
+
+@keyframes ipk-value-copied {
+  from { background-color: color-mix(in srgb, var(--success) 25%, transparent); }
+  to { background-color: transparent; }
+}
+
+@media (max-width: 520px) {
+  .ipk-table {
+    font-size: var(--ipk-table-small-font-size, 0.78rem);
+  }
+
+  .ipk-table th,
+  .ipk-table td {
+    padding: var(--ipk-table-small-cell-padding, 10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ipk-copy-value {
+    transition: none;
+  }
+
+  .ipk-copy-value.is-copied {
+    animation: none;
+  }
 }
 
 /* Subtle trailing note on a step label / field label, for tools that wire up

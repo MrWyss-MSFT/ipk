@@ -42,8 +42,6 @@
 }
 
 .rdx-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -60,10 +58,6 @@
 .rdx-tool textarea:not([readonly]) {
   width: 100%;
   resize: vertical;
-}
-
-.ipk-copy-wrap textarea {
-  width: 100%;
 }
 
 .rdx-summary {

@@ -27,19 +27,19 @@ const tool: ToolDefinition = {
         <div class="sid-fields">
           <div class="sid-field">
             <div class="ipk-field-header">
-              <label class="sid-field-label" for="sid-objectid">Entra ID ObjectID (GUID)</label>
+              <label class="sid-field-label ipk-field-label" for="sid-objectid">Entra ID ObjectID (GUID)</label>
               <button type="button" id="sid-objectid-example" class="ipk-example-btn">Load example</button>
             </div>
             <div class="ipk-copy-wrap">
               <input type="text" id="sid-objectid" class="mono" placeholder="4f29d7a1-8b3e-4c6a-9f12-3d7e5a8b61c0" />
               ${copyButtonHtml("sid-copy-objectid")}
             </div>
-            <span class="sid-error" id="sid-error-objectid" role="alert"></span>
+            <span class="sid-error ipk-error" id="sid-error-objectid" role="alert"></span>
           </div>
 
           <div class="sid-field">
             <div class="ipk-field-header">
-              <label class="sid-field-label" for="sid-sid">SID</label>
+              <label class="sid-field-label ipk-field-label" for="sid-sid">SID</label>
               <button type="button" id="sid-sid-example" class="ipk-example-btn">Load example</button>
             </div>
             <div class="ipk-copy-wrap">
@@ -51,7 +51,7 @@ const tool: ToolDefinition = {
               />
               ${copyButtonHtml("sid-copy-sid")}
             </div>
-            <span class="sid-error" id="sid-error-sid" role="alert"></span>
+            <span class="sid-error ipk-error" id="sid-error-sid" role="alert"></span>
           </div>
         </div>
       </div>

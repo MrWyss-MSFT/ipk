@@ -126,12 +126,12 @@ const tool: ToolDefinition = {
 
         <div class="ref-fav-panel" id="ref-fav-panel" hidden>
           <div class="ref-fav-header">
-            <span class="ref-label">Custom favorites (optional)</span>
+            <span class="ref-label ipk-field-label">Custom favorites (optional)</span>
             <button type="button" class="btn" id="ref-fav-add-custom">+ Add custom favorite</button>
           </div>
           <ul class="ref-fav-custom-list" id="ref-fav-custom-list"></ul>
 
-          <label class="ref-label" for="ref-fav-output">
+          <label class="ref-label ipk-field-label" for="ref-fav-output">
             cmd.exe command — adds the checked paths above to Registry Editor's Favorites
           </label>
           <div class="ipk-copy-wrap">

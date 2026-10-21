@@ -5,8 +5,6 @@
 }
 
 .gid-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -33,12 +31,6 @@
   margin-bottom: calc(var(--space-2) - var(--space-1));
 }
 
-.gid-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
 .gid-tool input[type="text"],
 .gid-tool textarea {
   width: 100%;
@@ -46,9 +38,4 @@
 
 #gid-ps {
   font-size: 0.8rem;
-}
-
-.gid-error {
-  color: var(--danger);
-  font-size: 0.85rem;
 }

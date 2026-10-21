@@ -14,16 +14,10 @@
 }
 
 .cfs-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
 .cfs-tool input[type="text"] {
-  width: 100%;
-}
-
-.ipk-copy-wrap textarea {
   width: 100%;
 }
 
@@ -41,9 +35,4 @@
   height: 16px;
   accent-color: var(--accent);
   cursor: pointer;
-}
-
-.cfs-error {
-  color: var(--danger);
-  font-size: 0.85rem;
 }

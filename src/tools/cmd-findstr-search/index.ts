@@ -29,13 +29,13 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="cfs-tool">
-        <label class="cfs-label" for="cfs-text">Text to search for</label>
+        <label class="cfs-label ipk-field-label" for="cfs-text">Text to search for</label>
         <input id="cfs-text" class="mono" type="text" placeholder="e.g. search string" value="search string" />
 
-        <label class="cfs-label" for="cfs-path">Root folder</label>
+        <label class="cfs-label ipk-field-label" for="cfs-path">Root folder</label>
         <input id="cfs-path" class="mono" type="text" placeholder="e.g. C:\\" value="C:\\" />
 
-        <label class="cfs-label" for="cfs-formats">File formats</label>
+        <label class="cfs-label ipk-field-label" for="cfs-formats">File formats</label>
         <input id="cfs-formats" class="mono" type="text" placeholder="e.g. *.ps1 *.bat *.log" value="*.ps1 *.bat *.log" />
 
         <label class="cfs-checkbox-label">
@@ -43,9 +43,9 @@ const tool: ToolDefinition = {
           Case-insensitive (/I)
         </label>
 
-        <span class="cfs-error" id="cfs-error" role="alert"></span>
+        <span class="cfs-error ipk-error" id="cfs-error" role="alert"></span>
 
-        <label class="cfs-label" for="cfs-output">cmd.exe command</label>
+        <label class="cfs-label ipk-field-label" for="cfs-output">cmd.exe command</label>
         <div class="ipk-ps-command">
           <div class="ipk-ps-tabs" role="tablist" aria-label="Command shell">
             <button type="button" class="ipk-ps-tab is-active" role="tab" aria-selected="true" tabindex="-1">Command Prompt</button>

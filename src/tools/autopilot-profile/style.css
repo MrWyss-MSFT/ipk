@@ -4,15 +4,7 @@
   gap: var(--space-2);
 }
 
-.apc-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
 .apc-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -25,11 +17,6 @@
   border-radius: var(--radius-sm);
   color: var(--text);
   resize: vertical;
-}
-
-.apc-status {
-  color: var(--danger);
-  font-size: 0.85rem;
 }
 
 #apc-results {
@@ -70,39 +57,12 @@
   white-space: nowrap;
 }
 
-.apc-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.82rem;
-}
-
-.apc-table th,
-.apc-table td {
-  text-align: left;
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-.apc-table th {
-  color: var(--text-muted);
-  font-size: 0.67rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: color-mix(in srgb, var(--text) 2%, var(--bg));
-}
-
 .apc-table tr.is-enabled td {
   background: color-mix(in srgb, var(--accent) 5%, var(--bg));
 }
 
 .apc-table tr.is-enabled td:first-child {
   color: var(--accent);
-}
-
-.apc-table tr:last-child td {
-  border-bottom: 0;
 }
 
 .apc-table td:first-child {
@@ -183,65 +143,11 @@
 }
 
 .apc-copy-value {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: inherit;
   font-size: 0.8rem;
-  text-align: left;
-  padding: 0 2px;
-  border-radius: var(--radius-sm);
-  overflow-wrap: anywhere;
-  cursor: pointer;
-  max-width: 100%;
-  transition: color 0.15s ease, background-color 0.15s ease;
-}
-
-.apc-number {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--text) 4%, var(--bg));
-  padding: 3px 6px;
-}
-
-.apc-copy-value:hover,
-.apc-copy-value:focus-visible {
-  color: var(--text);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.apc-copy-value.is-copied {
-  color: var(--success);
-  animation: apc-value-copied 0.5s ease;
-}
-
-@keyframes apc-value-copied {
-  from { background-color: color-mix(in srgb, var(--success) 25%, transparent); }
-  to { background-color: transparent; }
 }
 
 @media (max-width: 520px) {
-  .apc-table th,
-  .apc-table td {
-    padding: 10px;
-  }
-
   .apc-summary td {
     padding: 0;
-  }
-
-  .apc-table {
-    font-size: 0.78rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .apc-copy-value {
-    transition: none;
-  }
-
-  .apc-copy-value.is-copied {
-    animation: none;
   }
 }

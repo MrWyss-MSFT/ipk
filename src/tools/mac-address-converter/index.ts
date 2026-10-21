@@ -69,11 +69,11 @@ const tool: ToolDefinition = {
         </div>
 
         <div class="ipk-field-header">
-          <label class="mac-label" for="mac-input">MAC address(es) <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+          <label class="mac-label ipk-field-label" for="mac-input">MAC address(es) <span class="ipk-paste-note">— paste anywhere on the page</span></label>
           <button type="button" id="mac-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea id="mac-input" class="mono" rows="6" placeholder="Paste one or more MAC addresses, one per line..."></textarea>
-        <span class="mac-error" id="mac-error" role="alert"></span>
+        <span class="mac-error ipk-error" id="mac-error" role="alert"></span>
 
         <p class="mac-section-label">Convert to</p>
         <div class="mac-format-radios" id="mac-format-radios">
@@ -85,7 +85,7 @@ const tool: ToolDefinition = {
           <button type="button" class="btn btn-primary" data-case="upper">UPPERCASE</button>
         </div>
 
-        <label class="mac-label" for="mac-list-output">Converted</label>
+        <label class="mac-label ipk-field-label" for="mac-list-output">Converted</label>
         <div class="ipk-copy-wrap">
           <textarea id="mac-list-output" class="mono" rows="6" readonly></textarea>
           ${copyButtonHtml("mac-list-copy")}

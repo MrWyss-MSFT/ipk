@@ -167,12 +167,12 @@ const tool: ToolDefinition = {
           the "winning provider" column telling you who actually won.
         </p>
 
-        <p class="mdm-step-label">1. Get the MDM diagnostics report <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="mdm-step-label ipk-step-label">1. Get the MDM diagnostics report <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("mdm-cmd", { requiresAdmin: true })}
 
-        <p class="mdm-step-label">2. Paste anywhere on the page</p>
+        <p class="mdm-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="mdm-field-label" for="mdm-input">MDM diagnostics report (XML)</label>
+          <label class="mdm-field-label ipk-field-label" for="mdm-input">MDM diagnostics report (XML)</label>
           <button type="button" id="mdm-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -181,7 +181,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;MDMEnterpriseDiagnosticsReport&gt;&#10;  &lt;EnrollmentState&gt;&#10;    &lt;EnrollmentInfo&gt;...&lt;/EnrollmentInfo&gt;&#10;  &lt;/EnrollmentState&gt;&#10;  ...&#10;&lt;/MDMEnterpriseDiagnosticsReport&gt;"
         ></textarea>
-        <div id="mdm-status" class="mdm-status" role="alert"></div>
+        <div id="mdm-status" class="mdm-status ipk-error" role="alert"></div>
 
         <div id="mdm-results" hidden>
           <p id="mdm-summary" class="mdm-summary"></p>
@@ -195,7 +195,7 @@ const tool: ToolDefinition = {
           </div>
           <div class="mdm-tagbar" id="mdm-tagbar"></div>
           <div class="ipk-table-scroll">
-            <table class="mdm-table">
+            <table class="mdm-table ipk-table">
               <thead>
                 <tr>
                   <th>Policy</th>
@@ -208,6 +208,7 @@ const tool: ToolDefinition = {
               <tbody id="mdm-rows"></tbody>
             </table>
           </div>
+          <p id="mdm-copy-error" class="ipk-error" role="alert"></p>
           <p class="mdm-empty" id="mdm-empty" hidden>Nothing matches your filter.</p>
         </div>
       </div>
@@ -226,6 +227,7 @@ const tool: ToolDefinition = {
     const tagbarEl = container.querySelector<HTMLDivElement>("#mdm-tagbar")!;
     const rowsEl = container.querySelector<HTMLTableSectionElement>("#mdm-rows")!;
     const emptyEl = container.querySelector<HTMLParagraphElement>("#mdm-empty")!;
+    const copyErrorEl = container.querySelector<HTMLParagraphElement>("#mdm-copy-error")!;
 
     let allRows: CspPolicyRow[] = [];
     let activeScope = "all";
@@ -300,7 +302,7 @@ const tool: ToolDefinition = {
                   <span class="mdm-group-icon" aria-hidden="true">📁</span>
                   <span class="mdm-group-area">${escapeHtml(area)}</span>
                   ${hasPolicyCspDocsPage(area) ? docsLinkHtml(areaDocsUrl(area), area) : ""}
-                  <span class="mdm-group-count">${groupRows.length}</span>
+                  <span class="mdm-group-count ipk-number-badge">${groupRows.length}</span>
                 </span>
               </td>
             </tr>
@@ -311,11 +313,11 @@ const tool: ToolDefinition = {
               return `
                 <tr>
                   <td class="mdm-name-cell"${title ? ` title="${escapeHtml(title)}"` : ""}>
-                    <span class="mono">${escapeHtml(r.name)}</span>
+                    <button type="button" class="mdm-copy-value ipk-copy-value mono" data-copy-value="${escapeHtml(r.name)}" title="Click to copy" aria-label="Copy policy name">${escapeHtml(r.name)}</button>
                     ${hasPolicyCspDocsPage(r.area) ? docsLinkHtml(policyDocsUrl(r.area, r.name), r.name) : ""}
                   </td>
                   <td class="mdm-value-cell">
-                    <code class="mono">${escapeHtml(r.value)}</code>
+                    <button type="button" class="mdm-copy-value ipk-copy-value mono" data-copy-value="${escapeHtml(r.value)}" title="Click to copy" aria-label="Copy value">${escapeHtml(r.value)}</button>
                   </td>
                   <td class="mdm-provider-cell">${winningProviderBadgeHtml(r.winningProvider)}</td>
                   <td class="mdm-scope-cell">${escapeHtml(scopeLabel(r))}</td>
@@ -368,6 +370,21 @@ const tool: ToolDefinition = {
 
     input.addEventListener("input", render);
     filterInput.addEventListener("input", renderTable);
+    const onCopy = async (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest<HTMLButtonElement>(".mdm-copy-value");
+      if (!button) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyValue!);
+        copyErrorEl.textContent = "";
+        button.classList.remove("is-copied");
+        void button.offsetWidth;
+        button.classList.add("is-copied");
+      } catch (error) {
+        copyErrorEl.textContent = error instanceof Error ? error.message : "Couldn't copy that value.";
+      }
+    };
+    rowsEl.addEventListener("click", onCopy);
     const unwireGlobalPaste = wireGlobalPaste(input);
 
     const exampleBtn = container.querySelector<HTMLButtonElement>("#mdm-example")!;
@@ -376,6 +393,7 @@ const tool: ToolDefinition = {
     return () => {
       input.removeEventListener("input", render);
       filterInput.removeEventListener("input", renderTable);
+      rowsEl.removeEventListener("click", onCopy);
       unwireGlobalPaste();
       unwirePsTabs();
       unwireExample();

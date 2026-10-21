@@ -4,15 +4,7 @@
   gap: var(--space-2);
 }
 
-.mdm-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
 .mdm-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -25,11 +17,6 @@
   border-radius: var(--radius-sm);
   color: var(--text);
   resize: vertical;
-}
-
-.mdm-status {
-  color: var(--danger);
-  font-size: 0.85rem;
 }
 
 .mdm-summary {
@@ -113,33 +100,36 @@
   border-color: transparent;
 }
 
-.mdm-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.82rem;
+.mdm-tool .ipk-table-scroll {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  margin-top: var(--space-3);
 }
 
-.mdm-table th,
+.mdm-table {
+  --ipk-table-heading-tint: 4%;
+}
+
 .mdm-table td {
-  text-align: left;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
   word-break: break-word;
 }
 
 .mdm-table th {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
   white-space: nowrap;
 }
 
+.mdm-table tbody tr:not(.mdm-group-row):hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+}
+
 .mdm-group-row td {
-  background: var(--bg-hover);
-  border-top: 2px solid var(--border);
-  padding-top: 10px;
-  padding-bottom: 8px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg));
+  border-top: 1px solid var(--border);
+}
+
+.mdm-group-row:first-child td {
+  border-top: 0;
 }
 
 .mdm-group-header {
@@ -162,13 +152,7 @@
 }
 
 .mdm-group-count {
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
+  display: inline-block;
 }
 
 .mdm-docs-link {
@@ -189,10 +173,23 @@
 
 .mdm-name-cell {
   white-space: nowrap;
+  font-weight: 500;
 }
 
-.mdm-value-cell code {
-  word-break: break-all;
+.mdm-value-cell {
+  min-width: 200px;
+}
+
+.mdm-copy-value {
+  font-size: 0.8rem;
+}
+
+#mdm-copy-error {
+  margin: 0;
+}
+
+#mdm-copy-error:empty {
+  display: none;
 }
 
 .mdm-scope-cell,
@@ -223,28 +220,4 @@
   color: var(--text-muted);
   font-size: 0.85rem;
   font-style: italic;
-}
-
-@media (max-width: 640px) {
-  .mdm-table,
-  .mdm-table tbody,
-  .mdm-table tr,
-  .mdm-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .mdm-table thead {
-    display: none;
-  }
-
-  .mdm-table tr {
-    border-bottom: 1px solid var(--border);
-    padding: var(--space-2) 0;
-  }
-
-  .mdm-table td {
-    border-bottom: none;
-    padding: 2px 0;
-  }
 }

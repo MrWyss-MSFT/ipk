@@ -51,16 +51,9 @@
 }
 
 .sid-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0;
 }
 
 .sid-tool input[type="text"] {
   width: 100%;
-}
-
-.sid-error {
-  color: var(--danger);
-  font-size: 0.85rem;
 }

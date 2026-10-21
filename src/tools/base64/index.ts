@@ -34,12 +34,12 @@ const tool: ToolDefinition = {
           <button type="button" class="btn" data-mode="decode">Decode</button>
         </div>
         <div class="ipk-field-header">
-          <label class="b64-label" for="b64-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+          <label class="b64-label ipk-field-label" for="b64-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
           <button type="button" id="b64-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea id="b64-input" class="mono" rows="8" placeholder="Type or paste text here..."></textarea>
-        <span class="b64-error" id="b64-error" role="alert"></span>
-        <label class="b64-label" for="b64-output">Output</label>
+        <span class="b64-error ipk-error" id="b64-error" role="alert"></span>
+        <label class="b64-label ipk-field-label" for="b64-output">Output</label>
         <div class="ipk-copy-wrap">
           <textarea id="b64-output" class="mono" rows="8" readonly></textarea>
           ${copyButtonHtml("b64-copy")}

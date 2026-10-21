@@ -248,8 +248,8 @@ const DEVICE_USER_STATE_HTML = `
         <div class="wus-field"><label for="wus-localEnd">End (max 18 hours)</label><input type="time" id="wus-localEnd" step="60" value="${timeValue(DEFAULTS.activeEnd)}" required aria-describedby="wus-local-hours-error"></div>
       </div>
   </div>
-  <p class="wus-error" id="wus-availability-error" role="alert" hidden></p>
-  <p class="wus-error" id="wus-local-hours-error" role="alert" hidden></p>
+  <p class="wus-error ipk-error" id="wus-availability-error" role="alert" hidden></p>
+  <p class="wus-error ipk-error" id="wus-local-hours-error" role="alert" hidden></p>
   <button type="button" class="wus-btn" id="wus-edit-schedule" aria-haspopup="dialog" hidden>Edit device availability & user behavior</button>`;
 
 /** Device-local calendar dates stored as UTC epoch ms, like the rest of the engine. */
@@ -313,7 +313,7 @@ const tool: ToolDefinition = {
                 </div>
                 <div class="wus-release-controls" id="wus-release-${kind}-controls" hidden>
                 ${kind === "software" ? '<div class="wus-field"><label for="wus-release-software-title">Release title</label><input type="text" id="wus-release-software-title" value="Microsoft product update"></div>' : ""}
-                <div class="wus-field"><label${kind === "cu" ? "" : ` for="wus-release-${kind}-date"`}>Release date</label>${kind === "cu" ? '<span><time id="wus-patch-date" title="Patch Tuesday: second Tuesday of the selected month"></time> · Automatic (PT)</span>' : `<input type="date" id="wus-release-${kind}-date" aria-label="Release date for ${label}" aria-describedby="wus-release-${kind}-date-error"><span class="wus-release-date-error wus-error" id="wus-release-${kind}-date-error" role="alert" hidden></span>`}</div>
+                <div class="wus-field"><label${kind === "cu" ? "" : ` for="wus-release-${kind}-date"`}>Release date</label>${kind === "cu" ? '<span><time id="wus-patch-date" title="Patch Tuesday: second Tuesday of the selected month"></time> · Automatic (PT)</span>' : `<input type="date" id="wus-release-${kind}-date" aria-label="Release date for ${label}" aria-describedby="wus-release-${kind}-date-error"><span class="wus-release-date-error wus-error ipk-error" id="wus-release-${kind}-date-error" role="alert" hidden></span>`}</div>
                 <div class="wus-field"><label${kind === "software" ? "" : ` for="wus-release-${kind}-restart"`}>Requires restart</label>${kind === "software" ? "<span>Not modeled</span>" : kind === "cu"
                   ? '<select id="wus-release-cu-restart" aria-label="Monthly B-week CU requires restart"><option value="auto">Automatic (hotpatch schedule)</option><option value="yes">Yes (override)</option><option value="no">No (override)</option></select>'
                   : kind === "oob" || kind === "oobns"
@@ -335,7 +335,7 @@ const tool: ToolDefinition = {
           </div>
           <p class="wus-help" id="wus-release-note">Choose releases for this month. Policies still apply; restart overrides are simulation-only.</p>
           <p class="wus-help" id="wus-duration-note" hidden>Blank duration overrides inherit the defaults (5 minutes download, 20 minutes install unless changed). Zero means instantaneous. Monthly B-week overrides apply to every modeled B release.</p>
-          <p class="wus-error" id="wus-release-error" role="alert" hidden></p>
+          <p class="wus-error ipk-error" id="wus-release-error" role="alert" hidden></p>
         </details>
         ${DEVICE_USER_STATE_HTML}
         ${QUALITY_POLICY_HTML}
@@ -788,7 +788,7 @@ const tool: ToolDefinition = {
         ).reported.some(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name));
         editor.setAttribute("aria-invalid", String(parsed.errors.length > 0));
         preview.innerHTML = [
-          ...parsed.errors.map((message) => `<p class="wus-error" role="alert">${esc(message)}</p>`),
+          ...parsed.errors.map((message) => `<p class="wus-error ipk-error" role="alert">${esc(message)}</p>`),
           ...(parsed.warnings.length ? [`<div class="wus-import-warnings"><strong>Warnings — confirmation required</strong><ul>${parsed.warnings.map((message) => `<li>${esc(message)}</li>`).join("")}</ul></div>`] : []),
           ...(pendingEnrollment ? [
             `<div><strong>Cloud policy enrollment status</strong><div class="wus-enrollment-list">${parsed.reported.filter(([name]) => Object.hasOwn(ENROLLMENT_POLICIES, name)).map(([name, value]) => `<span class="${value === "1" ? "wus-enrolled" : "wus-not-enrolled"}">${value === "1" ? "✓" : "–"} ${esc(ENROLLMENT_POLICIES[name])}</span>`).join("")}</div><p class="wus-help">Pending import — informational only; not yet applied.</p></div>`,

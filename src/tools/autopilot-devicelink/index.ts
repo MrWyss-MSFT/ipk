@@ -246,7 +246,7 @@ function buildFieldHtml(field: ResultField, index: number): string {
   const id = `adl-copy-${index}`;
   return `
     <div class="adl-field">
-      <span class="adl-field-label">${escapeHtml(field.label)}</span>
+      <span class="adl-field-label ipk-field-label">${escapeHtml(field.label)}</span>
       <div class="ipk-copy-wrap">
         <input
           type="text"
@@ -351,7 +351,7 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="adl-tool">
-        <p class="adl-step-label">
+        <p class="adl-step-label ipk-step-label">
           1. Get the DeviceLink
           <span class="ipk-step-note">
             with the <a class="btn" href="#/tool/qr-scanner">📷 QR Code Scanner</a> tool,
@@ -361,7 +361,7 @@ const tool: ToolDefinition = {
           </span>
         </p>
         <div class="ipk-field-header">
-          <label class="adl-input-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
+          <label class="adl-input-label ipk-field-label" for="adl-input">DeviceLink URL or .devicelink.csv contents</label>
           <button type="button" class="btn ipk-example-btn" id="adl-example">Load example</button>
         </div>
         <textarea
@@ -371,7 +371,7 @@ const tool: ToolDefinition = {
           placeholder="devicelink:/1/?sn=...&amp;data=...&#10;&#10;or paste the contents of a .devicelink.csv file"
         ></textarea>
 
-        <p class="adl-error" id="adl-error" role="alert" hidden></p>
+        <p class="adl-error ipk-error" id="adl-error" role="alert" hidden></p>
 
         <div class="adl-results" id="adl-results"></div>
 
@@ -486,7 +486,7 @@ const tool: ToolDefinition = {
     function renderRowErrors(errors: DeviceLinkCsvRowError[]): string {
       if (errors.length === 0) return "";
       return errors
-        .map((e) => `<p class="adl-row-error">⚠️ Line ${e.line}: ${escapeHtml(e.message)}</p>`)
+        .map((e) => `<p class="adl-row-error ipk-error">⚠️ Line ${e.line}: ${escapeHtml(e.message)}</p>`)
         .join("");
     }
 

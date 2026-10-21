@@ -206,7 +206,7 @@ const tool: ToolDefinition = {
 
           <div class="awk-preview-wrap">
             <div class="awk-preview-header">
-              <span class="awk-label">Preview</span>
+              <span class="awk-label ipk-field-label">Preview</span>
               <div class="awk-preview-controls">
                 <label class="awk-antiburn-field" title="Periodically nudges the message so it doesn't burn a static image into the screen">
                   <input type="checkbox" id="awk-antiburn" checked />
@@ -231,7 +231,7 @@ const tool: ToolDefinition = {
 
         <div class="awk-message-field">
           <div class="awk-field-header">
-            <label class="awk-label" for="awk-message">Screen message (Markdown, optional)</label>
+            <label class="awk-label ipk-field-label" for="awk-message">Screen message (Markdown, optional)</label>
             <button type="button" id="awk-message-example" class="awk-populate-btn">Use example</button>
           </div>
           <textarea

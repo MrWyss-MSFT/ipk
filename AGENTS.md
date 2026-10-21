@@ -56,6 +56,27 @@ Create `src/tools/<kebab-id>/`:
 Use `copyButtonHtml()` / `wireCopyButton()` / `autoGrowTextarea()` from
 `@/app/copy-button` for any copyable field — don't reinvent copy buttons.
 
+Reuse the opt-in shared classes in `src/styles/components.css` before adding
+per-tool styling:
+
+- `.ipk-step-label`, `.ipk-field-label`, `.ipk-error` provide common
+  typography/colors. Keep field-label spacing adjustments local to the
+  containing layout.
+- `.ipk-table` provides table typography, cell spacing, headers, separators,
+  and narrow-screen spacing; add `.ipk-table-hover` for row highlights.
+  Keep column sizing/alignment local and use `.ipk-table-scroll` around
+  tables that can overflow. The `--ipk-table-*` properties support local
+  spacing/typography variants without duplicating the base rules.
+- `.ipk-number-badge` styles numeric codes/flags.
+- `.ipk-copy-value` styles inline copy targets, including hover/focus and
+  `.is-copied` feedback with reduced-motion support. It supplies appearance
+  only; the tool still wires copying, error reporting, and keyboard access.
+  It can be combined with `.ipk-number-badge`.
+
+Tool-specific classes can remain alongside these for behavior hooks and
+local overrides. Keep specialized layouts, tooltip positioning, status
+semantics, and textarea resizing/auto-grow behavior local.
+
 ## Adding a Playbook (guide)
 
 Playbooks (`src/tools/playbooks/`) are short, step-by-step guides authored as
@@ -300,7 +321,7 @@ grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
 - **"Paste something generated on a device" tools follow one stepped
   pattern** — see `src/tools/autopilot-hash` as the reference implementation
   and copy its structure for any new tool shaped like it:
-  - **Step 1** is a bold `<p class="xyz-step-label">1. Get the &lt;thing&gt;
+  - **Step 1** is a bold `<p class="ipk-step-label xyz-step-label">1. Get the &lt;thing&gt;
     …</p>`, phrased as "Get the \<thing\>" (not "Run this on the device"),
     followed by the generated command (see the PowerShell/cmd.exe bullet
     above). If the command only copies to clipboard and nothing more exotic,
@@ -312,11 +333,11 @@ grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
     NIC you care about from the output"). Don't mention an OS/device type
     (e.g. "on a Windows device") in step 1 — that's implied by the
     PowerShell/cmd.exe command itself.
-  - **Step 2** is always exactly `<p class="xyz-step-label">2. Paste anywhere
+  - **Step 2** is always exactly `<p class="ipk-step-label xyz-step-label">2. Paste anywhere
     on the page</p>` — the input field's own label (see next bullet) carries
     the "what goes here" explanation, so step 2 never needs to restate it.
   - **The field label above the input** is a separate, plain (non-bold)
-    `<label class="xyz-field-label" for="xyz-input">…</label>` describing
+    `<label class="ipk-field-label xyz-field-label" for="xyz-input">…</label>` describing
     what the field expects (e.g. "Base64 hardware hash
     (DeviceHardwareData)"). Give it `margin: 0 0 calc(var(--space-1) -
     var(--space-N))` where `--space-N` matches your tool's root container's
@@ -329,8 +350,8 @@ grows — see `src/tools/stay-awake` or `src/tools/reference` for examples.
     `@/app/global-paste` on the primary input so `Ctrl+V` works anywhere on
     the page, not just when that field has focus (call its returned cleanup
     function from your `mount()`'s unmount callback).
-  - **Error/status messages use the plain `.xyz-error` style**: `color:
-    var(--danger); font-size: 0.85rem;` on a `<span>`/`<p>`/`<div
+  - **Error/status messages use the shared `.ipk-error` class**, optionally
+    alongside a tool-specific behavior hook, on a `<span>`/`<p>`/`<div
     role="alert">` — no `min-height` reservation, no `var(--danger,
     #fallback)` color fallback (the `--danger` variable is always defined).
     Keep a dedicated error element distinct from any soft/partial warning

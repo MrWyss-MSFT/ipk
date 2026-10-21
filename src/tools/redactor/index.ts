@@ -60,7 +60,7 @@ const tool: ToolDefinition = {
           </fieldset>
 
           <div class="rdx-fields">
-            <label class="rdx-field-label" for="rdx-custom">Custom words (comma-separated)</label>
+            <label class="rdx-field-label ipk-field-label" for="rdx-custom">Custom words (comma-separated)</label>
             <input
               type="text"
               id="rdx-custom"
@@ -68,20 +68,20 @@ const tool: ToolDefinition = {
               placeholder="IPK - IT Pro Kit, Project Phoenix, Jane Doe"
             />
 
-            <label class="rdx-field-label" for="rdx-replacement">Replacement text</label>
+            <label class="rdx-field-label ipk-field-label" for="rdx-replacement">Replacement text</label>
             <input type="text" id="rdx-replacement" class="mono" value="${DEFAULT_REPLACEMENT}" />
           </div>
         </div>
 
         <div class="ipk-field-header">
-          <label class="rdx-field-label" for="rdx-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
+          <label class="rdx-field-label ipk-field-label" for="rdx-input">Input <span class="ipk-paste-note">— paste anywhere on the page</span></label>
           <button type="button" id="rdx-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea id="rdx-input" rows="10" placeholder="Paste text here..."></textarea>
 
         <div class="rdx-summary" id="rdx-summary" role="status"></div>
 
-        <label class="rdx-field-label" for="rdx-output">Redacted output</label>
+        <label class="rdx-field-label ipk-field-label" for="rdx-output">Redacted output</label>
         <div class="ipk-copy-wrap">
           <textarea id="rdx-output" class="mono" readonly rows="10"></textarea>
           ${copyButtonHtml("rdx-copy")}

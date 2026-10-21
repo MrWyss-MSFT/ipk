@@ -254,11 +254,6 @@
   gap: var(--space-1);
 }
 
-.qrs-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 .qrs-field-value {
   width: 100%;
 }
@@ -299,4 +294,3 @@
 .qrs-devicelink-export {
   align-self: flex-start;
 }
-

@@ -35,17 +35,17 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="cmw-tool">
-        <p class="cmw-step-label">1. Get the ComgmtWorkloads value on a co-managed device <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="cmw-step-label ipk-step-label">1. Get the ComgmtWorkloads value on a co-managed device <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("cmw-snippet", { requiresAdmin: true })}
-        <p class="cmw-step-label">2. Paste anywhere on the page</p>
+        <p class="cmw-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="cmw-field-label" for="cmw-input">ComgmtWorkloads value</label>
+          <label class="cmw-field-label ipk-field-label" for="cmw-input">ComgmtWorkloads value</label>
           <button type="button" id="cmw-example" class="ipk-example-btn">Load example</button>
         </div>
         <input id="cmw-input" class="mono" type="text" placeholder="e.g. 8193" value="8193" />
-        <span class="cmw-error" id="cmw-error" role="alert"></span>
+        <span class="cmw-error ipk-error" id="cmw-error" role="alert"></span>
         <p class="cmw-note">Tick or untick workloads below to build the value the other way around.</p>
-        <table class="cmw-table" id="cmw-table">
+        <table class="cmw-table ipk-table" id="cmw-table">
           <thead>
             <tr>
               <th>Workload</th>
@@ -56,7 +56,7 @@ const tool: ToolDefinition = {
           <tbody id="cmw-tbody"></tbody>
         </table>
 
-        <p class="cmw-step-label">As shown in the Intune admin center</p>
+        <p class="cmw-step-label ipk-step-label">As shown in the Intune admin center</p>
         <div class="ipk-copy-wrap">
           <p class="ipk-code mono" id="cmw-intune-text"></p>
           ${copyButtonHtml("cmw-intune-copy")}
@@ -103,7 +103,7 @@ const tool: ToolDefinition = {
           return `
               <tr${rowClass ? ` class="${rowClass}"` : ""}>
                 <td>${r.configMgrName ?? r.workload}${r.isForceAllSwitch ? '<span class="cmw-switch-note">Overrides individual switches</span>' : ""}</td>
-                <td><span class="cmw-flag">${r.value}</span></td>
+                <td><span class="cmw-flag ipk-number-badge">${r.value}</span></td>
                 <td class="cmw-enabled-cell">
                   <input type="checkbox" class="cmw-checkbox" aria-label="${r.configMgrName ?? r.workload}" data-flag-value="${r.value}" data-implied-only="${r.impliedOnly ? "true" : "false"}" ${r.isEnabled ? "checked" : ""} ${locked ? "disabled" : ""} />
                 </td>

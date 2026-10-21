@@ -81,7 +81,7 @@ export function wireScheduleEditor(container: HTMLElement, field: HTMLTextAreaEl
         ${WEEKDAYS.map((_, day) => `<div class="wus-schedule-column" data-day="${day}"></div>`).join("")}
       </div></div>
       <div class="wus-period-popup" popover="auto" role="dialog" aria-label="Edit online period"><div class="wus-schedule-edit"><strong>Online period</strong><label>Day <select data-edit="day">${WEEKDAYS.map((day, i) => `<option value="${i}">${day}</option>`).join("")}</select></label><label>From <input type="time" step="60" required data-edit="start"></label><label>To <input type="time" step="60" required data-edit="end"></label><button type="button" data-action="remove">Remove</button><button type="button" data-action="done-period">Done</button></div></div>
-      <p class="wus-error wus-schedule-error" role="alert"></p>
+      <p class="wus-error wus-schedule-error ipk-error" role="alert"></p>
       <section class="wus-behavior-editor"></section>
       <footer><span class="wus-help">Changes apply only when saved.</span><button type="button" data-action="cancel">Cancel</button><button type="button" data-action="apply">Apply changes</button></footer>`;
     dialog.querySelector(".wus-schedule-zone")!.textContent = zone();

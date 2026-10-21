@@ -1245,11 +1245,6 @@ a.wus-csp:focus-visible {
   background: color-mix(in srgb, var(--accent) 25%, var(--bg-elevated));
 }
 
-.wus-error {
-  color: var(--danger);
-  font-size: 0.85rem;
-}
-
 .wus-timeline {
   display: grid;
   grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);

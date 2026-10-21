@@ -122,7 +122,7 @@ export function mountBehaviorEditor(container: HTMLElement, dialog: HTMLElement,
           <div><label class="wus-check"><input type="checkbox" data-setting="userRestartNotify"> Notify me when a restart is required</label> <a class="wus-csp" href="ms-settings:windowsupdate-options" aria-label="Open Windows Update advanced options" title="Open Windows Update advanced options">↗</a></div>
           <label class="wus-check"><input type="checkbox" data-setting="userSignedIn"> A user is signed in when notifications fire</label>
         </div>
-        <p class="wus-error" role="alert"></p>`;
+        <p class="wus-error ipk-error" role="alert"></p>`;
   dialog.querySelector<HTMLElement>("[data-help]")!.title = `${container.querySelector<HTMLElement>("#wus-local-active-hours-title")!.title} Repeats every day. Drag or resize in half-hour increments, up to 18 hours. Click the bar's time text to edit. An earlier end continues into the next day; matching times mean no active hours. Existing times between half hours round to the nearest half hour when applied.`;
   for (const key of ["userRestartNotify", "userSignedIn"]) {
     dialog.querySelector<HTMLInputElement>(`[data-setting="${key}"]`)!.checked = source(key).checked;

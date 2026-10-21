@@ -4,15 +4,7 @@
   gap: var(--space-2);
 }
 
-.uhe-step-label {
-  font-weight: 600;
-  margin: var(--space-2) 0 0;
-  color: var(--text);
-}
-
 .uhe-field-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
   margin: 0 0 calc(var(--space-1) - var(--space-2));
 }
 
@@ -25,11 +17,6 @@
   border-radius: var(--radius-sm);
   color: var(--text);
   resize: vertical;
-}
-
-.uhe-status {
-  color: var(--danger);
-  font-size: 0.85rem;
 }
 
 .uhe-warn {

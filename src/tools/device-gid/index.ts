@@ -36,33 +36,33 @@ const tool: ToolDefinition = {
           reasons that have nothing to do with Intune reporting 🫠.
         </p>
 
-        <p class="gid-step-label">1. Get the local LID value <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="gid-step-label ipk-step-label">1. Get the local LID value <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("gid-ps-lid")}
 
-        <p class="gid-step-label">2. Enter either value — the other updates automatically</p>
+        <p class="gid-step-label ipk-step-label">2. Enter either value — the other updates automatically</p>
         <div class="gid-fields">
           <div class="gid-field">
             <div class="ipk-field-header">
-              <label class="gid-field-label" for="gid-lid">LID (hex)</label>
+              <label class="gid-field-label ipk-field-label" for="gid-lid">LID (hex)</label>
               <button type="button" id="gid-example" class="ipk-example-btn">Load example</button>
             </div>
             <div class="ipk-copy-wrap">
               <input type="text" id="gid-lid" class="mono" placeholder="0a1b2c3d4e5f6071" />
               ${copyButtonHtml("gid-copy-lid")}
             </div>
-            <span class="gid-error" id="gid-error-lid" role="alert"></span>
+            <span class="gid-error ipk-error" id="gid-error-lid" role="alert"></span>
           </div>
 
           <div class="gid-field">
             <div class="ipk-field-header">
-              <label class="gid-field-label" for="gid-gid">Device physical ID (g:)</label>
+              <label class="gid-field-label ipk-field-label" for="gid-gid">Device physical ID (g:)</label>
               <button type="button" id="gid-gid-example" class="ipk-example-btn">Load example</button>
             </div>
             <div class="ipk-copy-wrap">
               <input type="text" id="gid-gid" class="mono" placeholder="g:1234567891234567" />
               ${copyButtonHtml("gid-copy-gid")}
             </div>
-            <span class="gid-error" id="gid-error-gid" role="alert"></span>
+            <span class="gid-error ipk-error" id="gid-error-gid" role="alert"></span>
           </div>
         </div>
       </div>

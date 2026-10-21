@@ -101,11 +101,6 @@
   gap: var(--space-1);
 }
 
-.awk-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 .awk-message-input {
   width: 100%;
   font-size: 0.85rem;

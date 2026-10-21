@@ -312,12 +312,12 @@ const tool: ToolDefinition = {
           authoritative Microsoft classification.
         </p>
 
-        <p class="uhe-step-label">1. Get the update history <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="uhe-step-label ipk-step-label">1. Get the update history <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("uhe-cmd", { requiresAdmin: true })}
 
-        <p class="uhe-step-label">2. Paste anywhere on the page</p>
+        <p class="uhe-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="uhe-field-label" for="uhe-input">Update history (JSON)</label>
+          <label class="uhe-field-label ipk-field-label" for="uhe-input">Update history (JSON)</label>
           <button type="button" id="uhe-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -326,7 +326,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder='[{"Title":"...","Date":"2026-10-12T15:44:16.000Z","Categories":"","UpdateID":"...","RevisionNumber":1},...]'
         ></textarea>
-        <div id="uhe-status" class="uhe-status" role="alert"></div>
+        <div id="uhe-status" class="uhe-status ipk-error" role="alert"></div>
 
         ${filtersHtml()}
 

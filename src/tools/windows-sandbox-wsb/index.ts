@@ -40,12 +40,12 @@ function tipBubbleHtml(hint: string): string {
 
 /** A `.wsb-label` `<span>` (used inside a wrapping `<label>`) with a custom, copyable tooltip explaining the setting. */
 function spanLabelHtml(text: string, hint: string): string {
-  return `<span class="wsb-label wsb-tip" tabindex="0">${text}${tipBubbleHtml(hint)}</span>`;
+  return `<span class="wsb-label wsb-tip ipk-field-label" tabindex="0">${text}${tipBubbleHtml(hint)}</span>`;
 }
 
 /** A standalone `.wsb-label` `<label for="...">` with a custom, copyable tooltip explaining the setting. */
 function forLabelHtml(text: string, hint: string, forId: string): string {
-  return `<label class="wsb-label wsb-tip" for="${forId}">${text}${tipBubbleHtml(hint)}</label>`;
+  return `<label class="wsb-label wsb-tip ipk-field-label" for="${forId}">${text}${tipBubbleHtml(hint)}</label>`;
 }
 
 const WSB_INSTALL_COMMAND =
@@ -83,7 +83,7 @@ const tool: ToolDefinition = {
             <a href="https://learn.microsoft.com/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-configure-using-wsb-file" target="_blank" rel="noopener noreferrer">Windows Sandbox</a>.
             Double-click the downloaded file to launch Sandbox with these settings.
           </p>
-          <p class="wsb-note-label">Enable the Windows Sandbox feature first (run once, elevated PowerShell, requires restart):</p>
+          <p class="wsb-note-label ipk-field-label">Enable the Windows Sandbox feature first (run once, elevated PowerShell, requires restart):</p>
           <div class="ipk-copy-wrap">
             ${codeBlockHtml("wsb-install")}
             ${copyButtonHtml("wsb-install-copy")}
@@ -141,7 +141,7 @@ const tool: ToolDefinition = {
           <code>HostFolder =&gt; SandboxFolder (readonly)</code>. Omit the sandbox path to map to the desktop.
         </p>
 
-        <label class="wsb-label" for="wsb-output">Generated .wsb file</label>
+        <label class="wsb-label ipk-field-label" for="wsb-output">Generated .wsb file</label>
         <div class="ipk-copy-wrap">
           ${codeBlockHtml("wsb-output")}
           ${copyButtonHtml("wsb-copy")}

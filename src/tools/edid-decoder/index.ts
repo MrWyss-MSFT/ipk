@@ -230,7 +230,7 @@ function renderEntry(entry: EdidInputEntry, index: number, total: number): Rende
       html: `
         <section class="edd-entry">
           <h2 class="edd-entry-heading">${escapeHtml(fallbackHeading)}${renderBadges(entry)}</h2>
-          <p class="edd-error" role="alert">${escapeHtml(message)}</p>
+          <p class="edd-error ipk-error" role="alert">${escapeHtml(message)}</p>
         </section>
       `,
     };
@@ -290,11 +290,11 @@ const tool: ToolDefinition = {
   mount(container) {
     container.innerHTML = `
       <div class="edd-tool">
-        <p class="edd-step-label">1. Get the EDID for connected monitor(s) <span class="ipk-step-note">(copies to clipboard)</span></p>
+        <p class="edd-step-label ipk-step-label">1. Get the EDID for connected monitor(s) <span class="ipk-step-note">(copies to clipboard)</span></p>
         ${psCommandTabsHtml("edd-snippet")}
-        <p class="edd-step-label">2. Paste anywhere on the page</p>
+        <p class="edd-step-label ipk-step-label">2. Paste anywhere on the page</p>
         <div class="ipk-field-header">
-          <label class="edd-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>
+          <label class="edd-field-label ipk-field-label" for="edd-input">EDID hex, or the JSON from the command above</label>
           <button type="button" id="edd-example" class="ipk-example-btn">Load example</button>
         </div>
         <textarea
@@ -303,7 +303,7 @@ const tool: ToolDefinition = {
           rows="6"
           placeholder='00FFFFFFFFFFFF00... or [{"DevicePath":"...","EDIDHex":"00FFFFFFFFFFFF00..."}]'
         ></textarea>
-        <span class="edd-error" id="edd-top-error" role="alert"></span>
+        <span class="edd-error ipk-error" id="edd-top-error" role="alert"></span>
         <div class="edd-results" id="edd-results"></div>
       </div>
     `;

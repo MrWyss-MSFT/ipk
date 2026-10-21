@@ -38,7 +38,7 @@ interface ResultField {
 function buildFieldHtml(field: ResultField, id: string): string {
   return `
     <div class="qrs-field">
-      <span class="qrs-field-label">${escapeHtml(field.label)}</span>
+      <span class="qrs-field-label ipk-field-label">${escapeHtml(field.label)}</span>
       <div class="ipk-copy-wrap">
         <input
           type="text"
